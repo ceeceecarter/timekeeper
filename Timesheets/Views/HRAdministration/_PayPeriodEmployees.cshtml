@@ -1,0 +1,290 @@
+﻿@model List<NM.Web.WebApplication.Timesheets.Models.ViewModel.PayPeriodEmployee>
+
+<div style="border:1px solid #EEEEEE">
+    <table id="payPeriodEmployeeStatus" class="table grid-table table-striped small">
+        <thead style="border-color:#EEEEEE">
+            <tr style="background-color:#de0011;color:white">
+                <th></th>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Office</th>
+                <th>FLSA Status</th>
+                <th>Start Date</th>
+                <th>TimeKeeper Delegate</th>
+                <th>Supervisor</th>
+                <th>E</th>
+                <th>Status</th>
+                <th>Select</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            @if (Model != null && Model.Count > 0)
+            {
+                @Html.HiddenFor(m => Model[0].PayPeriodID, new { id = "hdPPEmployeePayPeriodId" })
+                for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td><a class="linkToEmployeeInformation" href="@Url.Action("Edit", "EmployeeAdministration", new { id= Model[i].IndividualId }, null)"><img src="@Model[i].Icon" /></a></td>
+                        <td>@Model[i].LastName</td>
+                        <td>@Model[i].FirstName</td>
+                        <td>@Model[i].Office</td>
+                        <td>@Model[i].FlsaStatus</td>
+                        <td>@Model[i].StartDate.ToString("MM/dd/yyyy")</td>
+                        <td>@Model[i].Delegate</td>
+                        <td>@Model[i].Supervisor</td>
+                        <td><a class="linkToTimesheetOfEmployee" href="@Url.Action("TimesheetOfEmployee", "Timesheets", new { individualId=Model[i].IndividualId, selectedYear="", selectedPayPeriod=Model[i].PayPeriodID }, null)"><img src="@Model[i].TimesheetErrorStatus" /></a></td>
+                        <td>@Model[i].TimesheetStatus</td>
+                        <td>
+                            @if (Model[i].FlsaStatus == "Non-Exempt")
+                            {
+                                @Html.CheckBoxFor(m => Model[i].Selected, new { id = Model[i].IndividualId, @class="cbSelect" })
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="container">
+    <div id="mdViewTimesheetOfEmployee" class="modal fade" role="dialog" data-backdrop="static" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-x-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="NmarqGrid-Header">Timesheet of Employee</div>
+                </div>
+                <div class="modal-body">
+                    <div id="dvViewTimesheetOfEmployee"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseTimesheetOfEmployee" type="button" class="btn btn-info">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--MODAL DIALOG: edit time entry-->
+<!--//Begin Modal Edit Time Entry-->
+<div id="dvTimeEntryEdit"></div>
+<!--//End Modal Edit Time-->
+<!--MODAL DIALOG: Delete time entry-->
+<!--//Begin Modal Delete Time-->
+<div id="dvTimeEntryDelete"></div>
+<!--//End Modal delete-->
+<!--MODAL DIALOG: edit on call entry-->
+<!--Begin Modal edit on call entry-->
+<div id="dvOnCallEntryEdit"></div>
+
+<!--MODAL DIALOG: Delete on call entry-->
+<!--Begin Modal delete On Call entry-->
+<div id="dvOnCallEntryDelete"></div>
+
+<!--MODAL DIALOG: edit Mileage entry-->
+<!--Begin Modal edit Mileage entry-->
+<div id="dvMileageEntryEdit"></div>
+
+<!--MODAL DIALOG: Delete Mileage entry-->
+<!--Begin Modal delete Mileage entry-->
+<div id="dvMileageEntryDelete"></div>
+
+<!--MODAL DIALOG: Submit Approval time entry-->
+<!--//Begin Modal Submit Approval Time-->
+<div id="dvTimeEntrySubmitApproval">
+    <!--This html will get replaced by the partial view return by $.ajax-->
+    <div class="container">
+        <div id="mdTimeEntrySubmitApproval" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--//End Modal Submit Approval-->
+<!--MODAL DIALOG: Submit Approval time entry-->
+<!--//Begin Modal Submit Approval Time-->
+<div id="dvTimeEntryApprove">
+    <!--This html will get replaced by the partial view return by $.ajax-->
+    <div class="container">
+        <div id="mdTimeEntryApprove" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        Loading...
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--//End Modal Submit Approval-->
+<!--MODAL DIALOG: Submit Reject time entry-->
+<!--//Begin Modal Submit Reject Time-->
+<div id="dvTimeEntryReject"></div>
+
+<div id="dvTimeEntryRejectLoading">
+    <div class="container">
+        <div id="mdLoadingModal" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Begin Employee Information Modal-->
+<div id="dvEmployeeInformation"></div>
+<div id="dvEmployeeInfoEdit"></div>
+<!--End Employee Information Modal-->
+<!--//End Modal Submit Approval-->
+<!--Prompt for Warning Message-->
+<div class="modal fade bs-modal-sm" id="mdWarning" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color:#b50022">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-target="#mdWarning">&times;</button>
+                <h5 class="modal-title" style="color:#ffffff">Warning</h5>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff">
+                <div class="text-danger text-danger" id="dvWarningMessage">
+                    <h4 id="h4WarningMessage">Missing information on fields. Please try again</h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseWarning" type="button" class="btn btn-default" data-dismiss="modal" data-target="#mdWarning">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End Prompt for Warning Message-->
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#payPeriodEmployeeStatus').tablesorter({
+            widthFixed: true,
+            sortList: [[1, 0], [2, 0]]
+        });
+    });
+
+    $(document).ready(function () {
+        $(".linkToTimesheetOfEmployee").on("click", function (event) {
+            event.preventDefault();
+
+            var pUrl = $(this).attr('href');
+            var pUrlParamValue = pUrl.split('?')[1];
+            var params = {};
+            $.each(pUrlParamValue.split('&'), function (c, q) {
+                var i = q.split('=');
+                params[i[0].toString()] = i[1].toString();
+            });
+
+            var indId = params["individualId"];
+            var selYear = params["selectedYear"];
+            var selPayPeriod = params["selectedPayPeriod"];
+
+            $.ajax({
+                url: '@Url.Action("GetTimesheetOfEmployee", "Timesheets")',
+                type: 'POST',
+                data: { individualId: indId, selectedYear: selYear, selectedPayPeriod: selPayPeriod },
+                beforeSend: function (event) {
+                    $.blockUI({
+                        message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Please wait while retrieving information...</h4></div>",
+                        css: {
+                            padding: "5px", '-webkit-border-radius': '10px', 'z-index': '9999999999', 'opacity': '2', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                        }
+                    });
+                },
+                success: function (data) {
+                    $("#dvViewTimesheetOfEmployee").empty();
+                    $("#dvViewTimesheetOfEmployee").html(data);
+                    $("#dvTimeEntryMenuSummary").hide();
+                    $("#mdViewTimesheetOfEmployee").modal('show');
+                    $.unblockUI();
+                }
+            })
+            //.done(function(result){
+            //})
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                $("#mdViewTimesheetOfEmployee").modal('hide');
+            });
+        });
+    });
+
+    //Handler for closing viewTimesheetOfEmployee modal
+    $(function () {
+        $("#btnCloseTimesheetOfEmployee").on("click", function (event) {
+            //debugger;
+            $("#mdViewTimesheetOfEmployee").modal('hide');
+            $("#dvViewTimesheetOfEmployee").empty();
+            $("#mdPayPeriodEmployees").modal('show');
+        });
+    });
+
+    $(function () {
+        $(".linkToEmployeeInformation").on('click', function (event) {
+            event.preventDefault();
+            var pUrl = $(this).attr('href');
+            var pUrlParamValue = "";
+            var params = {};
+            var indId = "";
+            if (pUrl.indexOf('?') > -1) {
+                pUrlParamValue = pUrl.split('?')[1];
+                $.each(pUrlParamValue.split('&'), function (c, q) {
+                    var i = q.split('=');
+                    params[i[0].toString()] = i[1].toString();
+                });
+                indId = params["id"];
+            }
+            else {
+                pUrlParamValue = pUrl.substring(pUrl.lastIndexOf('/') + 1);
+                indId = pUrlParamValue;
+            }
+            //debugger;
+            if (indId != "") {
+                $.ajax({
+                    url: '@Url.Action("Edit", "EmployeeAdministration")',
+                    type: 'POST',
+                    data: { id: indId },
+                    beforeSend: function (event) {
+                        $.blockUI({
+                            message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Please wait while retrieving information...</h4></div>",
+                            css: {
+                                padding: "5px", '-webkit-border-radius': '10px', 'z-index': '9999999999', 'opacity': '2', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                            }
+                        });
+                    },
+                    success: function (data) {
+                        $('#dvEmployeeInformation').empty();
+                        $('#dvEmployeeInformation').html(data);
+                        $('#modalEmployeeInformation').modal('show');
+                        $.unblockUI();
+                    }
+                });
+            }
+
+        });
+    });
+
+</script>

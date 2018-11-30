@@ -1,0 +1,92 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+
+@helper RenderColumnToString(decimal subtotal) { 
+    string result = subtotal > 0 ? subtotal.ToString() : "-";
+    @result;
+}
+
+@*@using GridMvc.Html*@
+
+@if (Model.TimeOffSummaryYTD != null && Model.TimeOffSummaryYTD.Count() > 0)
+{
+<div class="row">
+    <div class="col-sm-12">
+        <div class="NmarqGrid-SubHeader NmarqGrid-Spacer text-center">
+            <b>Time Off Summary By Type (YTD)</b>
+        </div>
+        <div class="well">
+            <div class="row">
+                <table class="table table-striped small">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left">Type</th>
+                            <th style="text-align: right">NonSubmitted</th>
+                            <th style="text-align: right">Submitted</th>
+                            <th style="text-align: right">Approved</th>
+                            <th style="text-align: right">Processed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TimeOffSummaryYTD.OrderByDescending(i => i.HoursType).ToList())
+                        {
+                            if (item.HoursTypeName == "Total")
+                            {
+                                <tr style="font-weight:bold">
+                                    <td><div style="text-align: left">@item.HoursTypeName</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.NonSubmitted)</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.Submitted)</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.Approved)</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.Processed)</div></td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td><div style="text-align: left">@item.HoursTypeName</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.NonSubmitted)</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.Submitted)</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.Approved)</div></td>
+                                    <td><div style="text-align: right">@RenderColumnToString(item.Processed)</div></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>                
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+    @*<div class="row">
+            @if (Model.TimeOffSummaryYTD != null)
+                {
+
+                @Html.Grid(Model.TimeOffSummaryYTD, "_Grid").Named("_timeOffSummaryYTD").Columns(col =>
+           {
+               col.Add(m => m.HoursTypeName, "Type")
+                       .Titled("Type");
+               col.Add(m => m.NonSubmitted, "NonSubmitted")
+                       .Titled("Non-Submitted")
+                       .Format("{0:0.00}");
+               col.Add(m => m.Submitted, "Submitted")
+                       .Titled("Submitted")
+                       .Format("{0:0.00}");
+               col.Add(m => m.Approved, "Approved")
+                       .Titled("Approved")
+                       .Format("{0:0.00}");
+               col.Add(m => m.Processed, "Processed")
+                       .Titled("Processed")
+                       .Format("{0:0.00}");
+           })
+            }
+        </div>*@
+    @*<script type="text/javascript">
+            $(function () {
+                debugger;
+                $("td.data-name").bind('change', function () {
+                    var tr = $(this).closest
+                });
+            });
+        </script>*@

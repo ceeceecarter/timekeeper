@@ -1,0 +1,258 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@helper SetPayPeriodActionVariable()
+{
+Model.IsPayPeriodActionOccurring = true;
+Model.PayPeriodActionOccurring = "submit";
+}
+@*@helper RenderPartColumn(int MilitaryTime)
+{
+if (MilitaryTime > 0)
+{
+    int hours = MilitaryTime / 100;
+    int minutes = MilitaryTime - hours * 100;
+    DateTime result = DateTime.MinValue;
+        @result.AddHours(hours).AddMinutes(minutes).ToString("hh:mm tt");
+    }
+    else
+    {
+        int result = 0;
+        @result;
+    }
+}*@
+
+@using GridMvc.Html
+
+<div class="container">
+    <div id="mdTimeEntrySubmitApproval" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title" style="color:#ffffff">Submit Time for Approval</h5>
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container-fluid">
+                        @using (Html.BeginForm("PostSendApproval", "Timesheets", FormMethod.Post, new { id = "formSendApproval" }))
+                        {
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="well well-sm">
+                                        <small>
+                                            Please make sure that time displayed is accurate and complete.
+                                            In the "Submit To" section, select the manager or timesheet delegate that should receive your timesheet for approval.
+                                            You can type a message to your manager/timesheet delegate(optional).
+                                        </small>
+                                    </div>
+                                    <div>
+                                        @foreach (var item in Model.TimesheetHours)
+                                        {
+                                            @Html.HiddenFor(m => item.TimesheetHoursID, new { @class = "tsHoursIds" })
+                                        }
+                                        @Html.HiddenFor(m => m.EmployeeInfoId, new { id = "hiddenEmployeeInfoId" })
+                                        @Html.HiddenFor(m => m.MasterUserId, new { id = "hiddenApproverMasterUserId" })
+                                        @Html.HiddenFor(m => m.EmployeeIndividual.MasterUserId, new { id = "hiddenEmployeeMasterUserId" })
+                                        @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hiddenSelectedPayPeriodID"})
+                                        @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id="hiddenEmployeeIndividual_IndividualId"})
+                                        @Html.HiddenFor(m => m.IsUserNonExempt, new { id="hiddenSubmitApproval_IsUserNonExempt" })
+                                        @Html.HiddenFor(m => m.LoggedInUser.IsUserTSHRAdmin, new { id="hiddenSubmitApproval_IsUserHRAdmin"})
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="col-xs-4">
+                                        <div class="row">
+                                            <div class="well well-sm">
+                                                <h4>Submit To</h4>
+                                                <div class="form-group">
+                                                    <div class="text-info">Manager:</div>
+                                                    @if (Model.ManagerOfIndividual != null)
+                                                    {
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox(Model.ManagerOfIndividual.FirstName, true, new { @class = "tsSubmitToCheckbox", id = Model.ManagerOfIndividual.IndividualID })
+                                                            @Html.Label(Model.ManagerOfIndividual.FirstName + " " + Model.ManagerOfIndividual.LastName)
+                                                        </div>
+                                                    }
+                                                    <div class="text-info">Delegates:</div>
+                                                    @foreach(var item in Model.IndividualDelegates) {
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox(item.DelegateToIndividual.FirstName, item.IsPrimaryDelegate, new { @class= "tsSubmitToCheckbox", id=item.DelegateToIndividualID })
+                                                            @Html.Label(item.DelegateToIndividual.FirstName + " " + item.DelegateToIndividual.LastName)
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <div class="row">
+                                            <div id="dvSubmitSummaryHoursView" class="grid-header-title">
+                                                @Html.Partial("_PayPeriodHoursTypeSummary", Model)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        @Html.Label("Comments:")
+                                        @*<textarea class="form-control" rows="10" cols="1500" id="txtComments"></textarea>*@
+                                        @Html.TextAreaFor(m => m.Comments, 10, 1500, new { @class = "form-control", id = "txtComments", style = "max-width:100%; width:100%;"  })
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="inpTimeSubmitApproval" type="submit" class="btn btn-default" value="Submit" />
+                    <input id="inpTimeSubmitApprovalCancel" type="button" class="btn btn-default" value="Cancel" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //-----------------------------Cancel Submit Approval Modal---------------------------------//
+    $(function () {
+        $("#inpTimeSubmitApprovalCancel").on('click', function (event) {
+            event.preventDefault();
+            var hfFLSAStatus = $("#hfFLSAStatus").val();
+            if (hfFLSAStatus == 1) {
+                $(".tsTimeEntryCheckBox").prop('checked', false);
+                $("#cbCheckedAllBoxes").prop('checked', false);
+            }
+            $("#mdTimeEntrySubmitApproval").modal('hide');
+        });
+    });
+    //-----------------------------Time Entry Submit Approval Modal---------------------------------//
+    $(function () {
+        //Handler to submit approval
+        $("#inpTimeSubmitApproval").on("click", function (event) {
+            event.preventDefault();
+
+            var list = new Array();
+            var delegates = new Array();
+            var employeeId = $("#hiddenEmployeeInfoId").val();
+            var masterApproverUserId = $("#hiddenApproverMasterUserId").val();
+            var masterEmployeeUserId = $("#hiddenEmployeeMasterUserId").val();
+            var selPayPeriodId = $("#hiddenSelectedPayPeriodID").val();
+
+            var dvEmployeeAccessListLength = $("#dvEmployeeAccessList").length;
+            var isUserHRAdmin = $("#hiddenSubmitApproval_IsUserHRAdmin").val();
+            var isUserNonExempt = $("#hiddenSubmitApproval_IsUserNonExempt").val();
+            var date = new Date();
+            var dd = date.getDate();
+            var mm = date.getMonth() + 1;
+            var yy = date.getFullYear();
+            var currentdate = mm + "-" + dd + "-" + yy
+
+            //Note: Property Name is SelectedTimeEntryViewModel (the same as the View Model)
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.SelectedDelegateIds = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeId;
+            SelectedTimeEntryViewModel.Comments = $("#txtComments").val();
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+            //Add Id to the list array
+            $(".tsHoursIds").each(function () {
+                list.push(this.value)
+            })
+            //Add Delegate Ids to the delegates array
+            $(".tsSubmitToCheckbox").each(function () {
+                var thisVal = (this.checked ? "1" : "0");
+                if(thisVal == "1")
+                    delegates.push(this.id);
+            });
+
+            if (delegates.length == 0) {
+                $("#h4WarningMessage").text("Missing where to submit information. Please try again");
+                $(".bs-modal-sm").modal('show');
+                return false;
+            }
+
+            //Add each time entry to the View Model
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+            //Add each Selected IndividualIds item to the View Model
+            for (var item in delegates) {
+                SelectedTimeEntryViewModel.SelectedDelegateIds[parseInt(item)] = delegates[item];
+            }
+
+            //assigned values to the object name which is the controller parameter
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel, MasterUserID: masterEmployeeUserId, ApproverMasterUserID: masterApproverUserId });
+            $("#mdTimeEntrySubmitApproval").modal('hide');
+            $.ajax({
+                url: '@Url.Action("PostSubmitForApproval", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                    $('#dvTSWeeklyView').empty();
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+                    //refresh the pay period hours summary
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_PayPeriodHoursSummary", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { selectedPayPeriodId: selPayPeriodId, employeeInfoId: employeeId, individualId: $("#hiddenEmployeeIndividual_IndividualId").val() },
+                        success: function (ppData) {
+                            $("#dvPayPeriodHoursTypeSummary").empty();
+                            $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                        }
+                    });
+
+                    //refresh the Time Off Summary YTD
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { startDate: currentdate, employeeInfoId: employeeId, individualId: $("#hiddenEmployeeIndividual_IndividualId").val() },
+                        success: function (summaryData) {
+                            $("#dvHoursTypeSummary").empty();
+                            $("#dvHoursTypeSummary").html(summaryData);
+                        }
+                    });
+                    
+                    if (isUserHRAdmin == 'True' || dvEmployeeAccessListLength > 0) {
+                        //refresh the Employee List Grid
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_TSEmployeeAccessList", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { approverMasterUserId: masterApproverUserId },
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function(empData){
+                                $("#dvLoadMessage").empty();
+                                $("#dvEmployeeAccessList").empty();
+                                $("#dvEmployeeAccessList").html(empData);
+                            }
+                        });
+                    }
+
+                    if (isUserNonExempt == 'True') {
+                        $("#dvAddEntryMenu").hide();
+                    }
+                    $("#dvTSWeeklyView").empty();
+                    $('#dvTSWeeklyView').html(data);
+                    $("#dvTimeEntryEdit").empty();
+                    $("#dvTimeEntrySubmitApproval").empty();
+                }
+            });
+        });
+    });
+</script>

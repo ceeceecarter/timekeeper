@@ -1,0 +1,1455 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="UnitedModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tblIndividual">
+          <Key>
+            <PropertyRef Name="IndividualID" />
+          </Key>
+          <Property Name="IndividualID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FirstName" Type="varchar" MaxLength="100" />
+          <Property Name="LastName" Type="varchar" MaxLength="100" />
+          <Property Name="Title" Type="varchar" MaxLength="100" />
+          <Property Name="CompanyID" Type="char" MaxLength="12" />
+          <Property Name="MasterUserID" Type="int" />
+          <Property Name="Cell" Type="varchar" MaxLength="50" />
+          <Property Name="Phone" Type="varchar" MaxLength="50" />
+          <Property Name="Fax" Type="varchar" MaxLength="50" />
+          <Property Name="Email" Type="varchar" MaxLength="200" />
+          <Property Name="AddressLine1" Type="varchar" MaxLength="200" />
+          <Property Name="AddressLine2" Type="varchar" MaxLength="200" />
+          <Property Name="City" Type="varchar" MaxLength="100" />
+          <Property Name="State" Type="varchar" MaxLength="50" />
+          <Property Name="ZipCode" Type="varchar" MaxLength="50" />
+          <Property Name="Version" Type="int" Nullable="false" />
+          <Property Name="ModifiedDatetime" Type="datetime" />
+          <Property Name="ModifiedByMasterUserID" Type="int" />
+          <Property Name="CreatedDatetime" Type="datetime" Nullable="false" />
+          <Property Name="CreatedByMasterUserID" Type="int" Nullable="false" />
+          <Property Name="SecondaryTitle" Type="varchar" MaxLength="100" />
+          <Property Name="Designations" Type="varchar" MaxLength="100" />
+          <Property Name="MailStop" Type="varchar" MaxLength="50" />
+          <Property Name="PhoneExtension" Type="varchar" MaxLength="5" />
+          <Property Name="PersonalysisFile" Type="binary" MaxLength="1" />
+          <Property Name="Birthdate" Type="datetime" />
+          <Property Name="StartDate" Type="datetime" />
+          <Property Name="TermDate" Type="datetime" />
+          <Property Name="Inactive" Type="bit" />
+          <Property Name="OfficeLocationBuildingID" Type="int" />
+          <Property Name="Clock" Type="varchar" MaxLength="10" />
+          <Property Name="ShowInPhoneLists" Type="bit" />
+          <Property Name="LogicalDepartment" Type="varchar" MaxLength="100" />
+          <Property Name="OfficeLocationsID" Type="int" />
+          <Property Name="IsEmployee" Type="bit" />
+          <Property Name="LogicalDepartmentID" Type="int" />
+          <Property Name="PersonalEmail" Type="varchar" MaxLength="200" />
+          <Property Name="HomePhone" Type="varchar" MaxLength="50" />
+          <Property Name="PersonalCell" Type="varchar" MaxLength="50" />
+          <Property Name="HomeAddress" Type="varchar" MaxLength="200" />
+          <Property Name="HomeCity" Type="varchar" MaxLength="100" />
+          <Property Name="HomeState" Type="varchar" MaxLength="50" />
+          <Property Name="HomeZipCode" Type="varchar" MaxLength="50" />
+          <Property Name="ManagerIndividualID" Type="int" Nullable="false" />
+          <Property Name="MiddleName" Type="varchar" MaxLength="100" />
+          <Property Name="PreferredFirstName" Type="varchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="tblIndividualPropertyRoles">
+          <Key>
+            <PropertyRef Name="EntityID" />
+            <PropertyRef Name="IndividualID" />
+            <PropertyRef Name="PropertyRoleID" />
+          </Key>
+          <Property Name="EntityID" Type="char" MaxLength="6" Nullable="false" />
+          <Property Name="IndividualID" Type="int" Nullable="false" />
+          <Property Name="PropertyRoleID" Type="int" Nullable="false" />
+          <Property Name="Sort" Type="int" Nullable="false" />
+          <Property Name="Version" Type="int" Nullable="false" />
+          <Property Name="ModifiedDatetime" Type="datetime" />
+          <Property Name="ModifiedByMasterUserID" Type="int" />
+          <Property Name="CreatedDatetime" Type="datetime" Nullable="false" />
+          <Property Name="CreatedByMasterUserID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblMasterUser">
+          <Key>
+            <PropertyRef Name="MasterUserID" />
+          </Key>
+          <Property Name="MasterUserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserName" Type="varchar" MaxLength="50" />
+          <Property Name="DomainName" Type="varchar" MaxLength="50" />
+          <Property Name="MRIUserID" Type="char" MaxLength="10" />
+          <Property Name="FirstName" Type="varchar" MaxLength="200" />
+          <Property Name="LastName" Type="varchar" MaxLength="200" />
+          <Property Name="AcceptedUPDirect" Type="bit" />
+          <Property Name="Version" Type="int" Nullable="false" />
+          <Property Name="ModifiedByMasterUserID" Type="int" />
+          <Property Name="ModifiedDatetime" Type="datetime" />
+          <Property Name="CreatedByMasterUserID" Type="int" Nullable="false" />
+          <Property Name="CreatedDatetime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblMasterUserRole">
+          <Key>
+            <PropertyRef Name="MasterUserID" />
+            <PropertyRef Name="RoleID" />
+          </Key>
+          <Property Name="MasterUserID" Type="int" Nullable="false" />
+          <Property Name="RoleID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblRole">
+          <Key>
+            <PropertyRef Name="RoleID" />
+          </Key>
+          <Property Name="RoleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="varchar" MaxLength="50" />
+          <Property Name="Description" Type="varchar" MaxLength="200" />
+          <Property Name="ApplicationID" Type="int" Nullable="false" />
+          <Property Name="Version" Type="int" Nullable="false" />
+          <Property Name="ModifiedByMasterUserID" Type="int" />
+          <Property Name="ModifiedDatetime" Type="datetime" />
+          <Property Name="CreatedByMasterUserID" Type="int" Nullable="false" />
+          <Property Name="CreatedDatetime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblTSCompanyCode">
+          <Key>
+            <PropertyRef Name="CompanyCodeID" />
+          </Key>
+          <Property Name="CompanyCodeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="txtCompanyCode" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtCompanyName" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtCompanyStatus" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtCompanyWebsite" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtCompanyAbbreviation" Type="nvarchar" MaxLength="25" />
+          <Property Name="chkTimesheetSystem" Type="smallint" />
+          <Property Name="txtNewCompanyIdentifier" Type="varchar" MaxLength="36" />
+        </EntityType>
+        <EntityType Name="tblTSEmployeeInfo">
+          <Key>
+            <PropertyRef Name="EmployeeInfoId" />
+          </Key>
+          <Property Name="EmployeeInfoId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MasterUserID" Type="int" />
+          <Property Name="CompanyCodeId" Type="int" Nullable="false" />
+          <Property Name="intEmployeeId" Type="int" Nullable="false" />
+          <Property Name="HRBP" Type="bit" />
+          <Property Name="IsNewPosition" Type="bit" />
+          <Property Name="ReplacingMasterUserId" Type="int" />
+          <Property Name="DateOfWelcomeEmail" Type="datetime" />
+          <Property Name="DateOfNewHireFormSent" Type="datetime" />
+          <Property Name="DateOfEnteredInPayForce" Type="datetime" />
+          <Property Name="DateOfTimeSaverReminder" Type="datetime" />
+          <Property Name="DateOfBackgroundCheck" Type="datetime" />
+          <Property Name="DateOfEVerify" Type="datetime" />
+          <Property Name="DatePopcornSent" Type="datetime" />
+          <Property Name="WorkStateID" Type="int" />
+          <Property Name="ReasonForTermination" Type="varchar(max)" />
+          <Property Name="SpecialPayIssues" Type="varchar(max)" />
+          <Property Name="IsLetterReceived" Type="bit" />
+          <Property Name="IsNopaReceived" Type="bit" />
+          <Property Name="DateOfEmailSentToTechOps" Type="datetime" />
+          <Property Name="DateOfExitInterview" Type="datetime" />
+          <Property Name="DateOfInformationToPayroll" Type="datetime" />
+          <Property Name="DateOfPTOPayout" Type="datetime" />
+          <Property Name="IsNonDisputeUnemployment" Type="bit" />
+          <Property Name="chkBenefitEligible" Type="smallint" />
+          <Property Name="chkPhotoShowExternal" Type="smallint" />
+          <Property Name="chkPhotoShowInternal" Type="smallint" />
+          <Property Name="intHRSupervisor" Type="nvarchar" MaxLength="250" />
+          <Property Name="memBiography" Type="ntext" />
+          <Property Name="memHRDelegate" Type="ntext" />
+          <Property Name="realFTE" Type="float" />
+          <Property Name="realMaxTimeOffPerWeek" Type="float" />
+          <Property Name="txtDomain" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtNewOrRehire" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtOfficer" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtPhotoHighResolution" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtPhotoWeb" Type="nvarchar" MaxLength="250" />
+          <Property Name="IsNonExempt" Type="bit" />
+          <Property Name="txtUserID" Type="nvarchar" MaxLength="250" Nullable="false" />
+          <Property Name="txtUserIDFics" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtAutograph" Type="nvarchar" MaxLength="250" />
+          <Property Name="FileNumber" Type="int" />
+          <Property Name="realHoursPerWeek" Type="float" />
+          <Property Name="memTemp" Type="ntext" />
+          <Property Name="memTemp2" Type="ntext" />
+          <Property Name="chkProcessAsNewEmployee" Type="smallint" />
+          <Property Name="chkPositionChange" Type="smallint" />
+          <Property Name="chkTimesheetAdmin" Type="smallint" />
+          <Property Name="dtmTempStartDate" Type="datetime" />
+          <Property Name="txtEmploymentType" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtNewEmployeeIdentifier" Type="nvarchar" MaxLength="36" />
+          <Property Name="ManagerComments" Type="nvarchar(max)" />
+          <Property Name="ITComments" Type="nvarchar(max)" />
+          <Property Name="PhysicalLocation" Type="nvarchar" MaxLength="250" />
+          <Property Name="PreviousExperience" Type="int" />
+          <Property Name="TemplateId" Type="uniqueidentifier" />
+          <Property Name="ComputerSetupId" Type="uniqueidentifier" />
+          <Property Name="AutoAudit_CreatedDate" Type="datetime" Nullable="false" />
+          <Property Name="AutoAudit_CreatedBy" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="AutoAudit_ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="AutoAudit_ModifiedBy" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="AutoAudit_RowVersion" Type="int" />
+          <Property Name="AccountSetupId" Type="uniqueidentifier" />
+          <Property Name="PhonePassCode" Type="nvarchar" MaxLength="50" />
+          <Property Name="BenefitEligible" Type="bit" />
+          <Property Name="TimesheetAdmin" Type="bit" />
+          <Property Name="EmployeeTerminationid" Type="uniqueidentifier" />
+          <Property Name="UploadToExternalWebSite" Type="bit" />
+          <Property Name="Freddie_Mac_Signatory" Type="bit" />
+        </EntityType>
+        <EntityType Name="tblTSHoliday">
+          <Key>
+            <PropertyRef Name="HolidayID" />
+          </Key>
+          <Property Name="HolidayID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="dtmHoliday" Type="datetime" />
+          <Property Name="HolidayName" Type="nvarchar" MaxLength="250" />
+        </EntityType>
+        <EntityType Name="tblTSHoursType">
+          <Key>
+            <PropertyRef Name="HoursTypeID" />
+          </Key>
+          <Property Name="HoursTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="HoursType" Type="nvarchar" MaxLength="250" />
+          <Property Name="BothFLSA" Type="bit" />
+          <Property Name="AddTime" Type="bit" />
+        </EntityType>
+        <EntityType Name="tblTSNavigation">
+          <Key>
+            <PropertyRef Name="TabId" />
+          </Key>
+          <Property Name="TabId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LinkText" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ControllerName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ActionName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ElementNameId" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="IsTSUser" Type="bit" Nullable="false" />
+          <Property Name="IsTSHRAdmin" Type="bit" Nullable="false" />
+          <Property Name="IsTSManager" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblTSPayPeriod">
+          <Key>
+            <PropertyRef Name="PayPeriodID" />
+          </Key>
+          <Property Name="PayPeriodID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="clpCSV" Type="nvarchar" MaxLength="250" />
+          <Property Name="dtmPeriodDue" Type="datetime" />
+          <Property Name="dtmPeriodEnd" Type="datetime" />
+          <Property Name="dtmPeriodPayDay" Type="datetime" />
+          <Property Name="dtmPeriodStart" Type="datetime" />
+          <Property Name="dtmProcessed" Type="datetime" />
+          <Property Name="txtLastPeriodOfYear" Type="nvarchar" MaxLength="250" />
+          <Property Name="txtStatus" Type="nvarchar" MaxLength="250" />
+          <Property Name="dtmReminderAllEmployees" Type="datetime" />
+          <Property Name="dtmReminderAllNonExempt" Type="datetime" />
+          <Property Name="dtmReminderUnApproved" Type="datetime" />
+          <Property Name="dtmReminderUnSubmittedNonExempt" Type="datetime" />
+          <Property Name="txtVerifyDelete" Type="nvarchar" MaxLength="250" />
+          <Property Name="chkDateConflict" Type="smallint" />
+          <Property Name="clpCSVNonExempt" Type="nvarchar" MaxLength="250" />
+          <Property Name="dtm1stReminder" Type="datetime" />
+          <Property Name="dtm2ndReminder" Type="datetime" />
+          <Property Name="dtmApprovalDueDate" Type="datetime" />
+          <Property Name="dtmCutOffDate" Type="datetime" />
+          <Property Name="IsBiWeeklyPayroll" Type="bit" />
+        </EntityType>
+        <EntityType Name="tblTSStatusType">
+          <Key>
+            <PropertyRef Name="StatusTypeID" />
+          </Key>
+          <Property Name="StatusTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StatusType" Type="nvarchar" MaxLength="250" />
+        </EntityType>
+        <EntityType Name="tblTSTimesheetHours">
+          <Key>
+            <PropertyRef Name="TimesheetHoursID" />
+          </Key>
+          <Property Name="TimesheetHoursID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeInfoId" Type="int" Nullable="false" />
+          <Property Name="PayPeriodID" Type="int" Nullable="false" />
+          <Property Name="ProcessedPayPeriod" Type="int" />
+          <Property Name="Date" Type="datetime" Nullable="false" />
+          <Property Name="TimeStart" Type="int" />
+          <Property Name="TimeEnd" Type="int" />
+          <Property Name="Hours" Type="decimal" Precision="5" Scale="2" Nullable="false" />
+          <Property Name="HoursTypeID" Type="int" Nullable="false" />
+          <Property Name="HoursRegular" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="HoursHoliday" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="HoursPTO" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="HoursJuryDuty" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="HoursBereavement" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="HoursUnpaid" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="HoursVolunteerPTO" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="OnCall" Type="bit" />
+          <Property Name="Mileage" Type="float" />
+          <Property Name="Parking" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="StatusTypeId" Type="int" />
+          <Property Name="EntryDate" Type="datetime" Nullable="false" />
+          <Property Name="EntryUser" Type="int" Nullable="false" />
+          <Property Name="SubmitDate" Type="datetime" />
+          <Property Name="SubmitUser" Type="int" />
+          <Property Name="ApproveDate" Type="datetime" />
+          <Property Name="ApproveUser" Type="int" />
+          <Property Name="ProcessDate" Type="datetime" />
+          <Property Name="ProcessPayPeriod" Type="int" />
+          <Property Name="LockOutEmployee" Type="bit" Nullable="false" />
+          <Property Name="LockOutManager" Type="bit" Nullable="false" />
+          <Property Name="LockOutAll" Type="bit" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_tblIndividual_CreatedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblIndividual">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblIndividual_ModifiedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="0..1" />
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblIndividual">
+              <PropertyRef Name="ModifiedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblIndividualPropertyRoles_tblIndividual">
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="1" />
+          <End Role="tblIndividualPropertyRoles" Type="Self.tblIndividualPropertyRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblIndividual">
+              <PropertyRef Name="IndividualID" />
+            </Principal>
+            <Dependent Role="tblIndividualPropertyRoles">
+              <PropertyRef Name="IndividualID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblMasterUser_tblMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblMasterUser1" Type="Self.tblMasterUser" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblMasterUser1">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblMasterUser_tblMasterUserModifiedBy">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="0..1" />
+          <End Role="tblMasterUser1" Type="Self.tblMasterUser" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblMasterUser1">
+              <PropertyRef Name="ModifiedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblMasterUserRole_MasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblMasterUserRole" Type="Self.tblMasterUserRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblMasterUserRole">
+              <PropertyRef Name="MasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblRole_CreatedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblRole" Type="Self.tblRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblRole">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblRolePermission_CreatedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblRole" Type="Self.tblRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblRole">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSEmployeeInfo_tblIndividual">
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="1" />
+          <End Role="tblTSEmployeeInfo" Type="Self.tblTSEmployeeInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblIndividual">
+              <PropertyRef Name="IndividualID" />
+            </Principal>
+            <Dependent Role="tblTSEmployeeInfo">
+              <PropertyRef Name="intEmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSTimesheetHours_tblTSEmployeeInfo">
+          <End Role="tblTSEmployeeInfo" Type="Self.tblTSEmployeeInfo" Multiplicity="1" />
+          <End Role="tblTSTimesheetHours" Type="Self.tblTSTimesheetHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSEmployeeInfo">
+              <PropertyRef Name="EmployeeInfoId" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHours">
+              <PropertyRef Name="EmployeeInfoId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSTimesheetHours_tblTSHoursType">
+          <End Role="tblTSHoursType" Type="Self.tblTSHoursType" Multiplicity="1" />
+          <End Role="tblTSTimesheetHours" Type="Self.tblTSTimesheetHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSHoursType">
+              <PropertyRef Name="HoursTypeID" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHours">
+              <PropertyRef Name="HoursTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSTimesheetHours_tblTSPayPeriod">
+          <End Role="tblTSPayPeriod" Type="Self.tblTSPayPeriod" Multiplicity="1" />
+          <End Role="tblTSTimesheetHours" Type="Self.tblTSTimesheetHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSPayPeriod">
+              <PropertyRef Name="PayPeriodID" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHours">
+              <PropertyRef Name="PayPeriodID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSTimesheetHours_tblTSStatusType">
+          <End Role="tblTSStatusType" Type="Self.tblTSStatusType" Multiplicity="0..1" />
+          <End Role="tblTSTimesheetHours" Type="Self.tblTSTimesheetHours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSStatusType">
+              <PropertyRef Name="StatusTypeID" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHours">
+              <PropertyRef Name="StatusTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="fnTSDateRange" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="dtmFrom" Type="datetime" Mode="In" />
+          <Parameter Name="dtmTo" Type="datetime" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="dtmDate" Type="datetime" />
+                <Property Name="intDate" Type="int" />
+                <Property Name="intDay" Type="int" />
+                <Property Name="intMonth" Type="int" />
+                <Property Name="intYear" Type="int" />
+                <Property Name="intDayOfWeek" Type="int" />
+                <Property Name="strMonth" Type="varchar" MaxLength="50" />
+                <Property Name="strDayOfWeek" Type="varchar" MaxLength="20" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
+        <EntityContainer Name="UnitedModelStoreContainer">
+          <EntitySet Name="tblIndividual" EntityType="Self.tblIndividual" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblIndividualPropertyRoles" EntityType="Self.tblIndividualPropertyRoles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblMasterUser" EntityType="Self.tblMasterUser" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblMasterUserRole" EntityType="Self.tblMasterUserRole" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblRole" EntityType="Self.tblRole" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSCompanyCode" EntityType="Self.tblTSCompanyCode" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSEmployeeInfo" EntityType="Self.tblTSEmployeeInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSHoliday" EntityType="Self.tblTSHoliday" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSHoursType" EntityType="Self.tblTSHoursType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSNavigation" EntityType="Self.tblTSNavigation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSPayPeriod" EntityType="Self.tblTSPayPeriod" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSStatusType" EntityType="Self.tblTSStatusType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblTSTimesheetHours" EntityType="Self.tblTSTimesheetHours" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_tblIndividual_CreatedByMasterUser" Association="Self.FK_tblIndividual_CreatedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblIndividual" EntitySet="tblIndividual" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblIndividual_ModifiedByMasterUser" Association="Self.FK_tblIndividual_ModifiedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblIndividual" EntitySet="tblIndividual" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblIndividualPropertyRoles_tblIndividual" Association="Self.FK_tblIndividualPropertyRoles_tblIndividual">
+            <End Role="tblIndividual" EntitySet="tblIndividual" />
+            <End Role="tblIndividualPropertyRoles" EntitySet="tblIndividualPropertyRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblMasterUser_tblMasterUser" Association="Self.FK_tblMasterUser_tblMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblMasterUser1" EntitySet="tblMasterUser" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblMasterUser_tblMasterUserModifiedBy" Association="Self.FK_tblMasterUser_tblMasterUserModifiedBy">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblMasterUser1" EntitySet="tblMasterUser" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblMasterUserRole_MasterUser" Association="Self.FK_tblMasterUserRole_MasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblMasterUserRole" EntitySet="tblMasterUserRole" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblRole_CreatedByMasterUser" Association="Self.FK_tblRole_CreatedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblRole" EntitySet="tblRole" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblRolePermission_CreatedByMasterUser" Association="Self.FK_tblRolePermission_CreatedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUser" />
+            <End Role="tblRole" EntitySet="tblRole" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSEmployeeInfo_tblIndividual" Association="Self.FK_tblTSEmployeeInfo_tblIndividual">
+            <End Role="tblIndividual" EntitySet="tblIndividual" />
+            <End Role="tblTSEmployeeInfo" EntitySet="tblTSEmployeeInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSEmployeeInfo" Association="Self.FK_tblTSTimesheetHours_tblTSEmployeeInfo">
+            <End Role="tblTSEmployeeInfo" EntitySet="tblTSEmployeeInfo" />
+            <End Role="tblTSTimesheetHours" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSHoursType" Association="Self.FK_tblTSTimesheetHours_tblTSHoursType">
+            <End Role="tblTSHoursType" EntitySet="tblTSHoursType" />
+            <End Role="tblTSTimesheetHours" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSPayPeriod" Association="Self.FK_tblTSTimesheetHours_tblTSPayPeriod">
+            <End Role="tblTSPayPeriod" EntitySet="tblTSPayPeriod" />
+            <End Role="tblTSTimesheetHours" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSStatusType" Association="Self.FK_tblTSTimesheetHours_tblTSStatusType">
+            <End Role="tblTSStatusType" EntitySet="tblTSStatusType" />
+            <End Role="tblTSTimesheetHours" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="UnitedModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="tblIndividual">
+          <Key>
+            <PropertyRef Name="IndividualID" />
+          </Key>
+          <Property Name="IndividualID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FirstName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Title" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CompanyID" Type="String" MaxLength="12" FixedLength="true" Unicode="false" />
+          <Property Name="MasterUserID" Type="Int32" />
+          <Property Name="Cell" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Phone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Fax" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AddressLine1" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AddressLine2" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="City" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="State" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ZipCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Version" Type="Int32" Nullable="false" />
+          <Property Name="ModifiedDatetime" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedByMasterUserID" Type="Int32" />
+          <Property Name="CreatedDatetime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedByMasterUserID" Type="Int32" Nullable="false" />
+          <Property Name="SecondaryTitle" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Designations" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="MailStop" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PhoneExtension" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="PersonalysisFile" Type="Binary" MaxLength="1" FixedLength="true" />
+          <Property Name="Birthdate" Type="DateTime" Precision="3" />
+          <Property Name="StartDate" Type="DateTime" Precision="3" />
+          <Property Name="TermDate" Type="DateTime" Precision="3" />
+          <Property Name="Inactive" Type="Boolean" />
+          <Property Name="OfficeLocationBuildingID" Type="Int32" />
+          <Property Name="Clock" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="ShowInPhoneLists" Type="Boolean" />
+          <Property Name="LogicalDepartment" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="OfficeLocationsID" Type="Int32" />
+          <Property Name="IsEmployee" Type="Boolean" />
+          <Property Name="LogicalDepartmentID" Type="Int32" />
+          <Property Name="PersonalEmail" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="HomePhone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PersonalCell" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HomeAddress" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="HomeCity" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="HomeState" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HomeZipCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="tblMasterUser" Relationship="Self.FK_tblIndividual_CreatedByMasterUser" FromRole="tblIndividual" ToRole="tblMasterUser" />
+          <NavigationProperty Name="tblMasterUser1" Relationship="Self.FK_tblIndividual_ModifiedByMasterUser" FromRole="tblIndividual" ToRole="tblMasterUser" />
+          <NavigationProperty Name="tblIndividualPropertyRoles" Relationship="Self.FK_tblIndividualPropertyRoles_tblIndividual" FromRole="tblIndividual" ToRole="tblIndividualPropertyRoles" />
+          <NavigationProperty Name="tblTSEmployeeInfoes" Relationship="UnitedModel.FK_tblTSEmployeeInfo_tblIndividual" FromRole="tblIndividual" ToRole="tblTSEmployeeInfo" />
+          <Property Name="ManagerIndividualID" Type="Int32" Nullable="false" />
+          <Property Name="MiddleName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PreferredFirstName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tblIndividualPropertyRole">
+          <Key>
+            <PropertyRef Name="EntityID" />
+            <PropertyRef Name="IndividualID" />
+            <PropertyRef Name="PropertyRoleID" />
+          </Key>
+          <Property Name="EntityID" Type="String" MaxLength="6" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="IndividualID" Type="Int32" Nullable="false" />
+          <Property Name="PropertyRoleID" Type="Int32" Nullable="false" />
+          <Property Name="Sort" Type="Int32" Nullable="false" />
+          <Property Name="Version" Type="Int32" Nullable="false" />
+          <Property Name="ModifiedDatetime" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedByMasterUserID" Type="Int32" />
+          <Property Name="CreatedDatetime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedByMasterUserID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="tblIndividual" Relationship="Self.FK_tblIndividualPropertyRoles_tblIndividual" FromRole="tblIndividualPropertyRoles" ToRole="tblIndividual" />
+        </EntityType>
+        <EntityType Name="tblMasterUser">
+          <Key>
+            <PropertyRef Name="MasterUserID" />
+          </Key>
+          <Property Name="MasterUserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DomainName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="MRIUserID" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="FirstName" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AcceptedUPDirect" Type="Boolean" />
+          <Property Name="Version" Type="Int32" Nullable="false" />
+          <Property Name="ModifiedByMasterUserID" Type="Int32" />
+          <Property Name="ModifiedDatetime" Type="DateTime" Precision="3" />
+          <Property Name="CreatedByMasterUserID" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDatetime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tblIndividuals" Relationship="Self.FK_tblIndividual_CreatedByMasterUser" FromRole="tblMasterUser" ToRole="tblIndividual" />
+          <NavigationProperty Name="tblIndividuals1" Relationship="Self.FK_tblIndividual_ModifiedByMasterUser" FromRole="tblMasterUser" ToRole="tblIndividual" />
+          <NavigationProperty Name="tblMasterUser1" Relationship="Self.FK_tblMasterUser_tblMasterUser" FromRole="tblMasterUser" ToRole="tblMasterUser1" />
+          <NavigationProperty Name="tblMasterUser2" Relationship="Self.FK_tblMasterUser_tblMasterUser" FromRole="tblMasterUser1" ToRole="tblMasterUser" />
+          <NavigationProperty Name="tblMasterUser11" Relationship="Self.FK_tblMasterUser_tblMasterUserModifiedBy" FromRole="tblMasterUser" ToRole="tblMasterUser1" />
+          <NavigationProperty Name="tblMasterUser3" Relationship="Self.FK_tblMasterUser_tblMasterUserModifiedBy" FromRole="tblMasterUser1" ToRole="tblMasterUser" />
+          <NavigationProperty Name="tblMasterUserRoles" Relationship="Self.FK_tblMasterUserRole_MasterUser" FromRole="tblMasterUser" ToRole="tblMasterUserRole" />
+          <NavigationProperty Name="tblRoles" Relationship="Self.FK_tblRole_CreatedByMasterUser" FromRole="tblMasterUser" ToRole="tblRole" />
+          <NavigationProperty Name="tblRoles1" Relationship="Self.FK_tblRolePermission_CreatedByMasterUser" FromRole="tblMasterUser" ToRole="tblRole" />
+        </EntityType>
+        <EntityType Name="tblMasterUserRole">
+          <Key>
+            <PropertyRef Name="MasterUserID" />
+            <PropertyRef Name="RoleID" />
+          </Key>
+          <Property Name="MasterUserID" Type="Int32" Nullable="false" />
+          <Property Name="RoleID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="tblMasterUser" Relationship="Self.FK_tblMasterUserRole_MasterUser" FromRole="tblMasterUserRole" ToRole="tblMasterUser" />
+        </EntityType>
+        <EntityType Name="tblRole">
+          <Key>
+            <PropertyRef Name="RoleID" />
+          </Key>
+          <Property Name="RoleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Title" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="ApplicationID" Type="Int32" Nullable="false" />
+          <Property Name="Version" Type="Int32" Nullable="false" />
+          <Property Name="ModifiedByMasterUserID" Type="Int32" />
+          <Property Name="ModifiedDatetime" Type="DateTime" Precision="3" />
+          <Property Name="CreatedByMasterUserID" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDatetime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tblMasterUser" Relationship="Self.FK_tblRole_CreatedByMasterUser" FromRole="tblRole" ToRole="tblMasterUser" />
+          <NavigationProperty Name="tblMasterUser1" Relationship="Self.FK_tblRolePermission_CreatedByMasterUser" FromRole="tblRole" ToRole="tblMasterUser" />
+        </EntityType>
+        <EntityType Name="tblTSCompanyCode">
+          <Key>
+            <PropertyRef Name="CompanyCodeID" />
+          </Key>
+          <Property Name="CompanyCodeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="txtCompanyCode" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtCompanyName" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtCompanyStatus" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtCompanyWebsite" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtCompanyAbbreviation" Type="String" MaxLength="25" FixedLength="false" Unicode="true" />
+          <Property Name="chkTimesheetSystem" Type="Int16" />
+          <Property Name="txtNewCompanyIdentifier" Type="String" MaxLength="36" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="tblTSPayPeriod">
+          <Key>
+            <PropertyRef Name="PayPeriodID" />
+          </Key>
+          <Property Name="PayPeriodID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="clpCSV" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="dtmPeriodDue" Type="DateTime" Precision="3" />
+          <Property Name="dtmPeriodEnd" Type="DateTime" Precision="3" />
+          <Property Name="dtmPeriodPayDay" Type="DateTime" Precision="3" />
+          <Property Name="dtmPeriodStart" Type="DateTime" Precision="3" />
+          <Property Name="dtmProcessed" Type="DateTime" Precision="3" />
+          <Property Name="txtLastPeriodOfYear" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtStatus" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="dtmReminderAllEmployees" Type="DateTime" Precision="3" />
+          <Property Name="dtmReminderAllNonExempt" Type="DateTime" Precision="3" />
+          <Property Name="dtmReminderUnApproved" Type="DateTime" Precision="3" />
+          <Property Name="dtmReminderUnSubmittedNonExempt" Type="DateTime" Precision="3" />
+          <Property Name="txtVerifyDelete" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="chkDateConflict" Type="Int16" />
+          <Property Name="clpCSVNonExempt" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="dtm1stReminder" Type="DateTime" Precision="3" />
+          <Property Name="dtm2ndReminder" Type="DateTime" Precision="3" />
+          <Property Name="dtmApprovalDueDate" Type="DateTime" Precision="3" />
+          <Property Name="dtmCutOffDate" Type="DateTime" Precision="3" />
+          <Property Name="IsBiWeeklyPayroll" Type="Boolean" />
+          <NavigationProperty Name="tblTSTimesheetHours" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSPayPeriod" FromRole="tblTSPayPeriod" ToRole="tblTSTimesheetHour" />
+        </EntityType>
+        <EntityType Name="tblTSStatusType">
+          <Key>
+            <PropertyRef Name="StatusTypeID" />
+          </Key>
+          <Property Name="StatusTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StatusType" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tblTSTimesheetHours" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSStatusType" FromRole="tblTSStatusType" ToRole="tblTSTimesheetHour" />
+        </EntityType>
+        <Association Name="FK_tblIndividual_CreatedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblIndividual">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblIndividual_ModifiedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="0..1" />
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblIndividual">
+              <PropertyRef Name="ModifiedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblIndividualPropertyRoles_tblIndividual">
+          <End Role="tblIndividual" Type="Self.tblIndividual" Multiplicity="1" />
+          <End Role="tblIndividualPropertyRoles" Type="Self.tblIndividualPropertyRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblIndividual">
+              <PropertyRef Name="IndividualID" />
+            </Principal>
+            <Dependent Role="tblIndividualPropertyRoles">
+              <PropertyRef Name="IndividualID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblMasterUser_tblMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblMasterUser1" Type="Self.tblMasterUser" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblMasterUser1">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblMasterUser_tblMasterUserModifiedBy">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="0..1" />
+          <End Role="tblMasterUser1" Type="Self.tblMasterUser" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblMasterUser1">
+              <PropertyRef Name="ModifiedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblMasterUserRole_MasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblMasterUserRole" Type="Self.tblMasterUserRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblMasterUserRole">
+              <PropertyRef Name="MasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblRole_CreatedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblRole" Type="Self.tblRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblRole">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblRolePermission_CreatedByMasterUser">
+          <End Role="tblMasterUser" Type="Self.tblMasterUser" Multiplicity="1" />
+          <End Role="tblRole" Type="Self.tblRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblMasterUser">
+              <PropertyRef Name="MasterUserID" />
+            </Principal>
+            <Dependent Role="tblRole">
+              <PropertyRef Name="CreatedByMasterUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="UnitedEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tblIndividuals" EntityType="Self.tblIndividual" />
+          <EntitySet Name="tblIndividualPropertyRoles" EntityType="Self.tblIndividualPropertyRole" />
+          <EntitySet Name="tblMasterUsers" EntityType="Self.tblMasterUser" />
+          <EntitySet Name="tblMasterUserRoles" EntityType="Self.tblMasterUserRole" />
+          <EntitySet Name="tblRoles" EntityType="Self.tblRole" />
+          <EntitySet Name="tblTSCompanyCodes" EntityType="Self.tblTSCompanyCode" />
+          <EntitySet Name="tblTSPayPeriods" EntityType="Self.tblTSPayPeriod" />
+          <EntitySet Name="tblTSStatusTypes" EntityType="Self.tblTSStatusType" />
+          <AssociationSet Name="FK_tblIndividual_CreatedByMasterUser" Association="Self.FK_tblIndividual_CreatedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblIndividual" EntitySet="tblIndividuals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblIndividual_ModifiedByMasterUser" Association="Self.FK_tblIndividual_ModifiedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblIndividual" EntitySet="tblIndividuals" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblIndividualPropertyRoles_tblIndividual" Association="Self.FK_tblIndividualPropertyRoles_tblIndividual">
+            <End Role="tblIndividual" EntitySet="tblIndividuals" />
+            <End Role="tblIndividualPropertyRoles" EntitySet="tblIndividualPropertyRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblMasterUser_tblMasterUser" Association="Self.FK_tblMasterUser_tblMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblMasterUser1" EntitySet="tblMasterUsers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblMasterUser_tblMasterUserModifiedBy" Association="Self.FK_tblMasterUser_tblMasterUserModifiedBy">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblMasterUser1" EntitySet="tblMasterUsers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblMasterUserRole_MasterUser" Association="Self.FK_tblMasterUserRole_MasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblMasterUserRole" EntitySet="tblMasterUserRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblRole_CreatedByMasterUser" Association="Self.FK_tblRole_CreatedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblRole" EntitySet="tblRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblRolePermission_CreatedByMasterUser" Association="Self.FK_tblRolePermission_CreatedByMasterUser">
+            <End Role="tblMasterUser" EntitySet="tblMasterUsers" />
+            <End Role="tblRole" EntitySet="tblRoles" />
+          </AssociationSet>
+          <EntitySet Name="tblTSEmployeeInfoes" EntityType="UnitedModel.tblTSEmployeeInfo" />
+          <AssociationSet Name="FK_tblTSEmployeeInfo_tblIndividual" Association="UnitedModel.FK_tblTSEmployeeInfo_tblIndividual">
+            <End Role="tblIndividual" EntitySet="tblIndividuals" />
+            <End Role="tblTSEmployeeInfo" EntitySet="tblTSEmployeeInfoes" />
+          </AssociationSet>
+          <EntitySet Name="tblTSTimesheetHours" EntityType="UnitedModel.tblTSTimesheetHour" />
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSEmployeeInfo" Association="UnitedModel.FK_tblTSTimesheetHours_tblTSEmployeeInfo">
+            <End Role="tblTSEmployeeInfo" EntitySet="tblTSEmployeeInfoes" />
+            <End Role="tblTSTimesheetHour" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSPayPeriod" Association="UnitedModel.FK_tblTSTimesheetHours_tblTSPayPeriod">
+            <End Role="tblTSPayPeriod" EntitySet="tblTSPayPeriods" />
+            <End Role="tblTSTimesheetHour" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSStatusType" Association="UnitedModel.FK_tblTSTimesheetHours_tblTSStatusType">
+            <End Role="tblTSStatusType" EntitySet="tblTSStatusTypes" />
+            <End Role="tblTSTimesheetHour" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <EntitySet Name="tblTSHoursTypes" EntityType="UnitedModel.tblTSHoursType" />
+          <AssociationSet Name="FK_tblTSTimesheetHours_tblTSHoursType" Association="UnitedModel.FK_tblTSTimesheetHours_tblTSHoursType">
+            <End Role="tblTSHoursType" EntitySet="tblTSHoursTypes" />
+            <End Role="tblTSTimesheetHour" EntitySet="tblTSTimesheetHours" />
+          </AssociationSet>
+          <FunctionImport Name="fnTSDateRange" IsComposable="true" ReturnType="Collection(UnitedModel.fnTSDateRange_Result)">
+            <Parameter Name="dtmFrom" Mode="In" Type="DateTime" />
+            <Parameter Name="dtmTo" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <EntitySet Name="tblTSHolidays" EntityType="UnitedModel.tblTSHoliday" />
+          <EntitySet Name="tblTSNavigations" EntityType="UnitedModel.tblTSNavigation" />
+          </EntityContainer>
+        <EntityType Name="tblTSEmployeeInfo">
+          <Key>
+            <PropertyRef Name="EmployeeInfoId" />
+          </Key>
+          <Property Name="EmployeeInfoId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MasterUserID" Type="Int32" Nullable="true" />
+          <Property Name="CompanyCodeId" Type="Int32" Nullable="false" />
+          <Property Name="intEmployeeId" Type="Int32" Nullable="false" />
+          <Property Name="HRBP" Type="Boolean" />
+          <Property Name="IsNewPosition" Type="Boolean" />
+          <Property Name="ReplacingMasterUserId" Type="Int32" />
+          <Property Name="DateOfWelcomeEmail" Type="DateTime" Precision="3" />
+          <Property Name="DateOfNewHireFormSent" Type="DateTime" Precision="3" />
+          <Property Name="DateOfEnteredInPayForce" Type="DateTime" Precision="3" />
+          <Property Name="DateOfTimeSaverReminder" Type="DateTime" Precision="3" />
+          <Property Name="DateOfBackgroundCheck" Type="DateTime" Precision="3" />
+          <Property Name="DateOfEVerify" Type="DateTime" Precision="3" />
+          <Property Name="DatePopcornSent" Type="DateTime" Precision="3" />
+          <Property Name="WorkStateID" Type="Int32" />
+          <Property Name="ReasonForTermination" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="SpecialPayIssues" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IsLetterReceived" Type="Boolean" />
+          <Property Name="IsNopaReceived" Type="Boolean" />
+          <Property Name="DateOfEmailSentToTechOps" Type="DateTime" Precision="3" />
+          <Property Name="DateOfExitInterview" Type="DateTime" Precision="3" />
+          <Property Name="DateOfInformationToPayroll" Type="DateTime" Precision="3" />
+          <Property Name="DateOfPTOPayout" Type="DateTime" Precision="3" />
+          <Property Name="IsNonDisputeUnemployment" Type="Boolean" />
+          <Property Name="chkBenefitEligible" Type="Int16" />
+          <Property Name="chkPhotoShowExternal" Type="Int16" />
+          <Property Name="chkPhotoShowInternal" Type="Int16" />
+          <Property Name="intHRSupervisor" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="memBiography" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="memHRDelegate" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="realFTE" Type="Double" />
+          <Property Name="realMaxTimeOffPerWeek" Type="Double" />
+          <Property Name="txtDomain" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtNewOrRehire" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtOfficer" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtPhotoHighResolution" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtPhotoWeb" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="IsNonExempt" Type="Boolean" />
+          <Property Name="txtUserID" Type="String" Nullable="false" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtUserIDFics" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtAutograph" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="FileNumber" Type="Int32" />
+          <Property Name="realHoursPerWeek" Type="Double" />
+          <Property Name="memTemp" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="memTemp2" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="chkProcessAsNewEmployee" Type="Int16" />
+          <Property Name="chkPositionChange" Type="Int16" />
+          <Property Name="chkTimesheetAdmin" Type="Int16" />
+          <Property Name="dtmTempStartDate" Type="DateTime" Precision="3" />
+          <Property Name="txtEmploymentType" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="txtNewEmployeeIdentifier" Type="String" MaxLength="36" FixedLength="false" Unicode="true" />
+          <Property Name="ManagerComments" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ITComments" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="PhysicalLocation" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="PreviousExperience" Type="Int32" />
+          <Property Name="TemplateId" Type="Guid" />
+          <Property Name="ComputerSetupId" Type="Guid" />
+          <Property Name="AutoAudit_CreatedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="AutoAudit_CreatedBy" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="AutoAudit_ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="AutoAudit_ModifiedBy" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="AutoAudit_RowVersion" Type="Int32" />
+          <Property Name="AccountSetupId" Type="Guid" />
+          <Property Name="PhonePassCode" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="BenefitEligible" Type="Boolean" />
+          <Property Name="TimesheetAdmin" Type="Boolean" />
+          <Property Name="EmployeeTerminationid" Type="Guid" />
+          <Property Name="UploadToExternalWebSite" Type="Boolean" />
+          <Property Name="Freddie_Mac_Signatory" Type="Boolean" />
+          <NavigationProperty Name="tblIndividual" Relationship="UnitedModel.FK_tblTSEmployeeInfo_tblIndividual" FromRole="tblTSEmployeeInfo" ToRole="tblIndividual" />
+          <NavigationProperty Name="tblTSTimesheetHours" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSEmployeeInfo" FromRole="tblTSEmployeeInfo" ToRole="tblTSTimesheetHour" />
+        </EntityType>
+        <Association Name="FK_tblTSEmployeeInfo_tblIndividual">
+          <End Type="UnitedModel.tblIndividual" Role="tblIndividual" Multiplicity="1" />
+          <End Type="UnitedModel.tblTSEmployeeInfo" Role="tblTSEmployeeInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblIndividual">
+              <PropertyRef Name="IndividualID" />
+            </Principal>
+            <Dependent Role="tblTSEmployeeInfo">
+              <PropertyRef Name="intEmployeeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="udf_DateRange_Result">
+          <Property Type="DateTime" Name="dtmDate" Nullable="true" Precision="23" />
+          <Property Type="Int32" Name="intDate" Nullable="true" />
+          <Property Type="Int32" Name="intDay" Nullable="true" />
+          <Property Type="Int32" Name="intMonth" Nullable="true" />
+          <Property Type="Int32" Name="intYear" Nullable="true" />
+          <Property Type="Int32" Name="intDayOfWeek" Nullable="true" />
+          <Property Type="String" Name="strMonth" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="strDayOfWeek" Nullable="true" MaxLength="20" />
+        </ComplexType>
+        <EntityType Name="tblTSTimesheetHour">
+          <Key>
+            <PropertyRef Name="TimesheetHoursID" />
+          </Key>
+          <Property Name="TimesheetHoursID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeInfoId" Type="Int32" Nullable="false" />
+          <Property Name="PayPeriodID" Type="Int32" Nullable="false" />
+          <Property Name="ProcessedPayPeriod" Type="Int32" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="TimeStart" Type="Int32" />
+          <Property Name="TimeEnd" Type="Int32" />
+          <Property Name="Hours" Type="Decimal" Nullable="false" Precision="5" Scale="2" />
+          <Property Name="HoursTypeID" Type="Int32" Nullable="false" />
+          <Property Name="HoursRegular" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="HoursHoliday" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="HoursPTO" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="HoursJuryDuty" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="HoursBereavement" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="HoursUnpaid" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="HoursVolunteerPTO" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="OnCall" Type="Boolean" />
+          <Property Name="Mileage" Type="Double" />
+          <Property Name="Parking" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="StatusTypeId" Type="Int32" />
+          <Property Name="EntryDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EntryUser" Type="Int32" Nullable="false" />
+          <Property Name="SubmitDate" Type="DateTime" Precision="3" />
+          <Property Name="SubmitUser" Type="Int32" />
+          <Property Name="ApproveDate" Type="DateTime" Precision="3" />
+          <Property Name="ApproveUser" Type="Int32" />
+          <Property Name="ProcessDate" Type="DateTime" Precision="3" />
+          <Property Name="ProcessPayPeriod" Type="Int32" />
+          <Property Name="LockOutEmployee" Type="Boolean" Nullable="false" />
+          <Property Name="LockOutManager" Type="Boolean" Nullable="false" />
+          <Property Name="LockOutAll" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="tblTSEmployeeInfo" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSEmployeeInfo" FromRole="tblTSTimesheetHour" ToRole="tblTSEmployeeInfo" />
+          <NavigationProperty Name="tblTSPayPeriod" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSPayPeriod" FromRole="tblTSTimesheetHour" ToRole="tblTSPayPeriod" />
+          <NavigationProperty Name="tblTSStatusType" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSStatusType" FromRole="tblTSTimesheetHour" ToRole="tblTSStatusType" />
+          <NavigationProperty Name="tblTSHoursType" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSHoursType" FromRole="tblTSTimesheetHour" ToRole="tblTSHoursType" />
+        </EntityType>
+        <Association Name="FK_tblTSTimesheetHours_tblTSEmployeeInfo">
+          <End Type="UnitedModel.tblTSEmployeeInfo" Role="tblTSEmployeeInfo" Multiplicity="1" />
+          <End Type="UnitedModel.tblTSTimesheetHour" Role="tblTSTimesheetHour" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSEmployeeInfo">
+              <PropertyRef Name="EmployeeInfoId" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHour">
+              <PropertyRef Name="EmployeeInfoId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSTimesheetHours_tblTSPayPeriod">
+          <End Type="UnitedModel.tblTSPayPeriod" Role="tblTSPayPeriod" Multiplicity="1" />
+          <End Type="UnitedModel.tblTSTimesheetHour" Role="tblTSTimesheetHour" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSPayPeriod">
+              <PropertyRef Name="PayPeriodID" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHour">
+              <PropertyRef Name="PayPeriodID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tblTSTimesheetHours_tblTSStatusType">
+          <End Type="UnitedModel.tblTSStatusType" Role="tblTSStatusType" Multiplicity="0..1" />
+          <End Type="UnitedModel.tblTSTimesheetHour" Role="tblTSTimesheetHour" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSStatusType">
+              <PropertyRef Name="StatusTypeID" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHour">
+              <PropertyRef Name="StatusTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tblTSHoursType">
+          <Key>
+            <PropertyRef Name="HoursTypeID" />
+          </Key>
+          <Property Name="HoursTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HoursType" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="BothFLSA" Type="Boolean" />
+          <NavigationProperty Name="tblTSTimesheetHours" Relationship="UnitedModel.FK_tblTSTimesheetHours_tblTSHoursType" FromRole="tblTSHoursType" ToRole="tblTSTimesheetHour" />
+          <Property Name="AddTime" Type="Boolean" />
+        </EntityType>
+        <Association Name="FK_tblTSTimesheetHours_tblTSHoursType">
+          <End Type="UnitedModel.tblTSHoursType" Role="tblTSHoursType" Multiplicity="1" />
+          <End Type="UnitedModel.tblTSTimesheetHour" Role="tblTSTimesheetHour" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblTSHoursType">
+              <PropertyRef Name="HoursTypeID" />
+            </Principal>
+            <Dependent Role="tblTSTimesheetHour">
+              <PropertyRef Name="HoursTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="fnTSDateRange_Result">
+          <Property Type="DateTime" Name="dtmDate" Nullable="true" Precision="23" />
+          <Property Type="Int32" Name="intDate" Nullable="true" />
+          <Property Type="Int32" Name="intDay" Nullable="true" />
+          <Property Type="Int32" Name="intMonth" Nullable="true" />
+          <Property Type="Int32" Name="intYear" Nullable="true" />
+          <Property Type="Int32" Name="intDayOfWeek" Nullable="true" />
+          <Property Type="String" Name="strMonth" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="strDayOfWeek" Nullable="true" MaxLength="20" />
+        </ComplexType>
+        <EntityType Name="tblTSHoliday">
+          <Key>
+            <PropertyRef Name="HolidayID" />
+          </Key>
+          <Property Name="HolidayID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="dtmHoliday" Type="DateTime" Precision="3" />
+          <Property Name="HolidayName" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="tblTSNavigation">
+          <Key>
+            <PropertyRef Name="TabId" />
+          </Key>
+          <Property Name="TabId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LinkText" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ControllerName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ActionName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ElementNameId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="IsTSUser" Type="Boolean" Nullable="false" />
+          <Property Name="IsTSHRAdmin" Type="Boolean" Nullable="false" />
+          <Property Name="IsTSManager" Type="Boolean" Nullable="false" />
+        </EntityType>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="UnitedModelStoreContainer" CdmEntityContainer="UnitedEntities">
+          <EntitySetMapping Name="tblIndividuals">
+            <EntityTypeMapping TypeName="UnitedModel.tblIndividual">
+              <MappingFragment StoreEntitySet="tblIndividual">
+                <ScalarProperty Name="PreferredFirstName" ColumnName="PreferredFirstName" />
+                <ScalarProperty Name="MiddleName" ColumnName="MiddleName" />
+                <ScalarProperty Name="ManagerIndividualID" ColumnName="ManagerIndividualID" />
+                <ScalarProperty Name="IndividualID" ColumnName="IndividualID" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="CompanyID" ColumnName="CompanyID" />
+                <ScalarProperty Name="MasterUserID" ColumnName="MasterUserID" />
+                <ScalarProperty Name="Cell" ColumnName="Cell" />
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Fax" ColumnName="Fax" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="AddressLine1" ColumnName="AddressLine1" />
+                <ScalarProperty Name="AddressLine2" ColumnName="AddressLine2" />
+                <ScalarProperty Name="City" ColumnName="City" />
+                <ScalarProperty Name="State" ColumnName="State" />
+                <ScalarProperty Name="ZipCode" ColumnName="ZipCode" />
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="ModifiedDatetime" ColumnName="ModifiedDatetime" />
+                <ScalarProperty Name="ModifiedByMasterUserID" ColumnName="ModifiedByMasterUserID" />
+                <ScalarProperty Name="CreatedDatetime" ColumnName="CreatedDatetime" />
+                <ScalarProperty Name="CreatedByMasterUserID" ColumnName="CreatedByMasterUserID" />
+                <ScalarProperty Name="SecondaryTitle" ColumnName="SecondaryTitle" />
+                <ScalarProperty Name="Designations" ColumnName="Designations" />
+                <ScalarProperty Name="MailStop" ColumnName="MailStop" />
+                <ScalarProperty Name="PhoneExtension" ColumnName="PhoneExtension" />
+                <ScalarProperty Name="PersonalysisFile" ColumnName="PersonalysisFile" />
+                <ScalarProperty Name="Birthdate" ColumnName="Birthdate" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="TermDate" ColumnName="TermDate" />
+                <ScalarProperty Name="Inactive" ColumnName="Inactive" />
+                <ScalarProperty Name="OfficeLocationBuildingID" ColumnName="OfficeLocationBuildingID" />
+                <ScalarProperty Name="Clock" ColumnName="Clock" />
+                <ScalarProperty Name="ShowInPhoneLists" ColumnName="ShowInPhoneLists" />
+                <ScalarProperty Name="LogicalDepartment" ColumnName="LogicalDepartment" />
+                <ScalarProperty Name="OfficeLocationsID" ColumnName="OfficeLocationsID" />
+                <ScalarProperty Name="IsEmployee" ColumnName="IsEmployee" />
+                <ScalarProperty Name="LogicalDepartmentID" ColumnName="LogicalDepartmentID" />
+                <ScalarProperty Name="PersonalEmail" ColumnName="PersonalEmail" />
+                <ScalarProperty Name="HomePhone" ColumnName="HomePhone" />
+                <ScalarProperty Name="PersonalCell" ColumnName="PersonalCell" />
+                <ScalarProperty Name="HomeAddress" ColumnName="HomeAddress" />
+                <ScalarProperty Name="HomeCity" ColumnName="HomeCity" />
+                <ScalarProperty Name="HomeState" ColumnName="HomeState" />
+                <ScalarProperty Name="HomeZipCode" ColumnName="HomeZipCode" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblIndividualPropertyRoles">
+            <EntityTypeMapping TypeName="UnitedModel.tblIndividualPropertyRole">
+              <MappingFragment StoreEntitySet="tblIndividualPropertyRoles">
+                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
+                <ScalarProperty Name="IndividualID" ColumnName="IndividualID" />
+                <ScalarProperty Name="PropertyRoleID" ColumnName="PropertyRoleID" />
+                <ScalarProperty Name="Sort" ColumnName="Sort" />
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="ModifiedDatetime" ColumnName="ModifiedDatetime" />
+                <ScalarProperty Name="ModifiedByMasterUserID" ColumnName="ModifiedByMasterUserID" />
+                <ScalarProperty Name="CreatedDatetime" ColumnName="CreatedDatetime" />
+                <ScalarProperty Name="CreatedByMasterUserID" ColumnName="CreatedByMasterUserID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblMasterUsers">
+            <EntityTypeMapping TypeName="UnitedModel.tblMasterUser">
+              <MappingFragment StoreEntitySet="tblMasterUser">
+                <ScalarProperty Name="MasterUserID" ColumnName="MasterUserID" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="DomainName" ColumnName="DomainName" />
+                <ScalarProperty Name="MRIUserID" ColumnName="MRIUserID" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="AcceptedUPDirect" ColumnName="AcceptedUPDirect" />
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="ModifiedByMasterUserID" ColumnName="ModifiedByMasterUserID" />
+                <ScalarProperty Name="ModifiedDatetime" ColumnName="ModifiedDatetime" />
+                <ScalarProperty Name="CreatedByMasterUserID" ColumnName="CreatedByMasterUserID" />
+                <ScalarProperty Name="CreatedDatetime" ColumnName="CreatedDatetime" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblMasterUserRoles">
+            <EntityTypeMapping TypeName="UnitedModel.tblMasterUserRole">
+              <MappingFragment StoreEntitySet="tblMasterUserRole">
+                <ScalarProperty Name="MasterUserID" ColumnName="MasterUserID" />
+                <ScalarProperty Name="RoleID" ColumnName="RoleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblRoles">
+            <EntityTypeMapping TypeName="UnitedModel.tblRole">
+              <MappingFragment StoreEntitySet="tblRole">
+                <ScalarProperty Name="RoleID" ColumnName="RoleID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="ApplicationID" ColumnName="ApplicationID" />
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="ModifiedByMasterUserID" ColumnName="ModifiedByMasterUserID" />
+                <ScalarProperty Name="ModifiedDatetime" ColumnName="ModifiedDatetime" />
+                <ScalarProperty Name="CreatedByMasterUserID" ColumnName="CreatedByMasterUserID" />
+                <ScalarProperty Name="CreatedDatetime" ColumnName="CreatedDatetime" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSCompanyCodes">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSCompanyCode">
+              <MappingFragment StoreEntitySet="tblTSCompanyCode">
+                <ScalarProperty Name="CompanyCodeID" ColumnName="CompanyCodeID" />
+                <ScalarProperty Name="txtCompanyCode" ColumnName="txtCompanyCode" />
+                <ScalarProperty Name="txtCompanyName" ColumnName="txtCompanyName" />
+                <ScalarProperty Name="txtCompanyStatus" ColumnName="txtCompanyStatus" />
+                <ScalarProperty Name="txtCompanyWebsite" ColumnName="txtCompanyWebsite" />
+                <ScalarProperty Name="txtCompanyAbbreviation" ColumnName="txtCompanyAbbreviation" />
+                <ScalarProperty Name="chkTimesheetSystem" ColumnName="chkTimesheetSystem" />
+                <ScalarProperty Name="txtNewCompanyIdentifier" ColumnName="txtNewCompanyIdentifier" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSPayPeriods">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSPayPeriod">
+              <MappingFragment StoreEntitySet="tblTSPayPeriod">
+                <ScalarProperty Name="PayPeriodID" ColumnName="PayPeriodID" />
+                <ScalarProperty Name="clpCSV" ColumnName="clpCSV" />
+                <ScalarProperty Name="dtmPeriodDue" ColumnName="dtmPeriodDue" />
+                <ScalarProperty Name="dtmPeriodEnd" ColumnName="dtmPeriodEnd" />
+                <ScalarProperty Name="dtmPeriodPayDay" ColumnName="dtmPeriodPayDay" />
+                <ScalarProperty Name="dtmPeriodStart" ColumnName="dtmPeriodStart" />
+                <ScalarProperty Name="dtmProcessed" ColumnName="dtmProcessed" />
+                <ScalarProperty Name="txtLastPeriodOfYear" ColumnName="txtLastPeriodOfYear" />
+                <ScalarProperty Name="txtStatus" ColumnName="txtStatus" />
+                <ScalarProperty Name="dtmReminderAllEmployees" ColumnName="dtmReminderAllEmployees" />
+                <ScalarProperty Name="dtmReminderAllNonExempt" ColumnName="dtmReminderAllNonExempt" />
+                <ScalarProperty Name="dtmReminderUnApproved" ColumnName="dtmReminderUnApproved" />
+                <ScalarProperty Name="dtmReminderUnSubmittedNonExempt" ColumnName="dtmReminderUnSubmittedNonExempt" />
+                <ScalarProperty Name="txtVerifyDelete" ColumnName="txtVerifyDelete" />
+                <ScalarProperty Name="chkDateConflict" ColumnName="chkDateConflict" />
+                <ScalarProperty Name="clpCSVNonExempt" ColumnName="clpCSVNonExempt" />
+                <ScalarProperty Name="dtm1stReminder" ColumnName="dtm1stReminder" />
+                <ScalarProperty Name="dtm2ndReminder" ColumnName="dtm2ndReminder" />
+                <ScalarProperty Name="dtmApprovalDueDate" ColumnName="dtmApprovalDueDate" />
+                <ScalarProperty Name="dtmCutOffDate" ColumnName="dtmCutOffDate" />
+                <ScalarProperty Name="IsBiWeeklyPayroll" ColumnName="IsBiWeeklyPayroll" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSStatusTypes">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSStatusType">
+              <MappingFragment StoreEntitySet="tblTSStatusType">
+                <ScalarProperty Name="StatusTypeID" ColumnName="StatusTypeID" />
+                <ScalarProperty Name="StatusType" ColumnName="StatusType" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSEmployeeInfoes">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSEmployeeInfo">
+              <MappingFragment StoreEntitySet="tblTSEmployeeInfo">
+                <ScalarProperty Name="Freddie_Mac_Signatory" ColumnName="Freddie_Mac_Signatory" />
+                <ScalarProperty Name="UploadToExternalWebSite" ColumnName="UploadToExternalWebSite" />
+                <ScalarProperty Name="EmployeeTerminationid" ColumnName="EmployeeTerminationid" />
+                <ScalarProperty Name="TimesheetAdmin" ColumnName="TimesheetAdmin" />
+                <ScalarProperty Name="BenefitEligible" ColumnName="BenefitEligible" />
+                <ScalarProperty Name="PhonePassCode" ColumnName="PhonePassCode" />
+                <ScalarProperty Name="AccountSetupId" ColumnName="AccountSetupId" />
+                <ScalarProperty Name="AutoAudit_RowVersion" ColumnName="AutoAudit_RowVersion" />
+                <ScalarProperty Name="AutoAudit_ModifiedBy" ColumnName="AutoAudit_ModifiedBy" />
+                <ScalarProperty Name="AutoAudit_ModifiedDate" ColumnName="AutoAudit_ModifiedDate" />
+                <ScalarProperty Name="AutoAudit_CreatedBy" ColumnName="AutoAudit_CreatedBy" />
+                <ScalarProperty Name="AutoAudit_CreatedDate" ColumnName="AutoAudit_CreatedDate" />
+                <ScalarProperty Name="ComputerSetupId" ColumnName="ComputerSetupId" />
+                <ScalarProperty Name="TemplateId" ColumnName="TemplateId" />
+                <ScalarProperty Name="PreviousExperience" ColumnName="PreviousExperience" />
+                <ScalarProperty Name="PhysicalLocation" ColumnName="PhysicalLocation" />
+                <ScalarProperty Name="ITComments" ColumnName="ITComments" />
+                <ScalarProperty Name="ManagerComments" ColumnName="ManagerComments" />
+                <ScalarProperty Name="txtNewEmployeeIdentifier" ColumnName="txtNewEmployeeIdentifier" />
+                <ScalarProperty Name="txtEmploymentType" ColumnName="txtEmploymentType" />
+                <ScalarProperty Name="dtmTempStartDate" ColumnName="dtmTempStartDate" />
+                <ScalarProperty Name="chkTimesheetAdmin" ColumnName="chkTimesheetAdmin" />
+                <ScalarProperty Name="chkPositionChange" ColumnName="chkPositionChange" />
+                <ScalarProperty Name="chkProcessAsNewEmployee" ColumnName="chkProcessAsNewEmployee" />
+                <ScalarProperty Name="memTemp2" ColumnName="memTemp2" />
+                <ScalarProperty Name="memTemp" ColumnName="memTemp" />
+                <ScalarProperty Name="realHoursPerWeek" ColumnName="realHoursPerWeek" />
+                <ScalarProperty Name="FileNumber" ColumnName="FileNumber" />
+                <ScalarProperty Name="txtAutograph" ColumnName="txtAutograph" />
+                <ScalarProperty Name="txtUserIDFics" ColumnName="txtUserIDFics" />
+                <ScalarProperty Name="txtUserID" ColumnName="txtUserID" />
+                <ScalarProperty Name="IsNonExempt" ColumnName="IsNonExempt" />
+                <ScalarProperty Name="txtPhotoWeb" ColumnName="txtPhotoWeb" />
+                <ScalarProperty Name="txtPhotoHighResolution" ColumnName="txtPhotoHighResolution" />
+                <ScalarProperty Name="txtOfficer" ColumnName="txtOfficer" />
+                <ScalarProperty Name="txtNewOrRehire" ColumnName="txtNewOrRehire" />
+                <ScalarProperty Name="txtDomain" ColumnName="txtDomain" />
+                <ScalarProperty Name="realMaxTimeOffPerWeek" ColumnName="realMaxTimeOffPerWeek" />
+                <ScalarProperty Name="realFTE" ColumnName="realFTE" />
+                <ScalarProperty Name="memHRDelegate" ColumnName="memHRDelegate" />
+                <ScalarProperty Name="memBiography" ColumnName="memBiography" />
+                <ScalarProperty Name="intHRSupervisor" ColumnName="intHRSupervisor" />
+                <ScalarProperty Name="chkPhotoShowInternal" ColumnName="chkPhotoShowInternal" />
+                <ScalarProperty Name="chkPhotoShowExternal" ColumnName="chkPhotoShowExternal" />
+                <ScalarProperty Name="chkBenefitEligible" ColumnName="chkBenefitEligible" />
+                <ScalarProperty Name="IsNonDisputeUnemployment" ColumnName="IsNonDisputeUnemployment" />
+                <ScalarProperty Name="DateOfPTOPayout" ColumnName="DateOfPTOPayout" />
+                <ScalarProperty Name="DateOfInformationToPayroll" ColumnName="DateOfInformationToPayroll" />
+                <ScalarProperty Name="DateOfExitInterview" ColumnName="DateOfExitInterview" />
+                <ScalarProperty Name="DateOfEmailSentToTechOps" ColumnName="DateOfEmailSentToTechOps" />
+                <ScalarProperty Name="IsNopaReceived" ColumnName="IsNopaReceived" />
+                <ScalarProperty Name="IsLetterReceived" ColumnName="IsLetterReceived" />
+                <ScalarProperty Name="SpecialPayIssues" ColumnName="SpecialPayIssues" />
+                <ScalarProperty Name="ReasonForTermination" ColumnName="ReasonForTermination" />
+                <ScalarProperty Name="WorkStateID" ColumnName="WorkStateID" />
+                <ScalarProperty Name="DatePopcornSent" ColumnName="DatePopcornSent" />
+                <ScalarProperty Name="DateOfEVerify" ColumnName="DateOfEVerify" />
+                <ScalarProperty Name="DateOfBackgroundCheck" ColumnName="DateOfBackgroundCheck" />
+                <ScalarProperty Name="DateOfTimeSaverReminder" ColumnName="DateOfTimeSaverReminder" />
+                <ScalarProperty Name="DateOfEnteredInPayForce" ColumnName="DateOfEnteredInPayForce" />
+                <ScalarProperty Name="DateOfNewHireFormSent" ColumnName="DateOfNewHireFormSent" />
+                <ScalarProperty Name="DateOfWelcomeEmail" ColumnName="DateOfWelcomeEmail" />
+                <ScalarProperty Name="ReplacingMasterUserId" ColumnName="ReplacingMasterUserId" />
+                <ScalarProperty Name="IsNewPosition" ColumnName="IsNewPosition" />
+                <ScalarProperty Name="HRBP" ColumnName="HRBP" />
+                <ScalarProperty Name="intEmployeeId" ColumnName="intEmployeeId" />
+                <ScalarProperty Name="CompanyCodeId" ColumnName="CompanyCodeId" />
+                <ScalarProperty Name="MasterUserID" ColumnName="MasterUserID" />
+                <ScalarProperty Name="EmployeeInfoId" ColumnName="EmployeeInfoId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSTimesheetHours">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSTimesheetHour">
+              <MappingFragment StoreEntitySet="tblTSTimesheetHours">
+                <ScalarProperty Name="LockOutAll" ColumnName="LockOutAll" />
+                <ScalarProperty Name="LockOutManager" ColumnName="LockOutManager" />
+                <ScalarProperty Name="LockOutEmployee" ColumnName="LockOutEmployee" />
+                <ScalarProperty Name="ProcessPayPeriod" ColumnName="ProcessPayPeriod" />
+                <ScalarProperty Name="ProcessDate" ColumnName="ProcessDate" />
+                <ScalarProperty Name="ApproveUser" ColumnName="ApproveUser" />
+                <ScalarProperty Name="ApproveDate" ColumnName="ApproveDate" />
+                <ScalarProperty Name="SubmitUser" ColumnName="SubmitUser" />
+                <ScalarProperty Name="SubmitDate" ColumnName="SubmitDate" />
+                <ScalarProperty Name="EntryUser" ColumnName="EntryUser" />
+                <ScalarProperty Name="EntryDate" ColumnName="EntryDate" />
+                <ScalarProperty Name="StatusTypeId" ColumnName="StatusTypeId" />
+                <ScalarProperty Name="Parking" ColumnName="Parking" />
+                <ScalarProperty Name="Mileage" ColumnName="Mileage" />
+                <ScalarProperty Name="OnCall" ColumnName="OnCall" />
+                <ScalarProperty Name="HoursVolunteerPTO" ColumnName="HoursVolunteerPTO" />
+                <ScalarProperty Name="HoursUnpaid" ColumnName="HoursUnpaid" />
+                <ScalarProperty Name="HoursBereavement" ColumnName="HoursBereavement" />
+                <ScalarProperty Name="HoursJuryDuty" ColumnName="HoursJuryDuty" />
+                <ScalarProperty Name="HoursPTO" ColumnName="HoursPTO" />
+                <ScalarProperty Name="HoursHoliday" ColumnName="HoursHoliday" />
+                <ScalarProperty Name="HoursRegular" ColumnName="HoursRegular" />
+                <ScalarProperty Name="HoursTypeID" ColumnName="HoursTypeID" />
+                <ScalarProperty Name="Hours" ColumnName="Hours" />
+                <ScalarProperty Name="TimeEnd" ColumnName="TimeEnd" />
+                <ScalarProperty Name="TimeStart" ColumnName="TimeStart" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="ProcessedPayPeriod" ColumnName="ProcessedPayPeriod" />
+                <ScalarProperty Name="PayPeriodID" ColumnName="PayPeriodID" />
+                <ScalarProperty Name="EmployeeInfoId" ColumnName="EmployeeInfoId" />
+                <ScalarProperty Name="TimesheetHoursID" ColumnName="TimesheetHoursID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSHoursTypes">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSHoursType">
+              <MappingFragment StoreEntitySet="tblTSHoursType">
+                <ScalarProperty Name="AddTime" ColumnName="AddTime" />
+                <ScalarProperty Name="BothFLSA" ColumnName="BothFLSA" />
+                <ScalarProperty Name="HoursType" ColumnName="HoursType" />
+                <ScalarProperty Name="HoursTypeID" ColumnName="HoursTypeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="fnTSDateRange" FunctionName="UnitedModel.Store.fnTSDateRange">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="UnitedModel.fnTSDateRange_Result">
+                <ScalarProperty Name="dtmDate" ColumnName="dtmDate" />
+                <ScalarProperty Name="intDate" ColumnName="intDate" />
+                <ScalarProperty Name="intDay" ColumnName="intDay" />
+                <ScalarProperty Name="intMonth" ColumnName="intMonth" />
+                <ScalarProperty Name="intYear" ColumnName="intYear" />
+                <ScalarProperty Name="intDayOfWeek" ColumnName="intDayOfWeek" />
+                <ScalarProperty Name="strMonth" ColumnName="strMonth" />
+                <ScalarProperty Name="strDayOfWeek" ColumnName="strDayOfWeek" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <EntitySetMapping Name="tblTSHolidays">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSHoliday">
+              <MappingFragment StoreEntitySet="tblTSHoliday">
+                <ScalarProperty Name="HolidayName" ColumnName="HolidayName" />
+                <ScalarProperty Name="dtmHoliday" ColumnName="dtmHoliday" />
+                <ScalarProperty Name="HolidayID" ColumnName="HolidayID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblTSNavigations">
+            <EntityTypeMapping TypeName="UnitedModel.tblTSNavigation">
+              <MappingFragment StoreEntitySet="tblTSNavigation">
+                <ScalarProperty Name="IsTSManager" ColumnName="IsTSManager" />
+                <ScalarProperty Name="IsTSHRAdmin" ColumnName="IsTSHRAdmin" />
+                <ScalarProperty Name="IsTSUser" ColumnName="IsTSUser" />
+                <ScalarProperty Name="ElementNameId" ColumnName="ElementNameId" />
+                <ScalarProperty Name="ActionName" ColumnName="ActionName" />
+                <ScalarProperty Name="ControllerName" ColumnName="ControllerName" />
+                <ScalarProperty Name="LinkText" ColumnName="LinkText" />
+                <ScalarProperty Name="TabId" ColumnName="TabId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

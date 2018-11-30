@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{118C66EB-99F6-4C28-A850-EFB6B42B2AC5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NM.Web.WebApplication.Timesheets.United</RootNamespace>
+    <AssemblyName>NM.Web.WebApplication.Timesheets.United</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Abstract\IRepository.cs" />
+    <Compile Include="BusinessModel\EmployeeIndividual.cs" />
+    <Compile Include="BusinessModel\MasterRole.cs" />
+    <Compile Include="BusinessModel\MasterUserRole.cs" />
+    <Compile Include="Extended\tblIndividual.cs" />
+    <Compile Include="Extended\tblTSEmployeeInfo.cs" />
+    <Compile Include="Extended\tblTSTimesheetHour.cs" />
+    <Compile Include="BusinessModel\TimeDateRange.cs" />
+    <Compile Include="BusinessModel\TimePayPeriod.cs" />
+    <Compile Include="Concrete\Repository.cs" />
+    <Compile Include="Enums\Enumeration.cs" />
+    <Compile Include="Models\fnTSDateRange_Result.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblIndividual.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblIndividualPropertyRole.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblMasterUser.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblMasterUserRole.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblRole.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSCompanyCode.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSEmployeeInfo.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSHoliday.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSHoursType.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSNavigation.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSPayPeriod.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSStatusType.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\tblTSTimesheetHour.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\udf_DateRange_Result.cs">
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UnitedEdm.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UnitedEdm.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UnitedEdm.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UnitedEdm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\UnitedEdm.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UnitedEdm.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <EntityDeploy Include="Models\UnitedEdm.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>UnitedEdm.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Models\UnitedEdm.edmx.diagram">
+      <DependentUpon>UnitedEdm.edmx</DependentUpon>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Models\UnitedEdm.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>UnitedEdm.edmx</DependentUpon>
+      <LastGenOutput>UnitedEdm.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\UnitedEdm.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>UnitedEdm.edmx</DependentUpon>
+      <LastGenOutput>UnitedEdm.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

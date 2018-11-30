@@ -1,0 +1,177 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@helper RenderColumnToFullName(string FirstName, string LastName)
+{
+string result = FirstName + " " + LastName;
+    @result;
+}
+
+@helper RenderTimesheetStatusToLink(string timesheetStatus, int individualId) { 
+var result = timesheetStatus;
+var selYear = DateTime.Now.Year;
+@Html.ActionLink(result, "GetTimeEntryForIndividual", new { id = individualId, selectedYear = selYear }, new { @class = "linkTimeEntry", @id=individualId, @selectedYear = selYear, title = "Manage Employee Time" })
+}
+
+@helper RenderPTOBalanceColumn(decimal PTOBalance) { 
+    string result = string.Empty;
+    if (PTOBalance > 0)
+    {
+        result = PTOBalance.ToString();
+        @result;
+    }
+    else
+    {
+        result = "-";
+        @result;
+    }
+}
+
+@using GridMvc.Html
+@if (Model.DirectEmployees != null)
+{
+    if (Model.DirectEmployees != null && Model.DirectEmployees.Count > 0)
+    {
+    <div class="row" style="padding-right:1em;">
+        <div class="col-sm-12">
+            <div class="NmarqGrid-SubHeader NmarqGrid-Spacer text-center">
+                <b>Direct Employee Access List</b>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="padding-right:1em;">
+        <div class="col-sm-12">
+            @Html.Grid(Model.DirectEmployees.OrderBy(i => i.FirstName).ThenBy(i => i.LastName), "_Grid").Named("directEmployees").Columns(col =>
+               {
+                   col.Add(m => m.IndividualId, true);
+                   col.Add(m => m.EmployeeInfoId, true);                   
+                   col.Add()
+                         .Titled("Employee")
+                         .SetWidth("25%")
+                         .RenderValueAs(m => RenderColumnToFullName(m.Individual.PreferredFirstName, m.Individual.LastName));
+                   col.Add(m => m.PTOBalance, "PTOBalance")
+                         .Titled("PTO Balance")
+                         .SetWidth("25%")
+                         .RenderValueAs(i =>
+                            RenderPTOBalanceColumn(i.PTOBalance).ToHtmlString()
+                         );
+                   col.Add()
+                           .Titled("Status")
+                           .SetWidth("25%")
+                           .Encoded(false)
+                           .Sanitized(false)
+                           .RenderValueAs(i =>
+                               RenderTimesheetStatusToLink(i.TimesheetStatus, i.IndividualId).ToHtmlString()
+                           );
+               })
+        </div>
+    </div>
+    }
+}
+
+@if (Model.DelegatedEmployees != null)
+{
+    if (Model.DelegatedEmployees != null && Model.DelegatedEmployees.Count() > 0)
+    {
+        <div class="row" style="padding-right:1em;">
+            <div class="col-sm-12">
+                <div class="NmarqGrid-SubHeader NmarqGrid-Spacer text-center">
+                    <b>Delegated Employee Access List</b>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="padding-right:1em;">
+            <div class="col-sm-12">
+                @if (Model.DelegatedEmployees.OrderBy(i => i.FirstName).ThenBy(i => i.LastName) != null && Model.DelegatedEmployees.Count > 0)
+                {
+                   @Html.Grid(Model.DelegatedEmployees, "_Grid").Named("delegatedEmployees").Columns(col =>
+                   {
+                       col.Add(m => m.IndividualId, true);
+                       col.Add(m => m.EmployeeInfoId, true);
+                       col.Add()
+                          .Titled("Employee")
+                          .SetWidth("25%")
+                          .RenderValueAs(m => RenderColumnToFullName(m.FirstName, m.LastName));
+                       col.Add(m => m.PTOBalance, "PTOBalance")
+                          .Titled("PTO Balance")
+                         .SetWidth("25%")
+                         .RenderValueAs(i =>
+                            RenderPTOBalanceColumn(i.PTOBalance).ToHtmlString()
+                         );
+                       col.Add()
+                             .Titled("Status")
+                            .SetWidth("25%")
+                             .Encoded(false)
+                             .Sanitized(false)
+                             .RenderValueAs(i =>
+                                RenderTimesheetStatusToLink(i.TimesheetStatus, i.IndividualId).ToHtmlString()
+                              );
+                   })
+                }
+            </div>
+
+        </div>
+    }
+}
+
+
+
+
+<script type="text/javascript">
+    $(function () {
+        $(".linkTimeEntry").on('click', function (event) {
+            event.preventDefault();            
+            var lastSlash = $(this).attr('href').lastIndexOf('/') + 1;
+            var individualId = $(this).attr('href').slice(lastSlash);
+            var url = $(this).attr('href');
+
+            //$.get(url, function (data) {
+            //    $('#dvTimeEntrySummaryPanel').empty();
+            //    $('#dvTimeEntrySummaryPanel').html(data);
+            //});
+            $.ajax({
+                url: url,
+                beforeSend: function(event){
+                    //$("#dvReloading").text("Reloading...").attr("class", "text-success glyphicon glyphicon-refresh");
+                    $.blockUI({
+                        message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Please wait while retrieving information...</h4></div>",
+                        css: {
+                            padding: "5px", '-webkit-border-radius': '10px', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                        }
+                    });
+
+                },
+                success: function (data) {
+                    $("#dvReloading").text("").removeAttr("class","glyphicon glyphicon-refresh");
+                    $('#dvTimeEntryManageView').empty();
+                    $('#dvTimeEntryManageView').html(data);
+                }
+            }).done(function (result) {
+                $.unblockUI();
+                //$.blockUI({
+                //    message: 'Loaded successfully!',
+                //    fadeIn: 700,
+                //    fadeOut: 700,
+                //    timeout: 2000,
+                //    showOverlay: false,
+                //    centerY: true,
+                //    css: {
+                //        width: '350px',
+                //        top: '200px',
+                //        left: '',
+                //        right: '10px',
+                //        border: 'none',
+                //        padding: '5px',
+                //        backgroundColor: '#000',
+                //        '-webkit-border-radius': '10px',
+                //        '-moz-border-radius': '10px',
+                //        opacity: .6,
+                //        color: '#fff',
+                //        'z-index': 9999999
+                //    }
+                //});
+                //$.growlUI("Notification", "Loaded successfully!")
+            });
+            return false;
+        });
+    });
+</script>

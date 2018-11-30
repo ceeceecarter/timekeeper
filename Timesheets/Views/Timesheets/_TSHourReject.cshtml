@@ -1,0 +1,224 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@helper SetPayPeriodActionVariable()
+{
+Model.IsPayPeriodActionOccurring = true;
+Model.PayPeriodActionOccurring = "reject";
+}
+@*@helper RenderPartColumn(int MilitaryTime)
+{
+if (MilitaryTime > 0)
+{
+    int hours = MilitaryTime / 100;
+    int minutes = MilitaryTime - hours * 100;
+    DateTime result = DateTime.MinValue;
+        @result.AddHours(hours).AddMinutes(minutes).ToString("hh:mm tt");
+    }
+    else
+    {
+        int result = 0;
+        @result;
+    }
+}*@
+
+@using GridMvc.Html
+
+<div class="container">
+    <div id="mdTimeEntryReject" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title" style="color:#ffffff">Reject Time</h5>
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container-fluid">
+                        @using (Html.BeginForm("PostSendApproval", "Timesheets", FormMethod.Post, new { id = "formSendApproval" }))
+                        {
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="well well-sm">
+                                        <small>
+                                            Please provide some feedback to the employee indicating why you are rejecting the timesheet.
+                                            The feedback provided here will automatically be sent to the employee via email.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="well well-sm">
+                                        <div class="row" style="padding-right:1em;">
+                                            <div id="dvHoursTypeSummary">
+                                                @SetPayPeriodActionVariable()
+                                                @Html.Partial("_PayPeriodHoursTypeSummary", Model)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                                
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group-lg">
+                                        @Html.Label("Comments:")
+                                        @Html.TextAreaFor(m => m.Comments,10, 500, new { @class = "form-control", id = "txtComments", style = "max-width:100%; width:100%;" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                @foreach (var item in Model.TimesheetHours)
+                                {
+                                    @Html.HiddenFor(m => item.TimesheetHoursID, new { @class = "tsHoursIds_Reject" })
+                                }
+                                @Html.HiddenFor(m => m.EmployeeInfoId, new { id = "hiddenEmployeeInfoId" })
+                                @Html.HiddenFor(m => m.MasterUserId, new { id = "hiddenApproverMasterUserId" })
+                                @Html.HiddenFor(m => m.EmployeeIndividual.MasterUserId, new { id = "hiddenEmployeeMasterUserId" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hiddenReject_SelectedPayPeriodId"})
+                                @Html.HiddenFor(m => m.LoggedInUser.IndividualID, new { id="hiddenReject_IndividualId"})
+                                @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id = "hiddenRejectEmployeeIndividual_IndividualId" })
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input id="inpTimeReject" type="submit" class="btn btn-default" value="Reject" />
+                    <input id="inpTimeRejectCancel" type="button" class="btn btn-default" value="Cancel" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //-----------------------------Cancel Reject Modal---------------------------------//
+    $(function () {
+        $("#inpTimeRejectCancel").on('click', function (event) {
+            event.preventDefault();
+            $("#mdTimeEntryReject").modal('hide');
+            //var hfFLSAStatus = $("#hfFLSAStatus").val();
+            //if (hfFLSAStatus == 1) {
+            //    $(".tsTimeEntryCheckBox").prop('checked', false);
+            //    $("#cbCheckedAllBoxes").prop('checked', false);
+            //}
+            $(".tsTimeEntryCheckBox").prop('checked', false);
+            $("#cbCheckedAllBoxes").prop('checked', false);
+        });
+
+    });
+    //-----------------------------Time Entry Reject Modal---------------------------------//
+    $(function () {
+        //Handler to submit approval
+        $("#inpTimeReject").on("click", function (event) {
+            event.preventDefault();
+            
+            var list = new Array();
+            var delegates = new Array();
+            var employeeId = $("#hiddenEmployeeInfoId").val();
+            var masterApproverUserId = $("#hiddenApproverMasterUserId").val();
+            var masterEmployeeUserId = $("#hiddenEmployeeMasterUserId").val();
+            var selPayPeriodId = $("#hiddenReject_SelectedPayPeriodId").val();
+            var approverIndividualId = $("#hiddenReject_IndividualId").val();
+            var date = new Date();
+            var dd = date.getDate();
+            var mm = date.getMonth() + 1;
+            var yy = date.getFullYear();
+            var currentdate = mm + "-" + dd + "-" + yy
+
+            //Note: Property Name is SelectedTimeEntryViewModel (the same as the View Model)
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.SelectedDelegateIds = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeId;
+            SelectedTimeEntryViewModel.Comments = $("#txtComments").val();
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+
+            //Add Id to the list array
+            $(".tsHoursIds_Reject").each(function () {
+                list.push(this.value)
+            })
+
+            ////Add Delegate Ids to the delegates array
+            //$(".tsSubmitToCheckbox").each(function () {
+            //    var thisVal = (this.checked ? "1" : "0");
+            //    if(thisVal == "1")
+            //        delegates.push(this.id);            
+            //});
+            
+            //Add each time entry to the View Model
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+            ////Add each Selected IndividualIds item to the View Model
+            //for (var item in delegates) {
+            //    SelectedTimeEntryViewModel.SelectedDelegateIds[parseInt(item)] = delegates[item];
+            //}
+            SelectedTimeEntryViewModel.SelectedDelegateIds[0] = approverIndividualId;
+
+            //assigned values to the object name which is the controller parameter
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel, MasterUserID: masterEmployeeUserId, ApproverMasterUserID: masterApproverUserId });
+            $("#mdTimeEntryReject").modal('hide');
+            $.ajax({
+                url: '@Url.Action("PostReject", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                    $('#dvTSWeeklyView').empty();
+                    //$("#dvLoadMessage").text("Reloading...").attr("class", " text-success glyphicon glyphicon-refresh");
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+                    //refresh the pay period hours summary
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_PayPeriodHoursSummary", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { selectedPayPeriodId: selPayPeriodId, employeeInfoId: employeeId, individualId: $("#hiddenRejectEmployeeIndividual_IndividualId").val() },
+                        success: function (ppData) {
+                            $("#dvPayPeriodHoursTypeSummary").empty();
+                            $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                        }
+                    });
+                    //refresh the Time Off Summary YTD
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { startDate: currentdate, employeeInfoId: employeeId, individualId: $("#hiddenRejectEmployeeIndividual_IndividualId").val() },
+                        success: function (summaryData) {
+                            $("#dvHoursTypeSummary").empty();
+                            $("#dvHoursTypeSummary").html(summaryData);
+                        }
+                    });
+
+                    //refresh the Employee List Grid
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_TSEmployeeAccessList", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { approverMasterUserId: masterApproverUserId },
+                        beforeSend: function (event) {
+                            var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                            $('#dvLoadMessage').html(textHtml);
+                        },
+                        success: function (empData) {
+                            $("#dvLoadMessage").empty();
+                            $("#dvEmployeeAccessList").empty();
+                            $("#dvEmployeeAccessList").html(empData);
+                        }
+                    });
+
+                    $("#dvTSWeeklyView").empty();
+                    $('#dvTSWeeklyView').html(data);
+                    $("#dvTimeEntryEdit").empty();
+                    $("#dvTimeEntrySubmitApproval").empty();
+                }
+            });
+        });
+    });
+</script>

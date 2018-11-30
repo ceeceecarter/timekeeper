@@ -1,0 +1,31 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.PayPeriodViewModel
+
+
+<div id="csvWidgets">
+    <div class="row">
+        <div class="col-sm-4">
+            @if (Model.txtStatus != null && Model.txtStatus == "Processed")
+            {
+                @Html.ActionLink("Exempt CSV", "DownloadProcessedCsv", "HRAdministration", new { pPayPeriodId = Model.PayPeriodID, pIsNonExempt = false }, new { id = "alDownloadProcessedExemptCsv", @class = "btn btn-info pull-right" })
+            }
+
+            @if (Model.txtStatus != null && Model.txtStatus != "Processed")
+            {
+                @Html.ActionLink("Preview Exempt CSV", "DownloadPreviewCsv", "HRAdministration", new { pPayPeriodId = Model.PayPeriodID, pIsNonExempt = false}, new { id = "alDownloadPreviewExemptCsv", @class = "btn btn-info pull-right" })
+            }
+            
+        </div>
+        <div class="col-sm-4">
+            @if (Model.txtStatus != null && Model.txtStatus == "Processed")
+            {
+                @Html.ActionLink("Non-Exempt CSV", "DownloadProcessedCsv", "HRAdministration", new { pPayPeriodId = Model.PayPeriodID, pIsNonExempt = true }, new { id = "alDownloadProcessedNonExemptCsv", @class = "btn btn-info pull-left" })
+            }
+
+            @if (Model.txtStatus != null && Model.txtStatus != "Processed")
+            {
+                @Html.ActionLink("Preview Non-Exempt CSV", "DownloadPreviewCsv", "HRAdministration", new { pPayPeriodId = Model.PayPeriodID, pIsNonExempt = true }, new { id = "alDownloadPreviewNonExemptCsv", @class = "btn btn-info pull-left" })
+            }
+        </div>
+    </div>
+</div>
+

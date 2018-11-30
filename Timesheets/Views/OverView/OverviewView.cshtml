@@ -1,0 +1,41 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.OverViewTabViewModel
+@{
+    ViewBag.Title = "Index";
+}
+
+@using GridMvc.Html
+
+<div class="container">
+    <h3>Overview Summary of Timesheet for Employee</h3>
+</div>
+
+@using (Html.BeginForm())
+{
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-8">
+                @if(Model != null)
+                {
+                    <div class="NmarqGrid-Header">Time Off Summary<span style="padding-left:10px"></span></div>
+                    @Html.Grid(Model.TimeOffSummary, "_Grid").Columns(col =>
+                    {
+                        col.Add(m => m.StatusCode)
+                            .Titled("Status");
+                        col.Add(m => m.TimeOffTotal)
+                            .Titled("Time Off Total")
+                            .Format("{0:0.00}");
+                    })
+                }
+            </div>
+        </div>
+    </div>
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //Make the Timesheet nav tab active
+        $("#navTimesheetOverview").addClass("active");
+
+    });
+</script>

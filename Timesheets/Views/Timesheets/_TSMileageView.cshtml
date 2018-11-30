@@ -1,0 +1,126 @@
+﻿
+@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@using GridMvc.Html
+
+<div class="col-sm-12">
+    <div class="NmarqGrid-SubHeader" style="padding-bottom:5px;">
+        <span class="NmarqGrid-Spacer"></span>
+        <b>Mileage</b>
+    </div>
+    <div class="well">
+        <div class="container-fluid">
+            @if (Model != null)
+            {
+                if (Model.MileageEntries != null)
+                {
+                    @Html.Grid(Model.MileageEntries, "_Grid").Columns(col =>
+               {
+               col.Add(m => m.EmployeeInfoID, true);
+               col.Add(m => m.TimesheetHoursID, true);
+               col.Add(false)
+               .Encoded(false)
+               .Sanitized(false)
+               .SetWidth("5%")
+               .Titled("")
+               .RenderValueAs(o =>
+                   o.tblTSStatusType.StatusType == "Approved" ? Html.CheckBox("cbApprovedTimeID", false, new { @class = "tsTimeEntryCheckBoxNonExempt", id = o.TimesheetHoursID }) :
+                   o.tblTSStatusType.StatusType == "Submitted" ? Html.CheckBox("cbSubmittedTimeID", false, new { @class = "tsTimeEntryCheckBoxNonExempt", id = o.TimesheetHoursID }) :
+                   o.tblTSStatusType.StatusType == "Non-Submitted" ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                   MvcHtmlString.Create(string.Empty));
+               col.Add(m => m.Date, "Date")
+                   .Titled("Date")
+                   .SetWidth("15%")
+                   .Format("{0:MM/dd/yyyy}");
+               col.Add(m => m.MileageDescription, "Description")
+                   .Titled("Location - Reason")
+                   .SetWidth("40%");
+               col.Add(m => m.MileageMiles, "Miles")
+                   .Titled("Miles")
+                   .SetWidth("18%")
+                   .Format("{0:0.00}");
+               col.Add(m => m.tblTSStatusType.StatusType)
+                   .Titled("Status")
+                   .SetWidth("12%");
+               //col.Add(m => m.MileageEffectiveDate)
+               //    .Titled("Rate Effective Date")
+               //    .SetWidth(30);
+               //col.Add(m => m.MileageRate)
+               //    .Titled("Rate")
+               //    .SetWidth(30);
+               col.Add()
+               .Encoded(false)
+               .Sanitized(false)
+               .SetWidth("5%")
+               .Css("hidden-xs") //hidden on phones
+               .RenderValueAs(i =>
+            @<b>
+                @if (Model.SelectedPayPeriod.txtStatus == "Open")
+                {
+                    if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                                            (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                                            (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                    {
+                        @Html.ActionLink(" ", "Edit", new { id = i.TimesheetHoursID, hoursTypeId = i.HoursTypeID }, new { @id = "editMileageEntry", @class = "dialog-edit glyphicon glyphicon-pencil" })
+                    }
+                }
+            </b>);
+               col.Add()
+                   .Encoded(false)
+                   .Sanitized(false)
+                   .SetWidth("5%")
+                   .Css("hidden-xs") //hidden on phones
+                   .RenderValueAs(i =>
+                @<b>
+                    @if (Model.SelectedPayPeriod.txtStatus == "Open")
+                    {
+                        if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                                                    (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                                                    (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                        {
+                            @Html.ActionLink(" ", "ConfirmDelete", new { id = i.TimesheetHoursID, hoursTypeId = i.HoursTypeID }, new { @id = "deleteMileageEntry", @class = "dialog-delete glyphicon glyphicon-trash" })
+                        }
+                    }
+                </b>);
+               })
+                }
+            }
+        </div>
+    </div>
+</div>
+
+
+@*<script type="text/javascript">
+
+        $(function () {
+            //Handler of Select All checkbox ('cbCheckedAllBoxes') to toggle check/uncheck time entry checkboxes
+            $("#cbCheckedAllBoxes").change(function () {
+                $(".tsTimeEntryCheckBox").prop('checked', $(this).prop('checked'));
+            });
+
+            //Show Modal Dialog Edit Time Entry
+            $("#editMileageEntry").on("click", function (event) {
+                event.preventDefault();
+                var url = $(this).attr('href');
+                $.get(url, function (data) {
+                    $('#dvTimeEntryEdit').empty();
+                    $('#dvTimeEntryEdit').html(data);
+                    $('#mdTimeEntryEdit').modal('show');
+                });
+                return false;
+            });
+
+            //Show Modal Confirm delete time entry
+            $("#deleteMileageEntry").on("click", function (event) {
+                var url = $(this).attr('href');
+                debugger;
+                $.get(url, function (data) {
+                    $('#dvOnCallEntryDelete').html(data);
+                    $('#mdOnCallEntryDelete').modal('show');
+                });
+                return false;
+            });
+
+        });
+
+    </script>*@

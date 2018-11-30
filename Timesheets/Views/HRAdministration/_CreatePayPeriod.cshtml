@@ -1,0 +1,406 @@
+﻿@{
+
+    NM.Web.WebApplication.Timesheets.Models.ViewModel.PayPeriodViewModel model = new NM.Web.WebApplication.Timesheets.Models.ViewModel.PayPeriodViewModel();
+
+    model.dtmPeriodStart = DateTime.Now;
+    model.dtmPeriodEnd = DateTime.Now;
+    model.dtmPeriodDue = DateTime.Now;
+    model.dtmPeriodPayDay = DateTime.Now;
+    model.dtm1stReminder = DateTime.Now;
+    model.dtm2ndReminder = DateTime.Now;
+    model.txtStatus = "Open";
+
+    var periodStartDate = model.dtmPeriodStart.ToShortDateString();
+    var periodEndDate = model.dtmPeriodEnd.ToShortDateString();
+    var periodDueDate = model.dtmPeriodDue.ToShortDateString();
+    var periodPayDate = model.dtmPeriodPayDay.ToShortDateString();
+    var periodFirstReminder = model.dtm1stReminder.Value.ToShortDateString();
+    var periodSecondReminder = model.dtm2ndReminder.Value.ToShortDateString();
+
+    var lastPeriodOfYearList = new SelectList(new[]
+    {
+            new { ID = "No", Name = "No" },
+            new { ID = "Yes", Name = "Yes" },
+        },
+    "ID", "Name", "No");
+}
+
+<script type="text/javascript">
+    function showDatePicker(controlName) {
+        $('#' + controlName).datepicker('show');
+    }
+    $(document).ready(function () {
+        
+
+        $('#CreatePayPeriod_PayPeriodStartDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindStartDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#CreatePayPeriod_PayPeriodEndDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#CreatePayPeriod_PayPeriodDueDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#CreatePayPeriod_PayPeriodPayDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#CreatePayPeriod_ReminderFirstSentDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#CreatePayPeriod_ReminderSecondSentDate').datepicker({
+                format: 'mm/dd/yyyy',
+                autoclose: true,
+                picktime: false
+         })
+        .change(bindDatePicker($(this)))
+        .on('changeDate', bindDatePicker);
+
+    });
+
+    function PayPeriodSaved()
+    {
+        OnChangeLastPeriodOfYearList();
+        createPayPeriodSave = true;
+    }
+
+    function bindDatePicker(e) {
+        document.getElementById('hfCreatePayPeriod_PayPeriodDueDate').value = document.getElementById('CreatePayPeriod_PayPeriodDueDate').value;
+        document.getElementById('hfCreatePayPeriod_PayPeriodPayDate').value = document.getElementById('CreatePayPeriod_PayPeriodPayDate').value;
+        document.getElementById('hfCreatePayPeriod_ReminderFirstSentDate').value = document.getElementById('CreatePayPeriod_ReminderFirstSentDate').value;
+        document.getElementById('hfCreatePayPeriod_ReminderSecondSentDate').value = document.getElementById('CreatePayPeriod_ReminderSecondSentDate').value;
+    }
+
+    function bindStartDatePicker(e) {
+
+        
+
+        //set the hidden field to the selected start date
+        document.getElementById('hfCreatePayPeriod_PayPeriodStartDate').value = document.getElementById('CreatePayPeriod_PayPeriodStartDate').value;
+
+        //set the end date two weeks out from the selected start date
+        var endDate = new Date(document.getElementById('CreatePayPeriod_PayPeriodStartDate').value);
+        endDate = addDays(endDate, 13);
+        document.getElementById('CreatePayPeriod_PayPeriodEndDate').value = (endDate.getMonth() + 1) + "/" + endDate.getDate() + "/" + endDate.getFullYear();
+        document.getElementById('hfCreatePayPeriod_PayPeriodEndDate').value = document.getElementById('CreatePayPeriod_PayPeriodEndDate').value;
+
+        //first friday after end date
+        var payDate = addDays(endDate, 6);
+        document.getElementById('CreatePayPeriod_PayPeriodPayDate').value = (payDate.getMonth() + 1) + "/" + payDate.getDate() + "/" + payDate.getFullYear();
+        document.getElementById('hfCreatePayPeriod_PayPeriodPayDate').value = document.getElementById('CreatePayPeriod_PayPeriodPayDate').value;
+
+        //due date one day before pay period end date
+        var dueDate = new Date(document.getElementById('CreatePayPeriod_PayPeriodEndDate').value);
+        dueDate.setDate(dueDate.getDate() - 1);
+        document.getElementById('CreatePayPeriod_PayPeriodDueDate').value = (dueDate.getMonth() + 1) + "/" + dueDate.getDate() + "/" + dueDate.getFullYear();
+        document.getElementById('hfCreatePayPeriod_PayPeriodDueDate').value = document.getElementById('CreatePayPeriod_PayPeriodDueDate').value;
+
+        //first reminder is two days before end date
+        var firstReminderDate = new Date(document.getElementById('CreatePayPeriod_PayPeriodEndDate').value);
+        firstReminderDate.setDate(firstReminderDate.getDate() - 2);
+        document.getElementById('CreatePayPeriod_ReminderFirstSentDate').value = (firstReminderDate.getMonth() + 1) + "/" + firstReminderDate.getDate() + "/" + firstReminderDate.getFullYear();
+        document.getElementById('hfCreatePayPeriod_ReminderFirstSentDate').value = document.getElementById('CreatePayPeriod_ReminderFirstSentDate').value;
+
+        //second reminder is one day before end date
+        var secondReminderDate = new Date(document.getElementById('CreatePayPeriod_PayPeriodEndDate').value);
+        secondReminderDate.setDate(secondReminderDate.getDate() - 1)
+        document.getElementById('CreatePayPeriod_ReminderSecondSentDate').value = (secondReminderDate.getMonth() + 1) + "/" + secondReminderDate.getDate() + "/" + secondReminderDate.getFullYear();
+        document.getElementById('hfCreatePayPeriod_ReminderSecondSentDate').value = document.getElementById('CreatePayPeriod_ReminderSecondSentDate').value;
+        
+    }
+
+    function addDays(date, days)
+    {
+        var result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+
+    function OnChangeLastPeriodOfYearList() {
+        var lastPeriodOfYear = $("#ddlLastPeriodOfYear").val();
+        $("#hfCreatePayPeriod_txtLastPeriodOfYear").val(lastPeriodOfYear);
+    }
+
+    function NotImplemented()
+    {
+        alert('Not yet implemented');
+        return false;
+    }
+
+    function RefreshPage() {
+        location.reload();
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    function Success()
+    {
+        location.reload();
+
+        $('#btnClose').click(function () {
+            location.reload();
+        });
+    }
+
+
+</script>
+
+<div class="container-fluid">
+    <div id="divResultStatus"></div>
+    @Html.ValidationSummary(true)
+    @using (Ajax.BeginForm("SavePayPeriod", "HRAdministration", model, new AjaxOptions { OnSuccess = "Success()", InsertionMode = InsertionMode.ReplaceWith, UpdateTargetId="deletePayPeriod" }, new { id = "frmPayPeriod" }))
+    {
+
+        <div class="row">
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => model.dtmPeriodStart, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodStartDate, null, "CreatePayPeriod_PayPeriodStartDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => model.dtmPeriodStart, new { id = "hfCreatePayPeriod_PayPeriodStartDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('CreatePayPeriod_PayPeriodStartDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+
+                <br />
+
+                @Html.LabelFor(m => model.dtmPeriodDue, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodEndDate, null, "CreatePayPeriod_PayPeriodDueDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => model.dtmPeriodDue, new { id = "hfCreatePayPeriod_PayPeriodDueDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('CreatePayPeriod_PayPeriodDueDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => model.dtmPeriodEnd, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodEndDate, null, "CreatePayPeriod_PayPeriodEndDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => model.dtmPeriodEnd, new { id = "hfCreatePayPeriod_PayPeriodEndDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('CreatePayPeriod_PayPeriodEndDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+
+                <br />
+
+                @Html.LabelFor(m => model.dtmPeriodPayDay, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodPayDate, null, "CreatePayPeriod_PayPeriodPayDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => model.dtmPeriodPayDay, new { id = "hfCreatePayPeriod_PayPeriodPayDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('CreatePayPeriod_PayPeriodPayDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => model.txtLastPeriodOfYear, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.HiddenFor(m => model.txtLastPeriodOfYear, new { id = "hfCreatePayPeriod_txtLastPeriodOfYear" })
+                    @Html.DropDownListFor(m => lastPeriodOfYearList, lastPeriodOfYearList, new { id = "ddlLastPeriodOfYear", @class = "form-control", onchange = "OnChangeLastPeriodOfYearList();" })
+                </div>
+
+                <br />
+
+                @Html.LabelFor(m => model.dtmProcessed, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.TextBoxFor(m => model.dtmProcessed, new { id = "tbDateProcessed", @class = "form-control", @readonly = true })
+                    <br />
+                    @Html.ValidationMessageFor(m => model.dtmProcessed)
+                </div>
+
+
+
+            </div>
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => model.txtStatus, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.TextBoxFor(m => model.txtStatus, new { id = "tbStatus", @class = "form-control", @readonly = true })
+                    <br />
+                    @Html.ValidationMessageFor(m => model.txtStatus)
+                </div>
+
+                <br />
+
+            </div>
+        </div>
+
+        @*<div class="row">
+            <div class="col-sm-12">
+                <div class="pull-right" style="margin-left:10px;">
+                    <figure>
+                        <img src="~/Content/images/file-excel-icon.png" alt="" />
+                        <figcaption>@Ajax.ActionLink("Non-Exempt", "DownloadNonExemptCsv", "HRAdministration", null, new { id = "alDownloadNonExemptCsv" })</figcaption>
+                    </figure>
+                </div>
+                <div class="pull-right" style="margin-left:10px;">
+                    <figure>
+                        <img src="~/Content/images/file-excel-icon.png" alt="" />
+                        <figcaption>@Ajax.ActionLink("Exempt", "DownloadExemptCsv", "HRAdministration", null, new { id = "alDownloadExemptCsv" })</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </div>*@
+
+        <br />
+        <br />
+
+        @Html.Label("Reminder Emails")<span>&nbsp;&nbsp;</span>@Html.ActionLink("Email/Text Editor", null, new { id = "createPayPeriodEmailTextEditor", onclick = "NotImplemented()" })
+        <div class="horizontal-line"></div>
+
+        //first row
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span>&nbsp;</span></h4>
+            </div>
+            <div class="col-sm-3 pull-right">
+                <h4><span class="label label-default">@Html.Label("Send 2nd Reminder at")</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4><span class="label label-default">@Html.Label("Last Sent on")</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4><span class="label label-default">@Html.Label("Send 1st Reminder at")</span></h4>
+            </div>
+         </div>
+
+         //second row
+         <div class="row">
+             <div class="col-sm-3">
+                 <h4><span class="label label-default">All Employees</span></h4>
+             </div>
+             <div class="col-sm-3">
+                 <h4>@Html.TextBoxFor(m => model.dtmReminderAllEmployees, new { id = "tbAllEmployeesSentOn", @class = "form-control", @readonly = true })</h4>
+             </div>
+             <div class="col-sm-3">
+                 <h4>
+                     <span class="input-group date">
+                         @Html.EditorFor(m => periodFirstReminder, null, "CreatePayPeriod_ReminderFirstSentDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                         @Html.HiddenFor(m => model.dtm1stReminder, new { id = "hfCreatePayPeriod_ReminderFirstSentDate" })
+                         <span class="input-group-addon" onclick="showDatePicker('CreatePayPeriod_ReminderFirstSentDate')">
+                             <span class="glyphicon glyphicon-calendar"></span>
+                         </span>
+                     </span>
+                 </h4>
+             </div>
+             <div class="col-sm-3">
+                 <h4>
+                     <span class="input-group date">
+                         @Html.EditorFor(m => periodSecondReminder, null, "CreatePayPeriod_ReminderSecondSentDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                         @Html.HiddenFor(m => model.dtm2ndReminder, new { id = "hfCreatePayPeriod_ReminderSecondSentDate" })
+                         <span class="input-group-addon" onclick="showDatePicker('CreatePayPeriod_ReminderSecondSentDate')">
+                             <span class="glyphicon glyphicon-calendar"></span>
+                         </span>
+                     </span>
+                 </h4>
+             </div>
+         </div>
+
+         //row 3
+        @*<div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">All Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>@Html.TextBoxFor(m => model.dtmReminderAllNonExempt, new { id = "tbAllEmployeesSentOn", @class = "form-control", @readonly = true })</h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Html.ActionLink("Send", "", null, new { id = "alAllNonExempt", @class = "form-control", @onclick = "return NotImplemented();" })</h4>
+            </div>
+        </div>*@
+
+        //row 4
+        @*<div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Non-Submitted Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>@Html.TextBoxFor(m => model.dtmReminderUnSubmittedNonExempt, new { id = "tbAllEmployeesSentOn", @class = "form-control", @readonly = true })</h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Html.ActionLink("Send", "", null, new { id= "alNonExemptNonSubmitted", @class="form-control", @onclick= "return NotImplemented();" })</h4>
+            </div>
+        </div>*@
+
+        //row 5
+        @*<div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Pending Approval Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3 tex" >
+                <h4>@Html.TextBoxFor(m => model.dtmReminderUnApproved, new { id = "tbAllEmployeesSentOn", @class = "form-control", @readonly = true })</h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Html.ActionLink("Send", "", null, new { id = "alNonExemptUnApproved", @class = "form-control", @onclick = "return NotImplemented();" })</h4>
+            </div>
+        </div>*@
+
+        //row 6
+        @*<div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Pending Approval Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3 tex">
+                <h4>@Html.TextBoxFor(m => model.txtStatus, new { id = "tbAllEmployeesSentOn", @class = "form-control", @readonly = true })</h4>
+            </div>
+        </div>*@
+
+        <div class="horizontal-line"></div>
+
+        <br />
+
+        <div class="row">
+            <div class="col-sm-6">
+                @*<input id="btnCreatePeriodPreview" class="btn btn-info pull-left NmarqGrid-fw-btn" type="submit" value="Preview" onclick="return NotImplemented();" style="margin-left:3px;margin-right:3px;" />*@
+                @*<input id="btnCreatePeriodProcess"class="btn btn-info pull-left NmarqGrid-fw-btn" type="button" value="Process" onclick="return NotImplemented();" style="margin-left:3px;margin-right:3px;" />*@
+                @*<input id="btnCreatePeriodUndo" class="btn btn-info pull-left NmarqGrid-fw-btn" type="submit" value="Undo" onclick="return NotImplemented();" style="margin-left:3px;margin-right:3px;" />*@
+                @*<input id="btnCreatePeriodEmail" class="btn btn-info pull-left NmarqGrid-fw-btn" type="button" value="Email" onclick="return NotImplemented();" style="margin-left:3px;margin-right:3px;" />*@
+                @*<input id="btnCreatePeriodDelete" class="btn btn-info pull-left NmarqGrid-fw-btn" type="button" value="Delete" onclick="return NotImplemented();" style="margin-left:3px;margin-right:3px;" />*@
+                <div id="deletePayPeriod"></div>
+            </div>
+
+            <div class="col-sm-6">
+                <input id="btnClose" class="btn btn-info pull-right" type="button" value="Close" onclick="HideIt();" style="margin-left:3px;margin-right:3px;" />
+                <input id="btnSave" class="btn btn-info pull-right" type="submit" value="Save" onclick="PayPeriodSaved()" style="margin-left:3px;margin-right:3px;"/>
+            </div>
+        </div>
+
+    }
+</div>

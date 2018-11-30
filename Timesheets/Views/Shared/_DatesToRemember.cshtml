@@ -1,0 +1,32 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@{
+    var displayCurrentPayPeriod = string.Format("{0} - {1}", Model.YearAndPayPeriod.CurrentPayPeriod.dtmPeriodStart.ToShortDateString(), Model.YearAndPayPeriod.CurrentPayPeriod.dtmPeriodEnd.ToShortDateString());
+}
+
+@{ //FormatDate to display for initial load for EditorFor control
+    var dtPeriodStart = Model.YearAndPayPeriod.CurrentPayPeriod.dtmPeriodStart.ToShortDateString();
+    var dtPeriodEnd = Model.YearAndPayPeriod.CurrentPayPeriod.dtmPeriodEnd.ToShortDateString();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="NmarqGrid-SubHeader NmarqGrid-Spacer text-center"><b>Dates To Remember</b></div>
+    </div>
+    <div class="row well">
+        <ul class="list-group">
+            <li class="list-group-item text-center">
+                @Html.Label("Current Pay Period: ")<br />
+                @Html.DisplayFor(m => @displayCurrentPayPeriod)
+            </li>
+            <li class="list-group-item text-center">
+                @Html.Label("Current Pay Period Due Date:")<br />
+                @Html.DisplayFor(m => m.YearAndPayPeriod.CurrentPayPeriod.dtmPeriodDue)
+            </li>
+            <li class="list-group-item text-center">
+                @Html.Label("Next Pay Day: ")<br />
+                @Html.DisplayFor(m => m.YearAndPayPeriod.CurrentPayPeriod.dtmPeriodPayDay)
+            </li>
+        </ul>
+    </div>
+</div>

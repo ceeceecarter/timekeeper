@@ -1,0 +1,41 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@{ 
+    var displayFirstName = string.IsNullOrEmpty(Model.EmployeeIndividual.Individual.PreferredFirstName) ? Model.EmployeeIndividual.FirstName.Trim() : Model.EmployeeIndividual.Individual.PreferredFirstName.Trim();
+}
+<div class="panel-group" id="dvSummaryAccordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-summaryhead">
+        <div id="pnlSummaryHeading" class="panel-heading" role="tab">
+            <h4 class="panel-title NmarqGrid-Header">
+                <a role="button" class="remove-underline-link SummaryContent" data-toggle="collapse" data-parent="#dvSummaryAccordion" href="#pnlSummaryContent" aria-expanded="true" aria-controls="pnlSummaryContent">
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                    <b>Summary</b> 
+                </a>
+                <span class="pull-right"> 
+                @Html.DisplayFor(m => displayFirstName) @Html.DisplayFor(m => m.EmployeeIndividual.LastName)
+                </span>
+            </h4>
+        </div>
+        <div id="pnlSummaryContent" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingSummary">
+            <div class="panel panel-body">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div id="dvDatesToRemember" class="grid-header-title">
+                            @Html.Partial("_DatesToRemember", Model)
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div id="dvPTOBalances" class="grid-header-title">
+                            @Html.Partial("_TSPTOBalances", Model)
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div id="dvHoursTypeSummary" class="grid-header-title">
+                            @Html.Partial("_TimeOffSummaryYTD", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

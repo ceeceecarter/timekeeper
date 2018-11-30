@@ -1,0 +1,691 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.PayPeriodViewModel
+@{
+    ViewBag.Title = "Edit Pay Period";
+}
+@{
+
+    var periodStartDate = "";
+    var periodEndDate = "";
+    var periodDueDate = "";
+    var periodPayDate = "";
+    var periodAllEmployeesReminderSent = "";
+    var periodAllNonExemptReminderSent = "";
+    var periodNonExemptNonSubmittedReminderSent = "";
+    var periodNonExemptUnapprovedReminderSent = "";
+
+    if (Model != null)
+    {
+        periodStartDate = Model.dtmPeriodStart == null ? "" : Model.dtmPeriodStart.ToShortDateString();
+        periodEndDate = Model.dtmPeriodEnd == null ? "" : Model.dtmPeriodEnd.ToShortDateString();
+        periodDueDate = Model.dtmPeriodDue == null ? "" : Model.dtmPeriodDue.ToShortDateString();
+        periodPayDate = Model.dtmPeriodPayDay == null ? "" : Model.dtmPeriodPayDay.ToShortDateString();
+
+        periodAllEmployeesReminderSent = Model.dtmReminderAllEmployees == null ? "" : Model.dtmReminderAllEmployees.Value.ToShortDateString();
+        periodAllNonExemptReminderSent = Model.dtmReminderAllNonExempt == null ? "" : Model.dtmReminderAllNonExempt.Value.ToShortDateString();
+        periodNonExemptNonSubmittedReminderSent = Model.dtmReminderUnSubmittedNonExempt == null ? "" : Model.dtmReminderUnSubmittedNonExempt.Value.ToShortDateString();
+        periodNonExemptUnapprovedReminderSent = Model.dtmReminderUnApproved == null ? "" : Model.dtmReminderUnApproved.Value.ToShortDateString();
+
+    }
+
+
+    if (string.IsNullOrEmpty(Model.txtLastPeriodOfYear))
+    {
+        Model.txtLastPeriodOfYear = "No";
+    }
+
+    var lastPeriodOfYearList = new SelectList(new[]
+        {
+            new { ID = "No", Name = "No" },
+            new { ID = "Yes", Name = "Yes" },
+        }, "ID", "Name", Model.txtLastPeriodOfYear);
+}
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+
+        $('#EditPayPeriod_PayPeriodStartDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindStartDatePicker)
+        .on('changeDate', bindDatePicker);
+
+
+        $('#EditPayPeriod_PayPeriodEndDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+
+        $('#EditPayPeriod_PayPeriodDueDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+
+        $('#EditPayPeriod_PayPeriodPayDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+
+        $('#EditPayPeriod_ReminderFirstSentDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+        })
+        .change(bindReminderFirstSentDate)
+        .on('changeDate', bindDatePicker);
+
+
+        $('#EditPayPeriod_ReminderSecondSentDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        })
+        .change(bindReminderSecondSentDate)
+        .on('changeDate', bindDatePicker);
+
+        $('#EditPayPeriod_CutOffDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose:true,
+            picktime:false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#EditPayPeriod_ApprovalDueDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose:true,
+            picktime:false
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+
+        $('#btnCloseFrom').click(function () {
+
+            $(".ui-dialog-content").dialog().dialog("close");
+            //return false;
+        });
+
+        $("#btnViewEmployeesInPeriod").on("click", function (event) {
+            event.preventDefault();
+
+            var payPeriodID = @Html.Raw(Json.Encode(Model.PayPeriodID));
+
+            //note: object name should be the same as the controller parameter
+            var postData = JSON.stringify({ PayPeriodId: payPeriodID });
+
+            //Get the modal dialog to confim deleting multiple time entries
+            $.ajax({
+                url: '@Url.Action("GetPayPeriodEmployees", "HRAdministration")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                beforeSend: function(event){
+                    $.blockUI({
+                        message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Please wait while retrieving information...</h4></div>",
+                        css: {
+                            padding: "5px", '-webkit-border-radius': '10px', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                        }
+                    });
+                },
+                success: function (data) {
+                    $("#divPayPeriodEmployees").html(data);
+                    $("#mdPayPeriodEmployees").modal('show');
+                }
+            })
+            .done(function(result){
+                $.unblockUI();
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Delete Multiple Request failed: " + errors.Message);
+                window.location.reload(true);
+            });
+            return false;
+        });
+
+    });
+
+
+    function bindReminderFirstSentDate()
+    {
+        document.getElementById('hfEditPayPeriod_ReminderFirstSentDate').value = document.getElementById('EditPayPeriod_ReminderFirstSentDate').value;
+    }
+
+    function bindReminderSecondSentDate() {
+        document.getElementById('hfEditPayPeriod_ReminderSecondSentDate').value = document.getElementById('EditPayPeriod_ReminderSecondSentDate').value;
+    }
+
+    function bindDatePicker() {
+        document.getElementById('hfEditPayPeriod_PayPeriodDueDate').value = document.getElementById('EditPayPeriod_PayPeriodDueDate').value;
+        document.getElementById('hfEditPayPeriod_PayPeriodPayDate').value = document.getElementById('EditPayPeriod_PayPeriodPayDate').value;
+        document.getElementById('hfEditPayPeriod_ReminderFirstSentDate').value = document.getElementById('EditPayPeriod_ReminderFirstSentDate').value;
+        document.getElementById('hfEditPayPeriod_ReminderSecondSentDate').value = document.getElementById('EditPayPeriod_ReminderSecondSentDate').value;
+        document.getElementById('hfEditPayPeriod_CutOffDate').value = document.getElementById('EditPayPeriod_CutOffDate').value;
+        document.getElementById('hfEditPayPeriod_ApprovalDueDate').value = document.getElementById('EditPayPeriod_ApprovalDueDate').value;
+    }
+
+    //This section initializes various dates after the start date is selected
+    function bindStartDatePicker() {
+
+        //set the hidden field to the selected start date
+        document.getElementById('hfEditPayPeriod_PayPeriodStartDate').value = document.getElementById('EditPayPeriod_PayPeriodStartDate').value;
+
+        //set the end date two weeks out from the selected start date
+        var endDate = new Date(document.getElementById('EditPayPeriod_PayPeriodStartDate').value);
+        endDate = addDays(endDate, 13);
+        document.getElementById('EditPayPeriod_PayPeriodEndDate').value = (endDate.getMonth() + 1) + "/" + endDate.getDate() + "/" + endDate.getFullYear();
+        document.getElementById('hfEditPayPeriod_PayPeriodEndDate').value = document.getElementById('EditPayPeriod_PayPeriodEndDate').value;
+
+        //first friday after end date
+        var payDate = addDays(endDate, 6);
+        document.getElementById('EditPayPeriod_PayPeriodPayDate').value = (payDate.getMonth() + 1) + "/" + payDate.getDate() + "/" + payDate.getFullYear();
+        document.getElementById('hfEditPayPeriod_PayPeriodPayDate').value = document.getElementById('EditPayPeriod_PayPeriodPayDate').value;
+
+        //due date one day before pay period end date
+        var dueDate = new Date(document.getElementById('EditPayPeriod_PayPeriodEndDate').value);
+        dueDate.setDate(dueDate.getDate() - 1);
+        document.getElementById('EditPayPeriod_PayPeriodDueDate').value = (dueDate.getMonth() + 1) + "/" + dueDate.getDate() + "/" + dueDate.getFullYear();
+        document.getElementById('hfEditPayPeriod_PayPeriodDueDate').value = document.getElementById('EditPayPeriod_PayPeriodDueDate').value;
+
+        //first reminder is two days before end date
+        var firstReminderDate = new Date(document.getElementById('EditPayPeriod_PayPeriodEndDate').value);
+        firstReminderDate.setDate(firstReminderDate.getDate() - 2);
+        document.getElementById('EditPayPeriod_ReminderFirstSentDate').value = (firstReminderDate.getMonth() + 1) + "/" + firstReminderDate.getDate() + "/" + firstReminderDate.getFullYear();
+        document.getElementById('hfEditPayPeriod_ReminderFirstSentDate').value = document.getElementById('EditPayPeriod_ReminderFirstSentDate').value;
+
+        //second reminder is one day before end date
+        var secondReminderDate = new Date(document.getElementById('EditPayPeriod_PayPeriodEndDate').value);
+        secondReminderDate.setDate(secondReminderDate.getDate() - 1)
+        document.getElementById('EditPayPeriod_ReminderSecondSentDate').value = (secondReminderDate.getMonth() + 1) + "/" + secondReminderDate.getDate() + "/" + secondReminderDate.getFullYear();;
+        document.getElementById('hfEditPayPeriod_ReminderSecondSentDate').value = document.getElementById('EditPayPeriod_ReminderSecondSentDate').value;
+    }
+
+    function showDatePicker(controlName) {
+        $('#' + controlName).datepicker('show');
+    }
+
+    function addDays(date, days)
+    {
+        var result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+    }
+
+    function OnChangeLastPeriodOfYearList() {
+        var lastPeriodOfYear = $("#ddlLastPeriodOfYear").val();
+        $("#hfEditPayPeriod_txtLastPeriodOfYear").val(lastPeriodOfYear);
+    }
+
+    function NotImplemented()
+    {
+        alert('Not yet implemented');
+        return false;
+    }
+
+    function ProcessUndo()
+    {
+        editPayPeriodSave = true;
+        ShowPreviewButton();
+        $("#tbStatus").val('Open');
+        HideUndoButton();
+
+    }
+
+    function ShowPreviewButton()
+    {
+        $("#btnExecutePreviewCsv").show();
+    }
+
+    function HidePreviewButton()
+    {
+        $("#btnExecutePreviewCsv").hide();
+    }
+
+    function ProcessSuccess()
+    {
+        editPayPeriodSave = true;
+        HidePreviewButton();
+        HideProcessButton();
+        ShowUndoButton();
+        $("#tbStatus").val('Processed');
+    }
+
+    function ShowProcessButton()
+    {
+        editPayPeriodSave = true;
+        $("#btnExecuteFinalProcessCsv").show();
+    }
+
+
+    function HideProcessButton()
+    {
+        $("#btnExecuteFinalProcessCsv").hide();
+    }
+
+    function HideUndoButton()
+    {
+        $("#btnEditPeriodUndoCsv").hide();
+    }
+
+    function ShowUndoButton()
+    {
+        $("#btnEditPeriodUndoCsv").show();
+    }
+
+    function SetNotificationSentDate(response)
+    {
+        var ctl = document.getElementById('EditPayPeriod_AllNonExemptSentDate');
+        ctl.value = response;
+    }
+
+    function SetNonSubmittedNonExemptNotificationSentDate(response)
+    {
+        var ctl = document.getElementById('EditPayPeriod_NonSubmittedNonExemptSentDate');
+        ctl.value = response;
+    }
+
+    function SetNonExemptUnapprovedSentDate(response)
+    {
+        var ctl = document.getElementById('EditPayPeriod_NonExemptUnapprovedSentDate');
+        ctl.value = response;
+    }
+
+    function SetExemptUnapprovedSentDate(response)
+    {
+        var ctl = document.getElementById('EditPayPeriod_ExemptUnapprovedSentDate');
+        ctl.value = response;
+    }
+
+    function SetNotificationFail(notificationType)
+    {
+        var ctl = document.getElementById(notificationType);
+        ctl.value = "Error";
+    }
+
+    function Success()
+    {
+        location.reload();
+    }
+
+</script>
+
+<div class="container-fluid">
+    <div id="divResultStatus"></div>
+    @Html.ValidationSummary(true)
+    @using (Ajax.BeginForm("SavePayPeriod", "HRAdministration", Model, new AjaxOptions { OnSuccess = "Success()", InsertionMode = InsertionMode.ReplaceWith, UpdateTargetId = "deletePayPeriod" }, new { id = "frmPayPeriod" }))
+    {
+
+        <div class="row">
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => Model.dtmPeriodStart, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodStartDate, null, "EditPayPeriod_PayPeriodStartDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => Model.dtmPeriodStart, new { id = "hfEditPayPeriod_PayPeriodStartDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_PayPeriodStartDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+
+                <br />
+
+                @Html.LabelFor(m => Model.dtmPeriodDue, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodDueDate, null, "EditPayPeriod_PayPeriodDueDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => Model.dtmPeriodDue, new { id = "hfEditPayPeriod_PayPeriodDueDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_PayPeriodDueDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => Model.dtmPeriodEnd, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodEndDate, null, "EditPayPeriod_PayPeriodEndDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => Model.dtmPeriodEnd, new { id = "hfEditPayPeriod_PayPeriodEndDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_PayPeriodEndDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+
+                <br />
+
+                @Html.LabelFor(m => Model.dtmPeriodPayDay, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => periodPayDate, null, "EditPayPeriod_PayPeriodPayDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @Html.HiddenFor(m => Model.dtmPeriodPayDay, new { id = "hfEditPayPeriod_PayPeriodPayDate" })
+                    <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_PayPeriodPayDate')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="col-sm-3">
+
+                @Html.LabelFor(m => Model.txtLastPeriodOfYear, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.HiddenFor(m => Model.txtLastPeriodOfYear, new { id = "hfEditPayPeriod_txtLastPeriodOfYear" })
+                    @Html.DropDownListFor(m => lastPeriodOfYearList, lastPeriodOfYearList, new { id = "ddlLastPeriodOfYear", @class = "form-control", onchange = "OnChangeLastPeriodOfYearList();" })
+                </div>
+
+                <br />
+
+                @Html.LabelFor(m => Model.dtmProcessed, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.EditorFor(m => Model.dtmProcessed, null, "EditPayPeriod_DateProcessed", new { htmlAttributes = new { @class = "form-control", type="date", disabled = "disabled" } })
+                    <br />
+                    @Html.ValidationMessageFor(m => Model.dtmProcessed)
+                </div>
+
+
+
+            </div>
+
+            <div class="col-sm-3">
+                @Html.LabelFor(m => Model.txtStatus, new { @class = "control-label" })
+                <div class="input-group date">
+                    @Html.TextBoxFor(m => Model.txtStatus, new { id = "tbStatus", @class = "form-control", @readonly = true })
+                    <br />
+                    @Html.ValidationMessageFor(m => Model.txtStatus)
+                </div>
+                <br />
+            </div>
+        </div>
+
+        @*<div class="row">
+                <div class="col-sm-12">
+                    <div class="pull-right" style="margin-left:10px;">
+                        <figure>
+                            <img src="~/Content/images/file-excel-icon.png" alt="" />
+                            <figcaption>@Ajax.ActionLink("Non-Exempt", "DownloadNonExemptCsv", "HRAdministration", null, new { id = "alDownloadNonExemptCsv" })</figcaption>
+                        </figure>
+                    </div>
+                    <div class="pull-right" style="margin-left:10px;">
+                        <figure>
+                            <img src="~/Content/images/file-excel-icon.png" alt="" />
+                            <figcaption>@Ajax.ActionLink("Exempt", "DownloadExemptCsv", "HRAdministration", null, new { id = "alDownloadExemptCsv" })</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>*@
+
+        <br />
+
+        <div class="horizontal-line"></div>
+        <br />
+        @*onclick = "$('#mdPayPeriodEditor').modal('hide');"*@
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-4">
+                    <input id="btnViewEmployeesInPeriod" class="btn btn-info pull-left" type="button" value="Pay Period Employees" style="margin-left:3px;margin-right:3px;" onclick="$('#mdPayPeriodEditor').modal('hide');" />
+                </div>
+                <div class="col-sm-6" id="divCsvDownloadLinks">
+                    @if (Model.DisplayCsvPreview == true)
+                    {
+                        @Html.Partial("_CsvWidgets", Model)
+                    }
+                </div>
+            </div>
+        </div>
+        <br />
+
+        @Html.Label("Reminder Emails")<span>&nbsp;&nbsp;</span>@Html.ActionLink("Email/Text Editor", null, new { htmlAttributes = new { id = "editPayPeriodEmailTextEditor", onclick = "NotImplemented()" } })
+        <div class="horizontal-line"></div>
+
+        //first row
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span>&nbsp;</span></h4>
+            </div>
+            <div class="col-sm-3 pull-right">
+                <h4><span class="label label-default">@Html.Label("Send 2nd Reminder at")</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4><span class="label label-default">@Html.Label("Last Sent on")</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4><span class="label label-default">@Html.Label("Send 1st Reminder at")</span></h4>
+            </div>
+        </div>
+
+        //second row
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default te">All Employees</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>@Html.EditorFor(m => Model.dtmReminderAllEmployees, null, "EditPayPeriod_AllEmployeesReminderSentDate", new { htmlAttributes = new { @class = "form-control", type = "date", disabled = "disabled" } })</h4>
+                @*<h4>@Html.TextBoxFor(m => Model.dtmReminderAllEmployees, new { id = "EditPayPeriod_AllEmployeesReminderSentDate", @class = "form-control" })</h4>*@
+            </div>
+            <div class="col-sm-3">
+                <h4>
+                    <span class="input-group date">
+                        @Html.EditorFor(m => Model.dtm1stReminder, null, "EditPayPeriod_ReminderFirstSentDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                        @Html.HiddenFor(m => Model.dtm1stReminder, new { id = "hfEditPayPeriod_ReminderFirstSentDate" })
+                        <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_ReminderFirstSentDate')">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </span>
+                </h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>
+                    <span class="input-group date">
+                        @Html.EditorFor(m => Model.dtm2ndReminder, null, "EditPayPeriod_ReminderSecondSentDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                        @Html.HiddenFor(m => Model.dtm2ndReminder, new { id = "hfEditPayPeriod_ReminderSecondSentDate" })
+                        <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_ReminderSecondSentDate')">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </span>
+                </h4>
+            </div>
+        </div>
+
+        //row All Non-Exempt
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">All Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>
+                    @Html.EditorFor(m => Model.dtmReminderAllNonExempt, null, "EditPayPeriod_AllNonExemptSentDate", new { htmlAttributes = new { id = "EditPayPeriod_AllNonExemptSentDate", @class = "form-control", type = "date", disabled = "disabled" } })
+                    @Html.HiddenFor(m => Model.dtmReminderAllNonExempt, new { id = "hfEditPayPeriod_AllNonExemptSentDate" })
+                </h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Ajax.ActionLink("Send", "SendEmailNotification", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pEmailType = "AllNonExempt" }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "SetNotificationSentDate", OnFailure = "SetNotificationFail('EditPayPeriod_AllNonExemptSentDate')" }, new { id = "btnNotifyAllNonExempt", @class = "form-control" })</h4>
+            </div>
+        </div>
+
+        //row Non-Submitted Non-Exempt
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Non-Submitted Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3 tex">
+                <h4>
+                    @Html.EditorFor(m => Model.dtmReminderUnSubmittedNonExempt, null, "EditPayPeriod_NonSubmittedNonExemptSentDate", new { htmlAttributes = new { @class = "form-control", type = "date", disabled = "disabled" } })
+                    @Html.HiddenFor(m => Model.dtmReminderUnSubmittedNonExempt, new { id = "hfEditPayPeriod_NonSubmittedNonExemptSentDate" })
+                </h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Ajax.ActionLink("Send", "SendEmailNotification", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pEmailType = "NonSubmittedNonExempt" }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "SetNonSubmittedNonExemptNotificationSentDate", OnFailure = "SetNotificationFail('EditPayPeriod_NonSubmittedNonExemptSentDate')" }, new { id = "btnNotifyNonSubmittedNonExempt", @class = "form-control" })</h4>
+            </div>
+        </div>
+
+        //row Pending Approval Non-Exempt
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default" style="padding-right:3px;">Pending Approval Non-Exempt</span></h4>
+            </div>
+            <div class="col-sm-3 tex">
+                <h4>@Html.EditorFor(m => Model.dtmReminderUnApproved, null, "EditPayPeriod_NonExemptUnapprovedSentDate", new { htmlAttributes = new { @class = "form-control", type = "date", disabled = "disabled" } })</h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Ajax.ActionLink("Send", "SendEmailNotification", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pEmailType = "NonExemptUnapproved" }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "SetNonExemptUnapprovedSentDate", OnFailure = "SetNotificationFail('EditPayPeriod_NonExemptUnapprovedSentDate')" }, new { id = "btnNotifyNonExemptUnapproved", @class = "form-control" })</h4>
+            </div>
+        </div>
+
+
+        //row Pending Approval Exempt
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Pending Approval Exempt</span></h4>
+            </div>
+            <div class="col-sm-3 tex">
+                <h4>@Html.EditorFor(m => Model.dtmReminderUnApprovedExempt, null, "EditPayPeriod_ExemptUnapprovedSentDate", new { htmlAttributes = new { @class = "form-control", type = "date", disabled = "disabled" } })</h4>
+            </div>
+            <div class="col-sm-3 text-center">
+                <h4>@Ajax.ActionLink("Send", "SendEmailNotification", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pEmailType = "ExemptUnapproved" }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "SetExemptUnapprovedSentDate", OnFailure = "SetNotificationFail('EditPayPeriod_NonExemptUnapprovedSentDate')" }, new { id = "btnNotifyExemptUnapproved", @class = "form-control" })</h4>
+            </div>
+        </div>
+
+        <div class="horizontal-line"></div>
+
+        <div>
+            <h4>Exempt Approval Reminder</h4>
+        </div>
+
+        //row Cut Off Date
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Cut Off Date</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>
+                    <span class="input-group date">
+                        @Html.EditorFor(m => Model.dtmCutOffDate, null, "EditPayPeriod_CutOffDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                        @Html.HiddenFor(m => Model.dtmCutOffDate, new { id = "hfEditPayPeriod_CutOffDate" })
+                        <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_CutOffDate')">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </span>
+                </h4>
+            </div>
+        </div>
+
+        //row Approval Due Date
+        <div class="row">
+            <div class="col-sm-3">
+                <h4><span class="label label-default">Approval Due Date</span></h4>
+            </div>
+            <div class="col-sm-3">
+                <h4>
+                    <span class="input-group date">
+                        @Html.EditorFor(m => Model.dtmApprovalDueDate, null, "EditPayPeriod_ApprovalDueDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                        @Html.HiddenFor(m => Model.dtmApprovalDueDate, new { id = "hfEditPayPeriod_ApprovalDueDate" })
+                        <span class="input-group-addon" onclick="showDatePicker('EditPayPeriod_ApprovalDueDate')">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </span>
+                </h4>
+            </div>
+        </div>
+
+        <div class="horizontal-line"></div>
+
+        <br />
+
+        <div class="row">
+            <div class="col-sm-6">
+                @Ajax.ActionLink("Preview", "ExecutePreviewCsv", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pIndividualId = @Model.AuthenticatedUser.IndividualID }, new AjaxOptions { HttpMethod = "POST", InsertionMode = InsertionMode.Replace, UpdateTargetId = "divCsvDownloadLinks", OnSuccess = "ShowProcessButton" }, new { id = "btnExecutePreviewCsv", @class = "btn btn-info", @style = Model.txtStatus == "Processed" ? "width:80px;display:none;" : "width:80px;" })
+                @Ajax.ActionLink("Undo", "UndoPayPeriod", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pIndividualId = @Model.AuthenticatedUser.IndividualID }, new AjaxOptions { HttpMethod = "POST", InsertionMode = InsertionMode.Replace, UpdateTargetId = "divCsvDownloadLinks", OnSuccess = "ProcessUndo" }, new { id = "btnEditPeriodUndoCsv", @class = "btn btn-info", style = Model.txtStatus == "Processed" ? "width:80px;" : "width:80px;display:none;" })
+                @Ajax.ActionLink("Process", "ExecuteFinalCsv", "HRAdministration", new { pPayPeriodId = @Model.PayPeriodID, pIndividualId = @Model.AuthenticatedUser.IndividualID }, new AjaxOptions { HttpMethod = "POST", InsertionMode = InsertionMode.Replace, UpdateTargetId = "divCsvDownloadLinks", OnSuccess = "ProcessSuccess" }, new { id = "btnExecuteFinalProcessCsv", @class = "btn btn-info", style = Model.txtStatus != "Processed" && Model.DisplayCsvPreview == true ? "width:80px;" : "width:80px;display:none;" })
+            </div>
+            <div class="col-sm-6 pull-right">
+                @*<input id="btnCancelForm" class="btn btn-info pull-right" type="button" value="Cancel" data-dismiss="modal" style="margin-left:3px;margin-right:3px;" />*@
+                <input id="btnCloseFrom" class="btn btn-info pull-right" type="button" value="Close" data-dismiss="modal" style="margin-left:3px;margin-right:3px;" />
+                <input id="btnSubmitForm" class="btn btn-info pull-right" type="submit" value="Save" style="margin-left:3px;margin-right:3px;" />
+            </div>
+        </div>
+
+    }
+</div>
+
+
+@*<!-- Begin Modal ==> Pay Period Employees role="dialog" aria-labelledby="basicModal" aria-hidden="true" -->
+    <div id="">
+        <div class="container-fluid">
+                <div id="mdPayPeriodEmployees" class="modal fade">
+                    <div class="modal-dialog modal-x-lg">
+                        <div class="modal-content" style="background-color:#f25d55">
+                            <div class="modal-header">Pay Period Employees</div>
+                            <div id="divPayPeriodEmployees" class="modal-body">Body content here</div>
+                            <div class="modal-footer"></div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <!--End Modal ==> Pay Period Employees -->*@
+
+
+<script type="text/javascript">
+    //Hide the View All Pay Periods grid
+    $(document).ready(function () {
+
+        if($("#tbStatus").val() == "Processed"){
+            $("#btnViewEmployeesInPeriod").hide();
+        }
+        else{
+            $("#btnViewEmployeesInPeriod").show();
+        }
+
+
+        //$("#mdPayPeriodEmployees").on('hidden.bs.modal', function (e) {
+        //    if ($('#mdPayPeriodEditor').hasClass('in')) {
+        //        $('body').addClass('modal-open');
+        //    }
+        //});
+
+        @*$("#btnViewEmployeesInPeriod").on("click", function (event) {
+            event.preventDefault();
+
+            //note: object name should be the same as the controller parameter
+            var postData = JSON.stringify({ PayPeriodId: payPeriodID });
+
+            //Get the modal dialog to confim deleting multiple time entries
+            $.ajax({
+                url: '@Url.Action("GetPayPeriod", "HRAdministration")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                success: function (data) {
+                    $("#divPayPeriodEmployees").html(data);
+                    $("#mdPayPeriodEmployees").modal('show');
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Delete Multiple Request failed: " + errors.Message);
+                window.location.reload(true);
+            });
+
+        });*@
+
+    });
+
+</script>

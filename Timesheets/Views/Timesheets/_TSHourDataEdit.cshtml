@@ -1,0 +1,351 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@helper RenderTimePart(int MilitaryTime, bool isHour)
+{
+if (MilitaryTime > 0)
+{
+    int hours = MilitaryTime / 100;
+    int minutes = MilitaryTime - hours * 100;
+    DateTime result = DateTime.MinValue;
+    if (isHour)
+    {
+            @result.AddHours(hours).Hour.ToString("0#");
+        }
+        else
+        {
+            @result.AddMinutes(minutes).ToString("mm");
+        }
+    }
+}
+
+
+@helper RenderColumn(int intColumn)
+{
+string result = intColumn.ToString();
+    @result;
+}
+
+@{
+    var displayCurrentPayPeriod = string.Format("{0} - {1}", Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString(), Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString());
+
+}
+
+<div class="container">
+    <div id="mdTimeEntryEdit" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title" style="color:#ffffff">Edit Time Entry</h5>
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container">
+                        @using (Html.BeginForm("EditSave", "Timesheets", FormMethod.Post, new { id = "formEditTimeEntry" }))
+                        {
+                            <div class="row">
+                                @Html.HiddenFor(m => m.EditTimesheetHourId)
+                                @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "hdDataEdit_IsUserNonExempt" })
+                                @Html.HiddenFor(m => m.EmployeeInfoId)
+                                @Html.HiddenFor(m => m.MasterUserId)
+                                @Html.HiddenFor(m => m.SelectedHoursType)
+                                @Html.HiddenFor(m => m.EditSelectedDateEntry)
+                                @Html.HiddenFor(m => m.EditSelectedHourMinuteInDecimal)
+                                @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hfHourDataEdit_SelectedPayPeriodID" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriodYear)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodStart, new { id = "hfSelectedPayPeriod_dtmPeriodStart" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodEnd, new { id = "hfSelectedPayPeriod_dtmPeriodEnd" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm1stReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm2ndReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.txtLastPeriodOfYear)
+                                @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId)
+                                @Html.HiddenFor(m => m.EmployeeIndividual.FLSAStatus)
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-inline">
+                                        @if (Model.IsUserNonExempt)
+                                        {
+                                            @Html.Label("Selected Pay Period: ")
+                                            @Html.DisplayFor(m => @displayCurrentPayPeriod)
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div id="dvValidateHoursOnDateEnteredMessage"></div>
+                                </div>
+                            </div>
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    @Html.Label("Type: ")
+                                    @Html.DropDownList("ddlEditSelectedHourType", new SelectList(Model.HoursType, "Value", "Text", selectedValue: Model.TimesheetHours.FirstOrDefault().tblTSHoursType.HoursTypeID.ToString()), new { id = "ddlEditSelectedHourType", @class = "form-control" })
+                                </div>
+                                <div class="form-group">
+                                    <span style="padding-left:5px;"></span>
+                                    @Html.Label("Date:")
+                                    @Html.TextBox("edittbDateSingleEntry", Model.TimesheetHours.FirstOrDefault().Date.ToShortDateString(), new { @class = "form-control", id = "edittbDateSingleEntry" })
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-inline">
+                                <div id="dvEditTime">
+                                    <div class="form-inline">
+                                        <div id="dvEditStartTime" class="form-group">
+                                            @Html.Label("Start Time Hour:")
+                                            @Html.DropDownList("ddlTimeStart", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: RenderTimePart(Model.TimesheetHours.FirstOrDefault().TimeStart, true).ToString()), new { id = "ddlTimeStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.EditSelectedHourStart)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlMinutesStart", new SelectList(Model.PickerMinutes, "Value", "Text", selectedValue: RenderTimePart(Model.EditSelectedMinuteStart, false)), new { id = "ddlMinutesStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.EditSelectedMinuteStart)
+                                        </div>
+                                        <div id="dvEditEndTime" class="form-group">
+                                            @Html.Label("End Time Hour:")
+                                            @Html.DropDownList("ddlTimeEnd", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: RenderTimePart(Model.TimesheetHours.FirstOrDefault().TimeEnd, true)), new { id = "ddlTimeEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.EditSelectedHourEnd)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlMinutesEnd", new SelectList(Model.PickerMinutes, "Value", "Text", selectedValue: RenderTimePart(Model.EditSelectedMinuteEnd, false)), new { id = "ddlMinutesEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.EditSelectedMinuteEnd)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-inline" style="padding-top:20px;">
+                                    <div id="dvEditTimeHourMinuteInDecimal" class="form-group">
+                                        @Html.Label("Hours:")
+                                        @Html.DropDownList("editddlTimeHourMinuteInDecimalEdit", new SelectList(Model.PickerHourMinuteInDecimal, "Value", "Text", selectedValue: Model.TimesheetHours.FirstOrDefault().Hours.ToString("G29")), new { id = "editddlTimeHourMinuteInDecimalEdit", @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                    @if (Model.IsUserHRAdmin || Model.EmployeeIndividual.IsUserDelegate || Model.EmployeeIndividual.IsUserTSManager)
+                    {
+                        <div class="text-right">
+                            <br />
+                            <span class="well-sm text-warning">Continue to update this record will change the status to Non-Submitted.</span>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <input id="inpTimeEditSave" type="submit" class="btn btn-default" value="Save" />
+                    <input id="inpTimeEditCancel" type="button" class="btn btn-default" value="Cancel" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //-----------------------------Time Entry Edit Modal---------------------------------//
+    $(function () {
+        toggleControl($("#ddlEditSelectedHourType").val());
+
+        $("#edittbDateSingleEntry").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        }).on('changeDate', function (e) {
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#edittbDateSingleEntry").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#hfSelectedPayPeriod_dtmPeriodStart").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#hfSelectedPayPeriod_dtmPeriodEnd").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedDate < currentPPStartDate || selectedDate > currentPPEndDate) {
+                    $("#h4WarningMessage").text("Start Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').appendTo('body').modal('show');
+                    return false;
+                }
+            }
+        });
+
+        $("#ddlEditSelectedHourType").change(function () {
+            var selectVal = $("#ddlEditSelectedHourType").val();
+            toggleControl(selectVal);
+        });
+    });
+
+    $(function () {
+        $("#inpTimeEditCancel").on('click', function (event) {
+            event.preventDefault();
+            $("#mdTimeEntryEdit").modal('hide');
+        });
+
+
+        //$("#btnCloseWarning").on("click", function () {
+        //    $("#mdTimeEntryEdit").modal('show');
+        //});
+
+        //$('body').on('hidden.bs.modal', '.modal', function () {
+        //    $(this).removeData('bs.modal');
+        //});
+
+    });
+
+    //-----------------------------Handler to save time entry changes---------------------------------//
+    $(function () {
+        $("#inpTimeEditSave").on("click", function (event) {
+            event.preventDefault();
+            $("#EditSelectedHourStart").val($("#ddlTimeStart").val());
+            $("#EditSelectedHourEnd").val($("#ddlTimeEnd").val());
+            $("#EditSelectedMinuteStart").val($("#ddlMinutesStart").val());
+            $("#EditSelectedMinuteEnd").val($("#ddlMinutesEnd").val());
+            var startSelectedTotals = (parseFloat($("#EditSelectedHourStart").val()) + (parseFloat($("#EditSelectedMinuteStart").val()) / 60));
+            var endSelectedTotals = (parseFloat($("#EditSelectedHourEnd").val()) + (parseFloat($("#EditSelectedMinuteEnd").val()) / 60));
+
+            var selectedHrMnInDecimal = parseFloat($("#editddlTimeHourMinuteInDecimalEdit").val().toString()).toFixed(2);
+            $("#EditSelectedHourMinuteInDecimal").val(selectedHrMnInDecimal);
+            var totalHoursSelected = endSelectedTotals - startSelectedTotals;
+            if ($("#ddlEditSelectedHourType").val() != 1) { //Non-regular hours type i.e. PTO, Unpaid, etc
+                totalHoursSelected = parseFloat($("#editddlTimeHourMinuteInDecimalEdit").val());
+            }
+
+            //Required field
+            var selectedDate = $("#edittbDateSingleEntry").val();
+
+            //Validate date entered for non-exempt
+            var selectedSingleDateEntry = $.datepicker.parseDate('mm/dd/yy', $("#edittbDateSingleEntry").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#hfSelectedPayPeriod_dtmPeriodStart").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#hfSelectedPayPeriod_dtmPeriodEnd").val());
+            var isUserNonExempt = $('#hdDataEdit_IsUserNonExempt').val();
+
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the selected pay period
+                if (selectedSingleDateEntry < currentPPStartDate || selectedSingleDateEntry > currentPPEndDate) {
+                    $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').modal('show');
+                    return false;
+                }
+            }
+            //validate time range entry
+            if (($("#ddlTimeStart").val() + $("#ddlMinutesStart").val()) > ($("#ddlTimeEnd").val() + $("#ddlMinutesEnd").val())) {
+                $("#h4WarningMessage").text("Start time must be earlier than end time");
+                $('.bs-modal-sm').modal('show');
+                return false;
+            }
+            if (($("#ddlTimeEnd").val() + $("#ddlMinutesEnd").val()) < ($("#ddlTimeStart").val() + $("#ddlMinutesStart").val())) {
+                $("#h4WarningMessage").text("End time must be later than start time");
+                $('.bs-modal-sm').modal('show');
+                return false;
+            }
+            $("#EditSelectedDateEntry").val(selectedDate);
+            $("#SelectedHoursType").val($("#ddlEditSelectedHourType").val());
+
+            $("#mdTimeEntryEdit").modal('hide');
+            var postdata = $('#formEditTimeEntry').serialize();
+            //debugger;
+            if ($("#EditSelectedDateEntry").val() != null && $("#EditSelectedDateEntry").val() != "") {
+                //Validate the total hours before saving changes
+                $.ajax({
+                    url: '@Url.Action("GetDateEnteredTotalHours", "Timesheets")',
+                    type: "POST",
+                    cache: false,
+                    dataType: 'json',
+                    data: postdata, // {dateEntered: $("#EditSelectedDateEntry").val(), payperiodId: $("#hfHourDataEdit_SelectedPayPeriodID").val(), employeeInfoId: $("#EmployeeInfoId").val(), editTimesheetHourId: $("#EditTimesheetHourId").val(), hoursSelected: totalHoursSelected },
+                    success: function (data) {
+                        $("#h4WarningMessage").empty();
+                        if (data.valid) {
+                            $.ajax({
+                                url: '@Url.Action("EditSave", "Timesheets")',
+                                type: "POST",
+                                cache: false,
+                                data: postdata, //{ id: hourId }
+                                beforeSend: function (event) {
+                                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                    $('#dvLoadMessage').html(textHtml);
+                                },
+                                success: function (data) {
+                                    $('#dvLoadMessage').empty();
+                                    $('#dvTSWeeklyView').html(data);
+
+                                    //refresh the Pay Period Hours Type Summary for NonExempt time entries
+                                    if ($("#hdDataEdit_IsUserNonExempt").val() == 'True') {
+                                        $.ajax({
+                                            url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary", "Timesheets")',
+                                            type: "POST",
+                                            cache: false,
+                                            data: { selectedPayPeriodId: $("#hfHourDataEdit_SelectedPayPeriodID").val(), employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                                            beforeSend: function (event) {
+                                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                                $('#dvLoadMessage').html(textHtml);
+                                            },
+                                            success: function (ppData) {
+                                                $('#dvLoadMessage').empty();
+                                                $("#dvPayPeriodHoursTypeSummary").empty();
+                                                $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                                            }
+                                        });
+                                    }
+                                    //refresh the Time Off Summary YTD
+                                    $.ajax({
+                                        url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                                        type: "POST",
+                                        cache: false,
+                                        data: { startDate: selectedDate, employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                                        beforeSend: function (event) {
+                                            var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                            $('#dvLoadMessage').html(textHtml);
+                                        },
+                                        success: function (summaryData) {
+                                            $('#dvLoadMessage').empty();
+                                            $("#dvHoursTypeSummary").empty();
+                                            $("#dvHoursTypeSummary").html(summaryData);
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            //debugger;
+                            var invalidDateEntryReason = [];
+                            var textHtmlOverlapping = "";
+                            var textHtmlMaxTimeOff = "";
+                            var textHtmlPTOExceeds = "";
+                            var maxTimeOff = data.maxTimeOff;
+                            var totalTimeOffEntered = data.hoursToAdd;
+                            for (i = 0; i < data.invalidDateReason.length; i++) {
+                                invalidDateEntryReason.push(data.invalidDateReason[i].split('#'));
+                            }
+                            for (i = 0; i < invalidDateEntryReason.length; i++) {
+                                if (invalidDateEntryReason[i][1] == "OverlappingTimeEntry") {
+                                    //textHtmlOverlapping += "<li>Time entry error for the following date(s): " + invalidDateEntries[i][0].substr(0, 9).trim() + "<br /> ";
+                                    textHtmlOverlapping += "<li>You have entered a duplicate/overlapping time entry on " + invalidDateEntryReason[i][0].substr(0, 10).trim() + "</li>";
+                                }
+                                else if (invalidDateEntryReason[i][1] == "Over24Hours") {
+                                    textHtmlOverlapping += "<li>Time entry error on these date(s): " + invalidDateEntryReason[i][0].substr(0, 10).trim() + "<br /> ";
+                                    textHtmlOverlapping += "The total time entered for the day exceeds 24 hours. </li>";
+                                }
+                                else if (invalidDateEntryReason[i][1] == "PTOExceeds12HourADay") {
+                                    textHtmlOverlapping += "<li>Time entry error on these date(s): " + invalidDateEntryReason[i][0].substr(0, 10).trim() + "<br /> ";
+                                    textHtmlOverlapping += "The total time off entered exceeds the maximum per day of 12 hours. </li>";
+                                }
+                                else if (invalidDateEntryReason[i][1] == "OverMaxTimeOffPerWeek") {
+                                    textHtmlMaxTimeOff += "<li>The total time off entered for the week of " + invalidDateEntryReason[i][0] + " exceeds the amount of time you are allowed to take in a week. You have entered " + totalTimeOffEntered + " hours time off, but";
+                                    textHtmlMaxTimeOff += " your maximum time off per week is only " + maxTimeOff + " hours.</li>";
+                                }
+                            }
+                            var textHtml = "<div class='alert'><h4 id='h4WarningMessage'>Timesheet Error:</h4>";
+                            textHtml += "<strong>Unable to create time entry. Please review error and try again.</strong><br /><br />";
+                            textHtml += "<ul>"
+                            textHtml += textHtmlOverlapping + textHtmlMaxTimeOff;textHtml += "</ul></div>";
+                            $("#h4WarningMessage").html(textHtml);
+                            $('.bs-modal-sm').appendTo('body').modal('show');
+                            return false;
+                        }
+                    }
+                });
+            }
+
+
+        });
+    });
+
+    //------------------FUNCTIONS---------------------------------------------//
+    function toggleControl(selectVal) {
+        if (selectVal == 1) {
+            $("#dvEditTimeHourMinuteInDecimal").attr("class", "hidden");
+            $("#dvEditTime").attr("class", "show");
+        } else {
+            $("#dvEditTimeHourMinuteInDecimal").attr("class", "show");
+            $("#dvEditTime").attr("class", "hidden");
+        }
+    }
+</script>

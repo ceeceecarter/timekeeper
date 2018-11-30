@@ -1,0 +1,204 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.PTOBalancesDataViewModel
+
+
+
+
+<div id="dvCSVDataEditor">
+    @Html.Partial("_PTOBalancesCSVDataEditor", Model)
+</div>
+
+
+<script type="text/javascript">
+
+    /*Read CSV File Handler*/
+    $(function () {
+        $("#inpPreviewFile").on("click", function (event) {
+            event.preventDefault();
+
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+            
+
+            if ($("#tb_FileNumber").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>File Number is empty. Please indicate the position number.</li>";
+            }
+            
+            if ($("#tb_CompanyCode").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Company Code is empty. Please indicate the position number.</li>"
+            }
+
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#dvCustomValidationSummary").empty();
+                $("#dvCustomValidationSummary").html(textHtml);
+                return false;
+            }
+
+            var formData = new FormData();
+            
+            var pdata = $("#fileUploadSection").serialize();
+            var file = document.getElementById('dataFile').files[0];
+            var isValid = validateForm();
+            
+            if (!isValid) {
+                $("#dvCustomValidationSummary" + "ul:first").focus();
+                return false;
+            }
+            formData.append('csvFileUpload', file);
+            formData.append('postData', pdata);
+            
+            $.ajax({
+                url: '@Url.Action("ReadPTOBalanceCSVFileToUpload", "HRAdministration")',
+                type: "POST",
+                contentType: false,
+                processData: false,
+                cache: false,
+                data: formData, 
+                beforeSend: function (event) {
+                    //var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $("#dvMessage").empty();
+                    $.blockUI({
+                        message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Please wait while retrieving data file...</h4></div>",
+                        css: {
+                            padding: "5px", '-webkit-border-radius': '10px', 'z-index': '9999999', 'color': '#000', 'opacity': '16', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                        }
+                    });
+                },
+                success: function (data) {
+                    //$("#dvMessageLoading").text("").removeAttr("class", "glyphicon glyphicon-refresh");
+                    //$("#dvMessageLoading").empty();
+                    var textHtml = "<span class='text-info'>Columns shown read from CSV file selected.</span>";
+                    $("#dvMessage").html(textHtml);
+                    $("#dvDisplayCSVData").empty();
+                    $("#dvDisplayCSVData").html(data);
+                    $("#dvDisplayCSVData" + " td:first").focus();
+                }
+            })
+            .done(function (result) {
+                $.unblockUI();
+            });
+            return false;
+        });
+    });
+
+    /*Process CSV File Handler*/
+    $(function () {
+        $("#inpProcessCSV").on("click", function (event) {
+            event.preventDefault();
+            
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+
+            if ($("#tb_FileNumber").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>File Number is empty. Please indicate the position number.</li>";
+            }
+
+            if ($("#tb_CompanyCode").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Company Code is empty. Please indicate the position number.</li>"
+            }
+
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#dvCustomValidationSummary").empty();
+                $("#dvCustomValidationSummary").html(textHtml);
+                return false;
+            }
+
+            var formData = new FormData();
+            var pData = $("#fileUploadSection").serialize();
+            var file = document.getElementById('dataFile').files[0];
+            var isValid = validateForm();
+            if (!isValid) {
+                $("#dvCustomValidationSummary" + "ul:first").focus();
+                return false;
+            }
+            formData.append('csvFileUpload', file);
+            formData.append('postData', pData);
+            $.ajax({
+                url: '@Url.Action("ProcessPTOBalanceCSVFile", "HRAdministration")',
+                type: "POST",
+                contentType: false,
+                processData: false,
+                cache: false,
+                data: formData,
+                beforeSend: function (event) {
+                    $("#dvMessage").empty();
+                    $.blockUI({
+                        message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Do not close window</h4><br /><h4>Please wait while processing data file...</h4></div>",
+                        css: {
+                            padding: "5px", '-webkit-border-radius': '10px', 'z-index': '9999999', 'color': '#000', 'opacity': '16', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                        }
+                    });
+                },
+                success: function (data) {
+                    var textHtml = "<span class='text-info'>You have successfully imported the following data.</span>";
+                    $("#dvMessage").html(textHtml);
+                    $("#dvDisplayCSVData").empty();
+                    $("#dvDisplayCSVData").html(data);
+                    $("#dvDisplayCSVData" + " td:first").focus();
+                }
+            })
+            .done(function (result) {
+                $.unblockUI();
+            });
+        });
+    });
+
+
+    /*Validate PTOBalance Form*/
+    function validateForm() {
+        var file = document.getElementById('dataFile').files[0];
+        if (file == null) {
+            var textHtml = "<ul><li>Please select CSV file to upload</li></ul>"
+            $("#dvCustomValidationSummary").html(textHtml);
+            return false;
+        }
+        if (file.name.split(".")[1] != "csv") {
+            var textHtml = "<ul><li>The file format is not supported.</li></ul>"
+            $("#dvCustomValidationSummary").html(textHtml);
+            return false;
+        }
+        else {
+            $("#dvCustomValidationSummary").empty();
+            return true;
+        }
+    }
+
+    /*LastUpdate datepicker settings*/
+    $(function () {
+        var currentDate = moment().format('MM/DD/YYYY');
+        $('#LastUpdateOfPTOBalances').val(currentDate);
+
+        $('#LastUpdateOfPTOBalances').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true,
+            picktime: false
+        });
+        //.on('changeDate', bindDatePicker);
+
+
+    });
+
+
+    /*Data File Change Event Handler*/
+    $(function () {
+        $("#dataFile").on("change", function () {
+            validateForm();
+            //clear the display CSV Data
+            $("#dvDisplayCSVData").empty();
+            $("#dvMessage").empty();
+        });
+    });
+
+    function showDatePicker(controlName) {
+        $('#' + controlName).datepicker('show');
+    }
+</script>

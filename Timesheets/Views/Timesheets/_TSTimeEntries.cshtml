@@ -1,0 +1,131 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@using GridMvc.Html
+
+<div class="col-sm-12">
+    <div class="NmarqGrid-SubHeader text-center">
+        <b>Pay Period Summary</b>
+    </div>
+    <div class="well">
+        <div class="container-fluid" style="border:solid; border-color:darkgrey; border-width:thin; border-radius: 10px; border-bottom:hidden">
+            <div class="row">
+                <div class="col-sm-2" style="align-content:center; font-weight:bold; vertical-align:central">Hours</div>
+                <div class="col-sm-10">
+                    @if (Model.IsUserNonExempt)
+                    {
+                        if (Model.HoursTypeSummary != null)
+                        {
+                            Model.HoursTypeSummary.OrderBy(m => m.HoursType);
+                            @Html.Grid(Model.TimeOffSummaryNonExempt.OrderBy(m => m.HoursTypeID), "_Grid").Columns(col =>
+                           {
+                               col.Add(m => m.HoursType)
+                                       .Titled(" ")
+                                       .SetWidth("25%");
+                               col.Add(m => m.TotalWeek1)
+                                       .Titled("Week 1")
+                                       .Format("{0:0.00}")
+                                       .SetWidth("25%");
+                               col.Add(m => m.TotalWeek2)
+                                       .Titled("Week 2")
+                                       .Format("{0:0.00}")
+                                       .SetWidth("25%");
+                               col.Add(m => m.Total)
+                                       .Titled("Total")
+                                       .Format("{0:0.00}")
+                                       .SetWidth("25%");
+
+                           })
+                        }
+                    }
+                    else if (!Model.IsUserNonExempt)
+                    {
+                        if (Model.TimeOffSummaryExempt != null)
+                        {
+                            Model.TimeOffSummaryExempt.OrderByDescending(m => m.HoursTypeID);
+                            @Html.Grid(Model.TimeOffSummaryExempt.OrderByDescending(i => (int)i.HoursType), "_Grid").Columns(col =>
+                           {
+                               col.Add(m => m.HoursTypeName)
+                                       .Titled("Type")
+                                       .SetWidth("25%");
+                               col.Add(m => m.NonSubmitted)
+                                       .Titled("NonSubmitted")
+                                       .SetWidth("25%");
+                               col.Add(m => m.Submitted)
+                                       .Titled("Submitted")
+                                       .SetWidth("25%");
+                               col.Add(m => m.Approved)
+                                       .Titled("Approved")
+                                       .SetWidth("25%");
+                               //col.Add(m => m.Processed)
+                               //        .Titled(" ")
+                               //        .SetWidth("25%");
+                               col.Add(m => m.Total)
+                                       .Titled(" ")
+                                       .SetWidth("25%");
+                           })
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid" style="border:solid; border-color:darkgrey; border-width:thin; border-radius: 10px;; border-bottom:hidden">
+            <div class="row">
+                <div class="col-sm-2" style="align-content:center; font-weight:bold; vertical-align:central">On Call</div>
+                <div class="col-sm-10">
+                    @if (Model.OnCallSummaryNonExempt != null)
+                    {
+                        @Html.Grid(Model.OnCallSummaryNonExempt.OrderBy(m => m.HoursTypeID), "_Grid").Columns(col =>
+                        {
+                            col.Add(m => m.HoursType)
+                                    .Titled(" ")
+                                    .SetWidth("25%");
+                            col.Add(m => m.TotalWeek1OnCall)
+                                    .Titled(" ")
+                                    .Format("${0:0.00}")
+                                    .SetWidth("25%");
+                            col.Add(m => m.TotalWeek2OnCall)
+                                    .Titled(" ")
+                                    .Format("${0:0.00}")
+                                    .SetWidth("25%");
+                            col.Add(m => m.TotalOnCall)
+                                    .Titled(" ")
+                                    .Format("${0:0.00}")
+                                    .SetWidth("25%");
+                        })
+                    }
+                </div>
+            </div>
+        </div>
+        @if (Model.IsUserNonExempt)
+        {
+            <div class="container-fluid" style="border:solid; border-color:darkgrey; border-width:thin; border-radius: 10px;">
+                <div class="row">
+                    <div class="col-sm-2" style="align-content:center; font-weight:bold; vertical-align:central">Mileage</div>
+                    <div class="col-sm-10">
+                        @if (Model.MileageSummary != null)
+                        {
+                            @Html.Grid(Model.MileageSummary.OrderBy(m => m.HoursTypeID), "_Grid").Columns(col =>
+                            {
+                                col.Add(m => m.HoursType)
+                                        .Titled("Mileage")
+                                        .SetWidth("25%");
+                                col.Add(m => m.TotalWeek1Milage)
+                                        .Titled(" ")
+                                        .Format("{0:0.0}")
+                                        .SetWidth("25%");
+                                col.Add(m => m.TotalWeek2Milage)
+                                        .Titled(" ")
+                                        .Format("{0:0.0}")
+                                        .SetWidth("25%");
+                                col.Add(m => m.TotalMilage)
+                                        .Titled(" ")
+                                        .Format("{0:0.0}")
+                                        .SetWidth("25%");
+                            })
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

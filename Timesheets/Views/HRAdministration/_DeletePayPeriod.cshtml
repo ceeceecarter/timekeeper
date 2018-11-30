@@ -1,0 +1,10 @@
+﻿
+
+<div id="deletePayPeriod">
+
+    @if (ViewBag.PayPeriodId != null && ViewBag.PayPeriodId != 0)
+    {
+        @Ajax.ActionLink("Delete Period", "DeletePayPeriod", "HRAdministration", new { pPayPeriodId = ViewBag.PayPeriodId, pIndividualId = ViewBag.AuthenticateUserId }, new AjaxOptions { InsertionMode = InsertionMode.ReplaceWith, UpdateTargetId = "deletePayPeriod" }, new { id = "alDeletePayPeriod", @class = "btn btn-info", title = "This will delete the pay pay period just created" })
+    }
+
+</div>

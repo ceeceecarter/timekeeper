@@ -1,0 +1,46 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TSNavigationItemCollectionViewModel
+
+@{
+    ViewBag.Title = "Navigation Tab of Timesheet";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var employeeInfoId = @Model.EmployeeIndividual.EmployeeInfoId.ToString();
+        var masterUserId = @Model.EmployeeIndividual.MasterUserId.ToString();
+        if(GetCookie("EmployeeInfoId") == ""){
+            document.cookie = "EmployeeInfoId=" + employeeInfoId + "; path=/";
+        }
+        if(GetCookie("MasterUserId") == ""){
+            document.cookie = "MasterUserId=" + masterUserId + "; path=/";
+        }
+    });
+</script>
+
+<div class="container" style="margin-top:50px">
+    <div class="row">
+        <div class="col-sm-12">
+            @*<p class="text-right">Welcome @ViewBag.UserLoginName</p>*@
+            <p class="text-right">Welcome @Model.EmployeeIndividual.FirstName @Model.EmployeeIndividual.LastName</p>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="navbar-collapse collapse">
+        <nav>
+            <ul class="nav nav-tabs">
+                @if (Model.NavigationItems != null)
+                {
+                    foreach (var item in Model.NavigationItems.OrderBy(x=> x.TabOrder).ToList())
+                    {
+                        <li id="@item.ElementNameId">
+                            @Html.RouteLink(
+                                    linkText: @item.LinkText,
+                                    routeValues: new { controller = @item.ControllerName, action = @item.ActionName })
+                        </li>
+                    }
+                }
+            </ul>
+        </nav>
+    </div>
+</div>

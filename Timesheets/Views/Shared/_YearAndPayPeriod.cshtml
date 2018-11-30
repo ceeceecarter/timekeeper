@@ -1,0 +1,180 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.YearAndPayPeriodViewModel
+@{
+    ViewBag.Title = "YearAndPayPeriod";
+}
+
+@{ //FormatDate to display for initial load for EditorFor control
+    var dtPeriodStart = Model.CurrentPayPeriod.dtmPeriodStart.ToShortDateString();
+    var dtPeriodEnd = Model.CurrentPayPeriod.dtmPeriodEnd.ToShortDateString();
+}
+
+<script type="text/javascript">
+    function showDatePicker(controlName) {
+        if ($("#ddlTimePeriods").val() == "-1") {
+            $('#' + controlName).datepicker('show');
+        }
+        else {
+            $('#' + controlName).datepicker('hide');
+        }
+    }
+    $(document).ready(function () {
+        
+
+        $('#CurrentPayPeriod_StartDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#CurrentPayPeriod_EndDate').datepicker({
+            format: 'mm/dd/yyyy',
+            autoclose: true
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        //var startDate = $('#CurrentPayPeriod_StartDate').val().toString().split(" ")[0];
+        //var endDate = $('#CurrentPayPeriod_EndDate').val().toString().split(" ")[0];
+        //$("#idSelectedPayPeriod").text(startDate.toString() + ' - ' + endDate.toString());
+    });
+
+    function bindDatePicker(e) {
+        document.getElementById('hfCurrentPayPeriod_StartDate').value = document.getElementById('CurrentPayPeriod_StartDate').value;
+        document.getElementById('hfCurrentPayPeriod_EndDate').value = document.getElementById('CurrentPayPeriod_EndDate').value;
+    }
+
+    function OnChangeTimePeriod() {
+        
+
+        //Date Range is selected then Start/End date picker value does not change
+        var selectedTimePeriodValue = $("#ddlTimePeriods").val();
+        var selStartDate = selectedTimePeriodValue.toString().split("-")[0].trim().split(" ")[0];
+        var selEndDate = selectedTimePeriodValue.toString().split("-")[1].trim().split(" ")[0];
+        var selTimePeriodValue = $("#ddlTimePeriods :selected").text();
+        if (selectedTimePeriodValue != "-1") {
+            $("#CurrentPayPeriod_StartDate").val(selStartDate);
+            $("#CurrentPayPeriod_EndDate").val(selEndDate);
+            $("#idSelectedPayPeriod").text(selStartDate + " - " + selEndDate);
+            $("#CurrentPayPeriod_StartDate").prop('disabled', true);
+            $("#CurrentPayPeriod_EndDate").prop('disabled', true);
+        }
+        else {
+            $("#idSelectedPayPeriod").text(selTimePeriodValue + " " + " - Please select Start Date and End Date");
+            //enable Start/End Date controls
+            $("#CurrentPayPeriod_StartDate").removeAttr('disabled');
+            $("#CurrentPayPeriod_EndDate").removeAttr('disabled');
+        }
+    }
+    function HandleTimeEntrySearch() {
+        var isNonExempt = $("#IsNonExempt").val();
+        var strEmployeeInfoId = GetCookie("EmployeeInfoId");
+  
+        /* Non Exempt: Search */
+        if (isNonExempt == "True") {
+
+            var selectedTimePeriodValue = $("#ddlTimePeriods").val();
+            var selStartDate = selectedTimePeriodValue.toString().split("-")[0].trim().split(" ")[0];
+            var selEndDate = selectedTimePeriodValue.toString().split("-")[1].trim().split(" ")[0];
+            if (selectedTimePeriodValue == "-1") { //DateRange
+                selStartDate = $("#CurrentPayPeriod_StartDate").val();
+                selEndDate = $("#CurrentPayPeriod_EndDate").val();
+            }
+
+            $.ajax({
+                url: '@Url.Action("GetTimeEntries", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: { startDate: selStartDate, endDate: selEndDate, employeeInfoId: strEmployeeInfoId },
+                success: function (data) {
+                    $("#dvTSWeeklyView").html(data);
+                }
+            });
+            return false;
+        }
+        else { //Exempt: Search by year
+            var selectedYear = $("#ddlYears").val();
+            GetTimeEntriesByYear(selectedYear, strEmployeeInfoId);
+            return false;
+        }
+    }
+
+    function GetTimeEntriesByYear(selectedYear, strEmployeeInfoId) {
+        $.ajax({
+            url: '@Url.Action("GetTimeEntriesByYear", "Timesheets")',
+            type: "POST",
+            cache: false,
+            data: { year: selectedYear, employeeInfoId: strEmployeeInfoId },
+            success: function (data) {
+                $("#dvTSWeeklyView").html(data);
+            }
+        });
+        return false;
+    }
+
+</script>
+
+@using (Html.BeginForm())
+{
+    <div class="row">
+        @if (Model != null)
+        {
+            <div class="row">
+                @Html.HiddenFor(m => m.IsNonExempt)
+                <!--Hide Years for Timesheet tab-->
+                @if (!Model.IsNonExempt)
+                {
+                    <div class="col-sm-3">
+                        <span class="dropdown-menu-left">Year</span>
+                        @Html.DropDownListFor(m => Model.CurrentYear, new SelectList(Model.TimeYears, "Value", "Text"), new { id = "ddlYears", @class = "form-control"})
+                    </div>
+                }
+                else
+                {
+                    <div class="col-sm-3">
+                        @Html.HiddenFor(m => m.CurrentPayPeriod.PayPeriodID)
+                        <span class="dropdown-menu-left">&nbsp;</span>
+                        @Html.DropDownListFor(m => Model.TimePeriods, new SelectList(Model.TimePeriods, "Value", "Text"), new { id = "ddlTimePeriods", @class = "form-control", onchange = "OnChangeTimePeriod();" })
+                    </div>
+                    <div class="col-sm-2">
+                        <span>Start Date</span>
+                        <div class="input-group date">
+                            @Html.EditorFor(m => @dtPeriodStart, null, "CurrentPayPeriod_StartDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                            @Html.HiddenFor(m => m.CurrentPayPeriod.dtmPeriodStart, new { id = "hfCurrentPayPeriod_StartDate" })
+                            <span class="input-group-addon" onclick="showDatePicker('CurrentPayPeriod_StartDate')">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <span>End Date</span>
+                        <div class="input-group date">
+                            @Html.EditorFor(m => dtPeriodEnd, null, "CurrentPayPeriod_EndDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                            @Html.HiddenFor(m => m.CurrentPayPeriod.dtmPeriodEnd, new { id = "hfCurrentPayPeriod_EndDate" })
+                            <span class="input-group-addon" onclick="showDatePicker('CurrentPayPeriod_EndDate')">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                    </div>
+                }
+
+                <div class="col-sm-3" style="padding-top:20px;">
+                    <span class="dropdown-menu-left">&nbsp;</span>
+                    <input type="submit" title="Search" id="inpSearch" class="btn btn-default" onclick='return HandleTimeEntrySearch();' value="Search" />
+                </div>
+            </div>
+            @*<div class="row" style="padding-top:20px;">
+                    <div class="col-sm-4 right">
+                        <input type="submit" title="Search" class="btn btn-default" onclick='return HandleTimeEntrySearch();' value="Search" />
+                    </div>
+                    <div class="col-sm-8">
+                        <label class="control-label">Pay Period Selected:</label>
+                        @Html.DisplayText(Model.CurrentPayPeriod.dtmPeriodStart.ToShortDateString())
+                        <div id="idSelectedPayPeriod"></div>
+                    </div>
+                </div>*@
+            <span style="padding-right:20px;"></span>
+        }
+    </div>
+
+}

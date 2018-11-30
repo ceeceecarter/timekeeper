@@ -1,0 +1,105 @@
+﻿@model IEnumerable<NM.Web.WebApplication.Timesheets.Models.ViewModel.SearchEmployeeResultViewModel>
+
+@helper RenderColumnToFullName(string FirstName, string LastName)
+{
+string result = FirstName + " " + LastName;
+    @result;
+}
+
+@helper RenderSearchResultStatusLink(int individualId, string EmploymentStatus, string FlsaStatus){
+if(FlsaStatus != "NonApplicable")
+{
+    if(EmploymentStatus != "No Status" && individualId > 0)
+    {
+            var result = EmploymentStatus;
+            @Html.ActionLink(result, "GetTimeEntryForIndividual", new { id = individualId}, new { @class = "linkSearchResultTimeEntry", @id=individualId, title="Manage Employee Time" })
+    }
+    else
+    {
+            var result = EmploymentStatus;
+            @result;
+    }
+}
+else
+{
+    var result = EmploymentStatus;
+    @result;
+}
+
+}
+
+
+@using GridMvc.Html
+<div class="row" style="padding-right:1em;">
+    <div class="col-sm-12">
+        <div class="NmarqGrid-SubHeader text-center">
+            <b>Search Results</b>
+        </div>
+    </div>
+</div>
+<div class="row" style="padding-right:1em;">
+    <div class="col-sm-12">
+        @if (Model != null && Model.Count() > 0)
+        {
+            @Html.Grid(Model.OrderBy(i => i.FirstName), "_Grid").Named("searchresultGrid").Columns(col =>
+            {
+                col.Add(m => m.IndividualId, true);
+                col.Add(m => m.EmployeeInfoId, true);
+                col.Add()
+                    .Titled("Employee")
+                    .Encoded(false)
+                    .Sanitized(false)
+                    .RenderValueAs(m => RenderColumnToFullName(m.FirstName, m.LastName));
+                col.Add(m => m.FileNumber, "FileNumber")
+                    .Titled("File Number");
+                col.Add(m => m.Balance, "Balance")
+                    .Titled("PTO Balance");
+                col.Add(m => m.FlsaStatus, "FlsaStatus")
+                    .Titled("NonExempt/Exempt/NonApplicable");
+                col.Add(m => m.EmploymentStatus, "EmploymentStatus")
+                    .Titled("Status")
+                    .Encoded(false)
+                    .Sanitized(false)
+                    .RenderValueAs(i =>
+                        RenderSearchResultStatusLink(i.IndividualId, i.EmploymentStatus, i.FlsaStatus).ToHtmlString()
+                    );
+            })
+        }
+        else
+        {
+            <div class="text-info">No result...please try again.</div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $(".linkSearchResultTimeEntry").on("click", function (event) {
+            event.preventDefault();
+            var lastSlash = $(this).attr('href').lastIndexOf('/') + 1;
+            var individualId = $(this).attr('href').slice(lastSlash);
+            var url = $(this).attr('href');
+
+            $.ajax({
+                url: url,
+                beforeSend: function (event) {
+                    $.blockUI({
+                        message: "<div><span class='glyphicon glyphicon-refresh spinning'></span><h4>Please wait while retrieving information...</h4></div>",
+                        css: {
+                            padding: "5px", '-webkit-border-radius': '10px', '-moz-border-radius': '10px', cursor: 'default', width: '550px'
+                        }
+                    });
+                },
+                success: function (data) {
+                    $("#dvReloading").text("").removeAttr("class", "glyphicon glyphicon-refresh");
+                    $('#dvTimeEntryManageView').empty();
+                    $('#dvTimeEntryManageView').html(data);
+                }
+            }).done(function (result) {
+                $.unblockUI();
+                //$.growlUI("Notification", "Loaded successfully!")
+            });
+            return false;
+        });
+    });
+</script>

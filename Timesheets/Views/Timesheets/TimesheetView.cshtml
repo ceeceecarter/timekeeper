@@ -1,0 +1,323 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+@{
+    ViewBag.Title = "Timesheet";
+}
+
+@{
+    var displayCurrentPayPeriod = Model.SelectedPayPeriod != null ? string.Format("{0} - {1}", Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString(), Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString()) : string.Empty;
+}
+
+@{ //FormatDate to display for initial load for EditorFor control
+    var dtPeriodStart = Model.SelectedPayPeriod != null ? Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString() : DateTime.Now.ToShortDateString();
+    var dtPeriodEnd = Model.SelectedPayPeriod != null ? Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString() : DateTime.Now.ToShortDateString();
+}
+
+
+<br />
+
+<div class="container-fluid">
+    @if (Model.EmployeeIndividual.IsUserTSUser || Model.EmployeeIndividual.IsUserTSHRAdmin || Model.EmployeeIndividual.IsUserTSManager || Model.EmployeeIndividual.IsUserDelegate || Model.IsUserHRAdmin ||
+                                                        Model.LoggedInUser.IsUserTSManager || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSUser)
+    {
+        if (Model.EmployeeIndividual != null && Model.EmployeeIndividual.FLSAStatus != -1)
+        {
+            if (Model.LoggedInUser.IsUserTSUser)
+            {
+                <div id="dvMyTimesheet" class="row">
+                    <div class="pull-right" style="padding-right:10px;">
+                        @Html.ActionLink("My Timesheet", "Index")
+                    </div>
+                </div>
+            }
+            <!--Employee Time Management-->
+            if (Model.EmployeeIndividual.IsUserDelegate || Model.EmployeeIndividual.IsUserTSHRAdmin || Model.IsUserHRAdmin || Model.LoggedInUser.IsUserTSManager || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserDelegate)
+            {
+                <div class="row" id="dvEmployeeTimeManagement">
+                    <div class="panel-group" id="dvEmployeeTimeManagementPanel" role="tablist" aria-multiselectable="true">
+                        <div class="panel panel-summaryhead">
+                            <div id="pnlEmployeeTimeManagementHeading" class="panel-heading" role="tab">
+                                <h4 class="panel-title NmarqGrid-Header">
+                                    <a role="button" class="remove-underline-link EmployeeTimeManagementContent" data-toggle="collapse" data-parent="#dvEmployeeTimeManagementPanel" href="#pnlEmployeeTimeManagementContent" aria-expanded="true" aria-controls="pnlEmployeeTimeManagementContent">
+                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                        <b>Employee Time Management</b>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="pnlEmployeeTimeManagementContent" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="employeeTimeManagement">
+                                <div class="panel panel-body">
+                                    <div class="row">
+                                        @if (Model.IsUserHRAdmin)
+                                        {
+                                            <div class="col-sm-3">
+                                                    @using (Html.BeginForm("PostSearchEmployees", "Timesheets", FormMethod.Post, new { id = "formSearchEmployees" }))
+                                                        {
+                                                            <div class="NmarqGrid-SubHeader  NmarqGrid-Spacer text-center"><b>Find Employee</b></div>
+                                                            <div class="well">
+                                                                <div id="dvSearchEmployees">
+                                                                    <div class="form-group">
+                                                                        @Html.Label("First Name")
+                                                                        <div class="form-inline">
+                                                                            @Html.TextBox("EmployeeIndividual_FirstName", string.Empty, new { @class = "form-control", type = "string", id = "EmployeeIndividual_FirstName" })
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        @Html.Label("Last Name")
+                                                                        <div class="form-inline">
+                                                                            @Html.TextBox("EmployeeIndividual_LastName", string.Empty, new { @class = "form-control", type = "string", id = "EmployeeIndividual_LastName" })
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        @Html.Label("File Number")
+                                                                        <div class="form-inline">
+                                                                            @Html.TextBox("EmployeeIndividual_FileNumber", string.Empty, new { @class = "form-control", type = "string", id = "EmployeeIndividual_FileNumber" })
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" id="btnSearchEmployees" class="btn btn-success">Search</button>
+                                                                <button type="button" id="btnClearSearch" class="btn btn-default">Clear</button>
+                                                            </div>
+                                                        }
+                                                </div>
+                                            <div class="col-sm-9">
+                                                <div id="dvEmployeeAccessList">
+                                                    @Html.Partial("_TSEmployeeAccessList", Model)
+                                                </div>
+                                            </div>
+                                        }
+                                        else //Non-HRAdmin Manager/Delegate employees
+                                        {
+                                            <div class="col-sm-12">
+                                                <div id="dvEmployeeAccessList">
+                                                    @Html.Partial("_TSEmployeeAccessList", Model)
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="row NmarqGrid-Spacer" style="padding:25px;">&nbsp;</div>
+
+                                    <!--Find Employee horizontal design-->
+                                    @*<div class="row" style="padding-right:1em;">
+                                        @if (Model.IsUserHRAdmin)
+                                        {
+                                            <div class="col-sm-12">
+                                                @using (Html.BeginForm("PostSearchEmployees", "Timesheets", FormMethod.Post, new { id = "formSearchEmployees" }))
+                                                {
+                                                    <div class="NmarqGrid-SubHeader  NmarqGrid-Spacer text-center"><b>Find Employee</b></div>
+                                                    <div class="well">
+                                                        <div id="dvSearchEmployees">
+                                                            <div class="form-group">
+                                                                <div class="form-inline">
+                                                                    @Html.Label("First Name")
+                                                                    @Html.TextBox("EmployeeIndividual_FirstName", string.Empty, new { @class = "form-control", type = "string", id = "EmployeeIndividual_FirstName" })
+                                                                    <span style="padding-right:10px;"></span>
+                                                                    @Html.Label("Last Name")
+                                                                    @Html.TextBox("EmployeeIndividual_LastName", string.Empty, new { @class = "form-control", type = "string", id = "EmployeeIndividual_LastName" })
+                                                                    <span style="padding-right:10px;"></span>
+                                                                    @Html.Label("File Number")
+                                                                    @Html.TextBox("EmployeeIndividual_FileNumber", string.Empty, new { @class = "form-control", type = "string", id = "EmployeeIndividual_FileNumber" })
+                                                                    <span style="padding-right:10px;"></span>
+                                                                    <button type="button" id="btnSearchEmployees" class="btn btn-success">Search</button>
+                                                                    <button type="button" id="btnClearSearch" class="btn btn-default">Clear</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>*@
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div id="dvSearchEmployeeResults"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div id="dvReloading"></div>
+        <!--Time Entry Manage View panel-->
+            <div id="dvTimeEntryManageView">
+                @Html.Partial("_TSTimeEntryManageView", Model)
+            </div>
+        }
+        else //Employee FLSA Status is non applicable
+        {
+            <div class="row">
+                <div class="col-sm-12">
+                    <h4 class="text-danger">You are not a TimeKeeper user. If this is by mistake, please contact HR.</h4>
+                </div>
+
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-sm-12">
+                <h4 class="text-danger">You are not a TimeKeeper user. If this is by mistake, please contact HR.</h4>
+            </div>
+
+        </div>
+    }
+
+
+</div>
+
+
+
+<!--MODAL DIALOG: edit time entry-->
+<!--//Begin Modal Edit Time Entry-->
+<div id="dvTimeEntryEdit"></div>
+<!--//End Modal Edit Time-->
+<!--MODAL DIALOG: Delete time entry-->
+<!--//Begin Modal Delete Time-->
+<div id="dvTimeEntryDelete"></div>
+<!--//End Modal delete-->
+<!--MODAL DIALOG: edit on call entry-->
+<!--Begin Modal edit on call entry-->
+<div id="dvOnCallEntryEdit"></div>
+
+<!--MODAL DIALOG: Delete on call entry-->
+<!--Begin Modal delete On Call entry-->
+<div id="dvOnCallEntryDelete"></div>
+
+<!--MODAL DIALOG: edit Mileage entry-->
+<!--Begin Modal edit Mileage entry-->
+<div id="dvMileageEntryEdit"></div>
+
+<!--MODAL DIALOG: Delete Mileage entry-->
+<!--Begin Modal delete Mileage entry-->
+<div id="dvMileageEntryDelete"></div>
+
+<!--MODAL DIALOG: Delete Multiple Time Entries-->
+@*<div id="dvDeleteMultipleTimeEntries"></div>*@
+<!--END MODAL: Delete Multiple Time Entries-->
+<!--MODAL DIALOG: Submit Approval time entry-->
+<!--//Begin Modal Submit Approval Time-->
+<div id="dvTimeEntrySubmitApproval">
+    @if (Model.TimesheetHours != null)
+    {
+        <!--This html will get replaced by the partial view return by $.ajax-->
+        <div class="container">
+            <div id="mdTimeEntrySubmitApproval" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        </div>
+                        <div class="modal-body">
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<!--//End Modal Submit Approval-->
+<!--MODAL DIALOG: Submit Approval time entry-->
+<!--//Begin Modal Submit Approval Time-->
+<div id="dvTimeEntryApprove">
+    @if (Model.TimesheetHours != null)
+    {
+        <!--This html will get replaced by the partial view return by $.ajax-->
+        <div class="container">
+            <div id="mdTimeEntryApprove" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        </div>
+                        <div class="modal-body">
+                            Loading...
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<!--//End Modal Submit Approval-->
+<!--MODAL DIALOG: Submit Reject time entry-->
+<!--//Begin Modal Submit Reject Time-->
+<div id="dvTimeEntryReject"></div>
+
+<div id="dvTimeEntryRejectLoading">
+    <div class="container">
+        <div id="mdLoadingModal" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--//End Modal Submit Approval-->
+
+<!--Prompt for Warning Message-->
+<div class="modal fade bs-modal-sm" id="mdTimeEntryWarning" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color:#b50022">
+            <div class="modal-header">
+                <button type="button" id="btnXCloseTimeEntryWarning" class="close" data-dismiss="modal" data-target="#mdTimeEntryWarning">&times;</button>
+                <h5 class="modal-title" style="color:#ffffff">Warning</h5>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff">
+                <div class="text-danger text-danger" id="dvWarningMessage">
+                    <h4 id="h4WarningMessage"></h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseWarning" type="button" class="btn btn-default" data-target="#mdTimeEntryWarning">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div class="modal fade bs-modal-sm" id="mdTimeEntryWarning" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color:#b50022">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-target="#mdWarning">&times;</button>
+                <h5 class="modal-title" style="color:#ffffff">Warning</h5>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff">
+                <div class="text-danger text-danger" id="dvWarningMessage">
+                    <h4 id="h4WarningMessage">Missing information on fields. Please try again</h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseWarning" type="button" class="btn btn-default" data-dismiss="modal" data-target="#mdTimeEntryWarning">Close</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+<!--End Prompt for Warning Message-->
+
+<script type="text/javascript">
+    $(function () {
+        //toggle collapsing chevron
+        $('#pnlEmployeeTimeManagementContent').on('show.bs.collapse', function () {
+            $('a.EmployeeTimeManagementContent > span').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        });
+        $('#pnlEmployeeTimeManagementContent').on('hide.bs.collapse', function () {
+            $('a.EmployeeTimeManagementContent > span').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        });
+        $('#pnlSummaryContent').on('show.bs.collapse', function () {
+            $('a.SummaryContent > span').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        });
+        $('#pnlSummaryContent').on('hide.bs.collapse', function () {
+            $('a.SummaryContent > span').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        });
+    });
+</script>
+
+

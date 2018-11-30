@@ -1,0 +1,204 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@helper RenderTimePart(int MilitaryTime, bool isHour)
+{
+if (MilitaryTime > 0)
+{
+    int hours = MilitaryTime / 100;
+    int minutes = MilitaryTime - hours * 100;
+    DateTime result = DateTime.MinValue;
+    if (isHour)
+    {
+            @result.AddHours(hours).Hour.ToString("0#");
+        }
+        else
+        {
+            @result.AddMinutes(minutes).ToString("mm");
+        }
+    }
+}
+
+
+@helper RenderColumn(int intColumn)
+{
+string result = intColumn.ToString();
+    @result;
+}
+
+@{
+    var displayCurrentPayPeriod = string.Format(" {0} - {1}", Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString(), Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString());
+}
+
+<div class="container">
+    <div id="mdOnCallEntryEdit" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title" style="color:#ffffff">Edit On Call Entry</h5>
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container" style="width: 100%;">
+                        @using (Html.BeginForm("EditSave", "Timesheets", FormMethod.Post, new { id = "formEditOnCallEntry" }))
+                        {
+                            <div class="row">
+                                @Html.HiddenFor(m => m.EditTimesheetHourId)
+                                @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "hfOnCallEdit_IsUserNonExempt" })
+                                @Html.HiddenFor(m => m.EmployeeInfoId)
+                                @Html.HiddenFor(m => m.MasterUserId)
+                                @Html.HiddenFor(m => m.EditSelectedDateEntry)
+                                @Html.HiddenFor(m => m.SelectedHoursType)
+                                @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hfOnCallEdit_SelectedPayPeriodId" })
+                                @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id = "hfOnCallEdit_IndividualId" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodStart, new { id = "hfOnCallEditSelectedPayPeriod_dtmPeriodStart" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodEnd, new { id = "hfOnCallEditSelectedPayPeriod_dtmPeriodEnd" })
+                                @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId)
+                                @Html.HiddenFor(m => m.EmployeeIndividual.FLSAStatus)
+                                <!--Required fields-->
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm1stReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm2ndReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.txtLastPeriodOfYear)
+                                @Html.HiddenFor(m => m.SelectedPayPeriodYear)
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-inline">
+                                        @if (Model.IsUserNonExempt)
+                                        {
+                                            @Html.Label("Selected Pay Period: ")
+                                            @Html.DisplayFor(m => @displayCurrentPayPeriod)
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <table style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>On Call Type</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="rowOneOnCall">
+                                        <td style="padding-right: 5px">@Html.DropDownList("editOnCallHoursType", new SelectList(Model.HoursTypeOnCall, "Value", "Text", Model.TimesheetHours.FirstOrDefault().HoursTypeID.ToString()), new { id = "editOnCallHoursType", @class = "form-control" })</td>
+                                        @Html.HiddenFor(m => m.TimesheetHours.FirstOrDefault().HoursTypeID, new { @id = "hfOnCallHoursType" })
+                                        <td style="padding-right: 5px">@Html.TextBox("editOnCallDate", Model.TimesheetHours.FirstOrDefault().Date.ToShortDateString(), new { @id = "editOnCallDate", @class = "form-control dp" })</td>
+                                        @Html.HiddenFor(m => m.TimesheetHours.FirstOrDefault().Date, new { @id = "hfOnCallDate" })
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+                    @if (Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSManager)
+                    {
+                        <div class="text-right">
+                            <br />
+                            <span class="well-sm text-warning">Editing this record will change the status to Non-Submitted.</span>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <input id="inpOnCallEditSave" type="submit" class="btn btn-default" data-dismiss="modal" value="Save" />
+                    <input id="inpOnCallEditCancel" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //-----------------------------OnCall Entry Edit Modal---------------------------------//
+    $(function () {
+        $("#inpOnCallEditCancel").on('click', function (event) {
+            event.preventDefault();
+            $("#mdOnCallEntryEdit").modal('hide');
+        })
+
+        $("#editOnCallDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        }).on('changeDate', function (e) {
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#editOnCallDate").val());
+            var selectedPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#hfOnCallEditSelectedPayPeriod_dtmPeriodStart").val());
+            var selectedPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#hfOnCallEditSelectedPayPeriod_dtmPeriodEnd").val());
+            var isUserNonExempt = $("#hfOnCallEdit_IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedDate < selectedPPStartDate || selectedDate > selectedPPEndDate) {
+                    $("#h4WarningMessage").text("Start Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').modal('show');
+                    return false;
+                }
+            }
+        });
+
+        //Handler to save OnCall entry changes
+        $("#inpOnCallEditSave").on("click", function (event) {
+            event.preventDefault();
+            
+            //Required field
+            var selectedDate = $("#editOnCallDate").val();
+
+            //Validate date entered for non-exempt
+            var selectedSingleDateEntry = $.datepicker.parseDate('mm/dd/yy', $("#editOnCallDate").val());
+            var selectedPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#hfOnCallEditSelectedPayPeriod_dtmPeriodStart").val());
+            var selectedPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#hfOnCallEditSelectedPayPeriod_dtmPeriodEnd").val());
+            var isUserNonExempt = $("#hfOnCallEdit_IsUserNonExempt").val();
+
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedSingleDateEntry < selectedPPStartDate || selectedSingleDateEntry > selectedPPEndDate) {
+                    $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').modal('show');
+                    return false;
+                }
+            }
+            var selectedOnCallPayPeriodId = $("#hfOnCallEdit_SelectedPayPeriodId").val();
+            $("#hfOnCallDate").val($("#editOnCallDate").val());
+            $("#hfOnCallHoursType").val($("#editOnCallHoursType").val());
+            $("#SelectedHoursType").val($("#editOnCallHoursType").val());
+
+            $("#EditSelectedDateEntry").val(selectedDate);
+
+            var postdata = $('#formEditOnCallEntry').serialize();
+            $("#mdOnCallEntryEdit").modal('hide');
+
+            $.ajax({
+                url: '@Url.Action("EditSave", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: postdata, //{ id: hourId }
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+                    $('#dvTSWeeklyView').html(data);
+                    $("#dvOnCallEntryEdit").empty();
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { selectedPayPeriodId: selectedOnCallPayPeriodId, employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                        beforeSend: function (event) {
+                            var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                            $('#dvLoadMessage').html(textHtml);
+                        },
+                        success: function (ppData) {
+                            $('#dvLoadMessage').empty();
+                            $("#dvPayPeriodHoursTypeSummary").empty();
+                            $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                        }
+                    });
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+            });
+        });
+    });
+</script>

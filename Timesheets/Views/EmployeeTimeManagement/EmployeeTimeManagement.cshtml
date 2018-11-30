@@ -1,0 +1,71 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.EmployeeTimeManagementViewModel
+
+@{
+    ViewBag.Title = "EmployeeTimeManagement";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    List<SelectListItem> names = new List<SelectListItem>();
+
+    SelectListItem item = new SelectListItem();
+    item.Text = "Allen Esselman";
+    item.Value = "1";
+    names.Add(item);
+
+
+    item = new SelectListItem();
+    item.Text = "Cecilia Carter";
+    item.Value = "2";
+    names.Add(item);
+
+    item = new SelectListItem();
+    names.Add(item);
+    item.Text = "Ella Kesta";
+    item.Value = "3";
+
+    item = new SelectListItem();
+    names.Add(item);
+    item.Text = "Alfred Araguay";
+    item.Value = "4";
+    item = new SelectListItem();
+
+    item = new SelectListItem();
+    names.Add(item);
+    item.Text = "List Board";
+    item.Value = "5";
+
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        //var availableValues = ["List 1","List 2","List 3","List 4"];
+        //// var msg = Assessments_JqueryAutoComplete.AutoComplete(request.term).value;
+        //$( "#ddEmployee" ).autocomplete({
+        //    source: availableValues
+        //});
+
+    });
+
+
+</script>
+
+<div class="container-fluid">
+    <div class="row">
+        <span style="padding-right:10px;"></span>
+        <div class="col-md-12">
+            <div id="dvEmployeePeriod" class="NmarqGrid-Header text-center"> </div>
+                <div class="form-group make-horizonal">
+                    <h3>@Html.Label("Current Employee: ", new { @class = "label label-primary" })</h3>
+                    @Html.DropDownList("ddEmployee", names.OrderBy(x => x.Text).ToList(), new { id = "ddEmployee", @class = "form-control" })
+                </div>
+                <span>&nbsp;&nbsp;</span>
+                <div class="form-group make-horizonal">
+                    <h3>@Html.Label("Pay Period: ", new { @class = "label label-primary" })</h3>
+                    @Html.DropDownList("ddEmployee", names.OrderBy(x => x.Text).ToList(), new { id = "ddEmployee", @class = "form-control" })
+                </div>
+        </div>
+    </div>
+</div>

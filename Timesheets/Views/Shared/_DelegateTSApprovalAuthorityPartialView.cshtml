@@ -1,0 +1,60 @@
+﻿@model  NM.Web.WebApplication.Timesheets.Models.ViewModel.DelegateViewModel
+
+@using GridMvc.Html
+<div class="well">
+    <div class="container-fluid">
+       @if (Model != null)
+       {
+           if (Model.ApproverDelegates != null)
+           {
+               @Html.Grid(Model.ApproverDelegates, "_Grid").Columns(col =>
+                {
+                col.Add(m => m.DelegateID, true);
+                col.Add(m => m.DelegateToIndividual.FirstName, "FirstName").Titled("First Name");
+                col.Add(m => m.DelegateToIndividual.LastName, "LastName").Titled("Last Name");
+                @*col.Add() 
+                    .Titled("Primary Delegate")
+                    .RenderValueAs(m => 
+                        @<b>
+                            @Html.CheckBox("checked", m.IsPrimaryDelegate)
+                        </b>
+                        );*@
+                @*col.Add()
+                    .Encoded(false)
+                    .Sanitized(false)
+                    .SetWidth(30)
+                    .RenderValueAs(i =>
+                        @<b>
+                            @Html.ActionLink(" ", "UpsertDelegate", new { delegateId = i.DelegateID, delegateToId = i.DelegateToIndividualID, managerId = i.IndividualID, isPrimaryDelegate = i.IsPrimaryDelegate }, new { @class = "dialog-edit glyphicon glyphicon-pencil", @id="linkEditDelegate" })
+
+                        </b>
+                        );*@
+                col.Add()
+                    .Encoded(false)
+                    .Sanitized(false)
+                    .SetWidth(30)
+                    .RenderValueAs(m =>
+                        @<b>
+                            @Html.ActionLink(" ", "DeleteDelegate", new { id = m.DelegateID, selectedIndividualID = Model.SelectedIndividualID }, new { @class = "dialog-delete glyphicon glyphicon-trash", @id="linkRemoveDelegate" })
+                        </b>
+                        );
+                    })
+               }
+           }
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $(".dialog-delete").on("click", function (event) {
+            event.preventDefault();
+            var url = $(this).attr('href');
+            $.get(url, function (data) {
+                $('#dvDelegateApproval').empty();
+                $('#dvDelegateApproval').html(data);
+            });
+            return false;
+        });
+    });
+</script>
+

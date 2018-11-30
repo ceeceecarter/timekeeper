@@ -1,0 +1,973 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.EmployeeIndividualViewModel
+
+
+@helper EmailTextBox(string email)
+{
+    <a href="mailto:@email">@email</a>
+}
+
+@using NM.Web.WebApplication.Timesheets.Infrastructure.Extensions
+
+@using (Html.BeginForm("EditSave", "EmployeeAdministration", FormMethod.Post, new { id = "formEditEmployeeInformation" }))
+{
+    <div id="modalEmployeeInformation" class="modal fade" role="dialog" data-backdrop="static" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" data-target="#modalEmployeeInformation">&times;</button>
+                    <h4 class="modal-title" style="color:#ffffff">Edit Information</h4>
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container-fluid">
+
+                        <div class="alert alert-danger dvAlert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <h4>Warning!</h4>
+                            <span> hello...</span>
+                        </div>
+
+                        <!--Employee Information-->
+                        <div class="row">
+                            @Html.HiddenFor(m => m.IndividualId, new { id = "hfIndividualId" })
+                            @Html.HiddenFor(m => m.Individual.IndividualID)
+                            @Html.HiddenFor(m => m.EmployeeInfoId)
+                            @Html.HiddenFor(m => m.EmployeeInformation.EmployeeInfoId)
+                            @Html.HiddenFor(m => m.Individual.MasterUserID)
+                            @Html.HiddenFor(m => m.MasterUserId, new { id = "MasterUserId" })
+                            @Html.HiddenFor(m => m.Individual.CompanyID)
+                            @Html.HiddenFor(m => m.Individual.Title, new { id = "hf_Individual_Title" })
+                            <div class="h4">Employee Detail</div>
+                        </div>
+                        <div class="row">
+                            <div class="well">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.RequiredLabelFor(m => Model.Individual.FirstName, new { @class = "col-sm-6 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.FirstName, new { @class = "form-control field-required", @required = true })
+                                                        @Html.ValidationMessageFor(m => m.Individual.FirstName)
+                                                        @Html.HiddenFor(m => m.Individual.FirstName)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.RequiredLabelFor(m => Model.Individual.PreferredFirstName, new { @class = "col-sm-6 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.PreferredFirstName, new { @class = "form-control field-required", @required = true })
+                                                        @Html.ValidationMessageFor(m => m.Individual.PreferredFirstName)
+                                                        @Html.HiddenFor(m => m.Individual.PreferredFirstName)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Middle Initial", new { @class = "col-sm-6 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.MiddleName, new { @class = "form-control" })
+                                                        @Html.HiddenFor(m => m.Individual.MiddleName)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.RequiredLabelFor(m => Model.Individual.LastName, new { @class = "col-sm-6 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.LastName, new { @class = "form-control field-required", @required = true })
+                                                        @Html.ValidationMessageFor(m => m.Individual.LastName)
+                                                        @Html.HiddenFor(m => m.Individual.LastName)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Officer Title", new { @class = "col-sm-6 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.DropDownListFor(m => m.EmployeeInformation.OfficerTitleID, new SelectList(Model.OfficerTitleList.OrderBy(i => i.Text), "Value", "Text"), "- Select Officer Title -", new { id = "ddlOfficerTitles", @class = "form-control" })
+                                                        @Html.ValidationMessageFor(m => m.EmployeeInformation.OfficerTitleID)
+                                                        @Html.HiddenFor(m => m.EmployeeInformation.OfficerTitleID, new { id = "hfEmployeeInformation_OfficerTitleId" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Status", new { @class = "col-sm-6 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.EmployeeStatusText, new { @class = "form-control", @readonly = "true" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Office Phone", new { @class = "col-sm-4 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.Phone, new { @class = "form-control" })
+                                                        @Html.HiddenFor(m => m.Individual.Phone)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Extension", new { @class = "col-sm-4 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.PhoneExtension, new { @class = "form-control" })
+                                                        @Html.HiddenFor(m => m.Individual.PhoneExtension)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Fax", new { @class = "col-sm-4 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.Fax, new { @class = "form-control" })
+                                                        @Html.HiddenFor(m => m.Individual.Fax)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Mobile Phone", new { @class = "col-sm-4 control-label" })
+                                                    <div class="col-sm-6">
+                                                        @Html.TextBoxFor(m => m.Individual.Cell, new { @class = "form-control" })
+                                                        @Html.HiddenFor(m => m.Individual.Cell)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    @Html.Label("Email", new { @class = "col-sm-4 control-label" })
+                                                    <div class="col-sm-8">
+                                                        @Html.TextBoxFor(m => m.Individual.Email, new { @class = "form-control", @style = "width:18em;" })
+                                                        @Html.HiddenFor(m => m.Individual.Email)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="dvEmailLinkRow">
+                                                @if (!string.IsNullOrEmpty(Model.Individual.Email))
+                                                {
+                                                    <div class="form-group">
+                                                        @Html.Label("Email Link", new { @class = "col-sm-4 control-label" })
+                                                        <div class="col-sm-8">
+                                                            @EmailTextBox(Model.Individual.Email)
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-horizontal">
+                                                @Html.Label("Company", new { @class = "col-sm-4 control-label required-label" })
+                                                @Html.HiddenFor(m => m.EmployeeInformation.CompanyCodeId, new { id = "hfEmployeeInformation_CompanyCodeId" })
+                                                @Html.DropDownListFor(m => m.EmployeeInformation.CompanyCodeId, new SelectList(Model.CompanyCodeList, "Value", "Text"), "- Select Company -", new { id = "ddlCompanyCodes", @class = "form-control field-required", @required = true })
+                                                @Html.ValidationMessageFor(m => m.EmployeeInformation.CompanyCodeId)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-horizontal">
+                                                @Html.Label("Job Title", new { @class = "control-label required-label" })
+                                                @Html.HiddenFor(m => m.EmployeeInformation.JobTitleID, new { id = "hfEmployeeInformation_JobTitleID" })
+                                                @if (Model.EmployeeInformation.JobTitleID != null)
+                                                {
+                                                    @Html.DropDownListFor(m => m.EmployeeInformation.JobTitleID, new SelectList(Model.JobTitleList, "Value", "Text"), "- Select Job Title -", new { id = "ddlJobTitles", @class = "form-control field-required", @required = true })
+                                                    @Html.ValidationMessageFor(m => m.EmployeeInformation.JobTitleID)
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownListFor(m => Model.EmployeeInformation.JobTitleID, new SelectList(Model.JobTitleList, "Value", "Text"), "- Select Job Title -", new { id = "ddlJobTitles", @class = "form-control field-required", @required = true })
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            @Html.Label("Work Location", new { @class = "control-label required-label" })
+                                            <div class="form-horizontal">
+                                                @Html.HiddenFor(m => m.EmployeeInformation.WorkLocationID, new { id = "hfEmployeeInformation_WorkLocationID" })
+                                                @if (Model.EmployeeInformation.WorkLocationID != null)
+                                                {
+                                                    @Html.DropDownListFor(m => m.EmployeeInformation.WorkLocationID, new SelectList(Model.WorkLocationList, "Value", "Text"), "- Select Work Locations -", new { id = "ddlWorkLocations", @class = "form-control field-required", @required = true })
+                                                    @Html.ValidationMessageFor(m => m.EmployeeInformation.WorkLocationID)
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownListFor(m => Model.EmployeeInformation.WorkLocationID, new SelectList(Model.WorkLocationList, "Value", "Text"), "- Select Work Location -", new { id = "ddlWorkLocations", @class = "form-control field-required", @required = true })
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--HR Information-->
+                        <div class="row">
+                            <div class="h4">HR Information</div>
+                        </div>
+                        <div class="row">
+                            <div class="well">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            @Html.Label("Start Date", new { @class = "control-label required-label" })
+                                            <div class="input-group date">
+                                                @Html.EditorFor(m => m.Individual.StartDate, null, "Individual_StartDate", new { htmlAttributes = new { @class = "form-control field-required", @required = true, type = "date" } })
+                                                @Html.HiddenFor(m => m.Individual.StartDate, new { id = "hfIndividual_StartDate" })
+                                                <span class="input-group-addon" onclick="showDatePicker('Individual_StartDate')">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                                @Html.ValidationMessageFor(m => m.Individual.StartDate)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            @Html.Label("End Date", new { @class = "control-label" })
+                                            <div class="input-group date">
+                                                @Html.EditorFor(m => m.Individual.TermDate, null, "Individual_TermDate", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                                                @Html.HiddenFor(m => m.Individual.TermDate, new { id = "hfIndividual_TermDate" })
+                                                <span class="input-group-addon" onclick="showDatePicker('Individual_TermDate')">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                                @Html.ValidationMessageFor(m => m.Individual.TermDate)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            @Html.Label("File Number", new { @class = "control-label" })
+                                            <div class="form-group">
+                                                @Html.TextBoxFor(m => m.EmployeeInformation.FileNumber, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(m => m.EmployeeInformation.FileNumber)
+                                                @Html.HiddenFor(m => m.EmployeeInformation.FileNumber)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            @Html.Label("ADP Employee ID", new { @class = "control-label" })
+                                            <div class="form-group">
+                                                @Html.TextBoxFor(m => m.EmployeeInformation.EmployeeID, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(m => m.EmployeeInformation.EmployeeID)
+                                                @Html.HiddenFor(m => m.EmployeeInformation.EmployeeID)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                @Html.Label("Supervisor", new { @class = "control-label required-label" })
+                                                @Html.HiddenFor(m => m.Individual.ManagerIndividualID, new { id = "hfIndividual_ManagerIndividualId" })
+                                                @if (Model.Individual.ManagerIndividualID > 0)
+                                                {
+                                                    @Html.DropDownListFor(m => m.Individual.ManagerIndividualID, new SelectList(Model.EmployeeList, "Value", "Text"), "- Select Supervisor/Manager -", new { id = "ddlSupervisor", @class = "form-control field-required", style = "width: 100%", @required = true })
+                                                    @Html.ValidationMessageFor(m => m.Individual.ManagerIndividualID)
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownListFor(m => Model.Individual.ManagerIndividualID, new SelectList(Model.EmployeeList, "Value", "Text"), "- Select Supervisor/Manager -", new { id = "ddlSupervisor", @class = "form-control field-required", style = "width: 100%", @required = true })
+                                                    @Html.ValidationMessageFor(m => Model.Individual.ManagerIndividualID)
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                @Html.Label("Cost Center", new { @class = "control-label required-label" })
+                                                @Html.HiddenFor(m => m.EmployeeInformation.CostCenterID, new { id = "hfEmployeeInformation_CostCenterID" })
+
+                                                @if (Model.EmployeeInformation.CostCenterID != null)
+                                                {
+                                                    @Html.DropDownListFor(m => m.EmployeeInformation.CostCenterID, new SelectList(Model.CostCenterList, "Value", "Text"), "- Select Cost Center -", new { id = "ddlCostCenter", @class = "form-control field-required", style = "width: 100%", @required = true })
+                                                    @Html.ValidationMessageFor(m => m.EmployeeInformation.CostCenterID)
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownListFor(m => Model.EmployeeInformation.CostCenterID, new SelectList(Model.CostCenterList, "Value", "Text"), "- Select Cost Center -", new { id = "ddlCostCenter", @class = "form-control field-required", style = "width: 100%", @required = true })
+                                                    @Html.ValidationMessageFor(m => m.EmployeeInformation.CostCenterID)
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            @Html.Label("Employment Type", new { @class = "control-label required-label" })
+                                            <div class="form-group">
+                                                @Html.HiddenFor(m => m.EmployeeInformation.EmploymentTypeID, new { id = "hfEmployeeInformation_EmploymentTypeID" })
+                                                @if (Model.EmployeeInformation.EmploymentTypeID != null)
+                                                {
+                                                    @Html.DropDownListFor(m => m.EmployeeInformation.EmploymentTypeID, new SelectList(Model.EmploymentTypeList, "Value", "Text"), "- Select Employment Type -", new { id = "ddlEmploymentType", @class = "form-control field-required", @required = true })
+                                                }
+                                                else
+                                                {
+                                                    @Html.DropDownListFor(m => Model.EmployeeInformation.EmploymentTypeID, new SelectList(Model.EmploymentTypeList, "Value", "Text"), "- Select Employment Type -", new { id = "ddlEmploymentType", @class = "form-control field-required", @required = true })
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            @Html.Label("FLSA Status", new { @class = "control-label required-label" })
+                                            <div class="form-group">
+                                                @*<div class="form-inline">*@
+                                                @Html.HiddenFor(m => m.FLSAStatus, new { id = "hfFLSAStatus" })
+                                                @Html.DropDownListFor(m => m.FLSAStatus, new SelectList(Model.FLSAStatusList, "Value", "Text"), "- Select FLSA -", new { id = "ddlFLSAStatus", @class = "form-control field-required", @required = true })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            @Html.Label("Hours Per Week", new { @class = "control-label required-label" })
+                                            <div class="form-group">
+                                                @Html.TextBoxFor(m => m.EmployeeInformation.realHoursPerWeek, new { @class = "form-control field-required", @required = true, @id = "tbEmployeeInformation_realHoursPerWeek" })
+                                                @Html.ValidationMessageFor(m => m.EmployeeInformation.realHoursPerWeek)
+                                                @Html.HiddenFor(m => m.EmployeeInformation.realHoursPerWeek)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            @Html.Label("Max Time Off Per Week", new { @class = "control-label required-label" })
+                                            <div class="form-group">
+                                                @Html.TextBoxFor(m => m.EmployeeInformation.realMaxTimeOffPerWeek, new { @class = "form-control field-required", @required = true, @id = "tbEmployeeInformation_realMaxTimeOffPerWeek" })
+                                                @Html.ValidationMessageFor(m => m.EmployeeInformation.realMaxTimeOffPerWeek)
+                                                @Html.HiddenFor(m => m.EmployeeInformation.realMaxTimeOffPerWeek)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            @Html.Label("FTE", new { @class = "control-label", id = "lblFTE" })
+                                            <div class="form-group">
+                                                @Html.TextBoxFor(m => m.EmployeeInformation.realFTE, new { @class = "form-control", id = "tbEmployeeInformation_realFTE", @style = "width:5em;", @readonly = true })
+                                                @Html.HiddenFor(m => m.EmployeeInformation.realFTE)
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-inline">
+                                                        @Html.HiddenFor(m => m.EmployeeInformation.PTOEligible, new { id = "hfEmployeeInformation_PTOEligible" })
+                                                        @if (Model.EmployeeInformation.PTOEligible != null)
+                                                        {
+                                                            @Html.CheckBox("cbPTOEligible", (bool)Model.EmployeeInformation.PTOEligible, new { @class = "checkbox" })
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.CheckBox("cbPTOEligible", false, new { @class = "checkbox" })
+                                                        }
+                                                        @Html.Label("PTO Eligible", new { @class = "control-label" })
+                                                        @Html.ValidationMessageFor(m => m.EmployeeInformation.PTOEligible)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-inline">
+                                                        @Html.HiddenFor(m => m.EmployeeInformation.OnCallEligible, new { id = "hfEmployeeInformation_OnCallEligible" })
+                                                        @if (Model.EmployeeInformation.OnCallEligible != null)
+                                                        {
+                                                            @Html.CheckBox("cbOnCallEligible", (bool)Model.EmployeeInformation.OnCallEligible, new { @class = "checkbox" })
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.CheckBox("cbOnCallEligible", false, new { @class = "checkbox" })
+                                                        }
+                                                        @Html.Label("On Call Eligible", new { @class = "control-label" })
+                                                        @Html.ValidationMessageFor(m => m.EmployeeInformation.OnCallEligible)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form-inline">
+                                                        @Html.HiddenFor(m => m.EmployeeInformation.ExcludeFromReminderEmails, new { id = "hfEmployeeInformation_ExcludeFromReminderEmails" })
+                                                        @if (Model.EmployeeInformation.ExcludeFromReminderEmails != null)
+                                                        {
+                                                            @Html.CheckBox("cbExcludeFromReminderEmails", (bool)Model.EmployeeInformation.ExcludeFromReminderEmails, new { @class = "checkbox" })
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.CheckBox("cbExcludeFromReminderEmails", false, new { @class = "checkbox" })
+                                                        }
+                                                        @Html.Label("Exclude From Reminder Emails")
+                                                        @Html.ValidationMessageFor(m => m.EmployeeInformation.ExcludeFromReminderEmails)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+
+                                            @*<div class="row">
+                                                    <div class="col-sm-8">
+                                                        <div class="form-inline">
+                                                            @Html.HiddenFor(m => m.EmployeeInformation.BenefitEligible, new { id = "hfEmployeeInformation_BenefitEligible" })
+                                                            @if (Model.EmployeeInformation.BenefitEligible != null)
+                                                            {
+                                                            @Html.CheckBox("cbBenefitEligible", (bool)Model.EmployeeInformation.BenefitEligible, new { @class = "checkbox" })
+                                                            }
+                                                            else
+                                                            {
+                                                            @Html.CheckBox("cbBenefitEligible", false, new { @class = "checkbox" })
+                                                            }
+                                                            @Html.Label("Benefit Eligible", new { @class = "control-label" })
+                                                            @Html.ValidationMessageFor(m => m.EmployeeInformation.BenefitEligible)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-8">
+                                                        <div class="form-inline">
+                                                            @Html.HiddenFor(m => m.EmployeeInformation.IsNonExempt, new { id = "hfEmployeeInformation_IsNonExempt" })
+                                                            @Html.CheckBox("cbIsNonExempt", (bool)Model.EmployeeInformation.IsNonExempt, new { @class = "checkbox" })
+                                                            @Html.Label("Non-Exempt (FLSA Status)", new { @class = "control-label" })
+                                                        </div>
+                                                    </div>
+                                                </div>*@
+
+
+                                            <div class="col-sm-12 well">
+                                                <div class="h4">IT Use Only</div>
+                                                <div class="row">
+                                                    <div class="form-inline">
+                                                        @Html.Label("Master UserID", new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.DisplayFor(m => m.MasterUserId, new { @class = "read-only" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-inline">
+                                                        @Html.Label("Individual ID", new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.DisplayFor(m => m.IndividualId, new { @class = "read-only" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 well">
+                                            <div class="h4">TimeKeeper Access</div>
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <div class="form-inline">
+                                                        @Html.HiddenFor(m => m.IsUserTSHRAdmin, new { id = "hfIsUserTSHRAdmin" })
+                                                        @Html.CheckBox("cbIsUserTSHRAdmin", Model.IsUserTSHRAdmin, new { @class = "checkbox" })
+                                                        @Html.Label("TimeKeeper Admin")
+                                                        @Html.ValidationMessageFor(m => m.IsUserTSHRAdmin)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <div class="form-inline">
+                                                        @Html.HiddenFor(m => m.IsUserTSUser, new { id = "hfIsUserTSUser" })
+                                                        @Html.CheckBox("cbIsUserTSUser", Model.IsUserTSUser, new { @class = "checkbox" })
+                                                        @Html.Label("TimeKeeper User")
+                                                        @Html.ValidationMessageFor(m => m.IsUserTSUser)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-8">
+                                                    <div class="form-inline">
+                                                        @Html.HiddenFor(m => m.Individual.IsEmployee, new { id = "hfIndividual_IsEmployee" })
+                                                        @Html.CheckBox("cbIsAnEmployee", (bool)Model.Individual.IsEmployee, new { @class = "checkbox" })
+                                                        @Html.Label("Is An Employee")
+                                                        @Html.ValidationMessageFor(m => m.Individual.IsEmployee)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <!--Timesheet Delegates-->
+                        <div class="row">
+                            <div class="h4">Approver Delegates</div>
+                        </div>
+                        <div class="row" id="dvDelegateApproval">
+                            @Html.Partial("_DelegateTSApprovalAuthorityPartialView", Model.DelegateViewModel)
+                        </div>
+                        <div class="row">
+                            <div class="h4">Search for Employees to Add as Delegates</div>
+                        </div>
+                        <div class="row well">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-inline">
+                                            @Html.Label("First Name:", new { @class = "col-sm-4 control-label" })
+                                            @Html.TextBox("tbFirstName", "", new { @class = "form-control", @id = "tbFirstName" })
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-inline">
+                                            @Html.Label("Last Name:", new { @class = "col-sm-4 control-label" })
+                                            @Html.TextBox("tbLastName", "", new { @class = "form-control", @id = "tbLastName" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <div class="row">
+                                    <div class="container-fluid">
+                                        <input id="inpSearchEmployee" type="button" class="btn btn-info" value="Search For Delegates" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row well">
+                            <div class="container-fluid">
+                                <div id="dvDelegateTSSearchResults">
+                                </div>
+                            </div>
+                            @*@Html.Partial("_DelegateTSSearchResultsPartialView", Model.Individual)*@
+                        </div>
+                        @*<div class="row">
+                                <div class="container-fluid">
+                                    <input id="inpAddDelegate" type="button" class="btn btn-info" value="Add Time Approver Delegates" />
+                                </div>
+                            </div>*@
+                        <div class="alert alert-danger dvAlert">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <h4>Warning!</h4>
+                            <span>Best check yo self, you're not...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!--Button to Save and Cancel-->
+                    <button id="btnEmployeeEditSave" type="submit" class="btn btn-info" data-target="#modalEmployeeInformation">Save Changes</button>
+                    <button id="btnEmployeeEditCancel" type="button" class="btn btn-info" data-target="#modalEmployeeInformation">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@*<div class="container-fluid">
+        <div id="mdAddDelegates" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" id="btnCloseX" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" style="color:#ffffff">Add Time Approver Delegates</h4>
+                    </div>
+                    <div class="modal-body">
+                        @using (Html.BeginForm("SearchForAddDelegates", "EmployeeInformation", FormMethod.Post, new { @id = "formManagerDelegatesSearch", @name = "ManagerDelegatesSearch", @class = "ManagerDelegatesSearch" }))
+                        {
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="well">
+                                        <div class="form-inline">
+                                            @Html.Label("First Name", new { @class = "control-label" })
+                                            @Html.TextBox("tbFirstName", "", new { @class = "form-control", @id = "tbFirstName" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnSearchForApproverDelegates" name="btnSearchForApproverDelegates" type="submit" class="btn btn-info">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+<!--Prompt for Warning Message-->
+<div id="mdWarning" class="modal fade bs-modal bs-modal-sm" tabindex="-1" data-keyboard="true" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="background-color:#b50022">
+            <div class="modal-header">
+                <button id="btnXClose" type="button" class="close" data-target="#mdWarning">&times;</button>
+                <h4 class="modal-title" style="color:#ffffff">Warning - Required Fields</h4>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff">
+                <div class="text-danger">
+                    <h5 id="h4Warning"></h5>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseWarning" type="button" class="close" data-target="#mdWarning">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--End Prompt for Warning Message-->
+
+<script type="text/javascript">
+    var site = site || {};
+    site.baseUrl = site.baseUrl || "";
+    $(function () {
+        $.ajaxSetup({ cache: false });
+
+
+        //To fix the issue not being able to scroll when the top modal is closed
+        // - Re-add the 'modal-open' class back to the bottom modal
+        // Reference: http://stackoverflow.com/questions/27371918/stacking-modals-scrolls-the-main-page-when-one-is-closed
+        $("#mdWarning").on('hidden.bs.modal', function (e) {
+            $('#modalEmployeeInformation').modal('show');
+            if ($('#modalEmployeeInformation').hasClass('in')) {
+                $('body').addClass('modal-open');
+            }
+        });
+
+        $("#btnCloseWarning").on('click', function (event) {
+            event.preventDefault();
+            $("#mdWarning").modal('hide');
+        });
+        $("#btnXClose").on('click', function (event) {
+            event.preventDefault
+            $("#mdWarning").modal('hide');
+        });
+
+        $('.dvAlert').addClass('hidden');
+
+        //if ($('.modal:visible').length > 0) {
+        //    $('.modal-backdrop').css(':first').addClass('hidden');
+        //}
+
+        //---------------------------------------------------------//
+        //Setup StartDate datepicker
+        $("#Individual_StartDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        //---------------------------------------------------------//
+        //Setup End Date datepicker
+        $("#Individual_TermDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        //---------------------------------------------------------//
+        //Handler for Cancel button -> empty content of <div id=dvEmployeeInformation>
+        //$('#inpEmployeeEditCancel').on('click', function () {
+        //    $('#dvEmployeeInformation').empty();
+        //});
+        $('#btnEmployeeEditCancel').click(function () {
+            $(this).removeData('bs-modal');
+            $("#modalEmployeeInformation").modal('hide');
+        });
+
+
+        //---------------------------------------------------------//
+        ////Handler for Search approver delegate button
+        //$("#btnSearchForApproverDelegates").on('click', function (event) {
+        //    event.preventDefault();
+        //    $("#dvDelegateTSSearchResults").text($("#tbFirstName").val());
+        //
+        //});
+
+        ////---------------------------------------------------------//
+        ////Handler to set delegate in the search result
+        //$(".linkSetDelegate").on('click', function (event) {
+        //    event.preventDefault();
+        //
+        //});
+
+        $("#Individual_FirstName").on("change",
+        function () {
+            $("#Individual_PreferredFirstName").val($("#Individual_FirstName").val());
+        });
+
+        //---------------------------------------------------------//
+        ////Handler for Hours Per Week change event
+        //// When hours per week change
+        ////  1. recalculate FTE = x / 40
+        ////  2. validate hours per week not gt 40
+        ////  3. max time off per week must equal hours per week
+        //---------------------------------------------------------//
+        $("#tbEmployeeInformation_realHoursPerWeek").change(function () {
+            var hoursPerWeek = $("#tbEmployeeInformation_realHoursPerWeek").val();
+            if (hoursPerWeek > 40) {
+                //reset to max 40 hours
+                $("#tbEmployeeInformation_realHoursPerWeek").val(40);
+                $("#tbEmployeeInformation_realMaxTimeOffPerWeek").val(40);
+                alert("Value must not be over 40 hours.");
+            }
+            if (hoursPerWeek >= 0 && hoursPerWeek <= 40) {
+                //recalculate and update FTE
+                var newVal = hoursPerWeek / 40.00;
+                $("#tbEmployeeInformation_realFTE").val(newVal);
+                $("#tbEmployeeInformation_realMaxTimeOffPerWeek").val(hoursPerWeek);
+            }
+        });
+
+        //---------------------------------------------------------//
+        ////Handler for Max Time Off Per Week change event
+        //// When max time per week change
+        ////  1. max time off per week not gt 40 hours and not gt hours per week
+        //---------------------------------------------------------//
+        $("#tbEmployeeInformation_realMaxTimeOffPerWeek").change(function () {
+            var maxTimeOffPerWeek = $("#tbEmployeeInformation_realMaxTimeOffPerWeek").val();
+            //var hoursPerWeek = $("#tbEmployeeInformation_realHoursPerWeek").val;
+            if (maxTimeOffPerWeek > 40) {
+                $("#tbEmployeeInformation_realMaxTimeOffPerWeek").val(40);
+                alert("Max Time Off Per Week must not excess 40 or Hours Per Week value");
+            };
+        });
+
+        //---------------------------------------------------------//
+        //Handler to Search approver delegate button
+        $("#inpSearchEmployee").on('click', function (event) {
+            event.preventDefault();
+            var firstName = $("#tbFirstName").val();
+            var lastName = $("#tbLastName").val();
+            var selectedIndividualId = $("#hfIndividualId").val();
+            $.ajax({
+                url: '@Url.Action("SearchApproverDelegates", "EmployeeAdministration")',
+                type: "POST",
+                data: { fName: firstName, lName: lastName, individualId: selectedIndividualId },
+                success: function (data) {
+                    $("#dvDelegateTSSearchResults").html(data);
+                },
+                error: function (xhr, ajaxOptions, throwError) {
+                    alert(throwError);
+                }
+            });
+        });
+
+        //---------------------------------------------------------//
+        ////Handler to edit delegate
+        //$("#linkEditDelegate").on('click', function (event) {
+        //    event.preventDefault();
+        //
+        //});
+
+        //---------------------------------------------------------//
+        ////Handler to remove delegate
+        //$("#linkRemoveDelegate").on('click', function (event) {
+        //    event.preventDefault();
+        //
+        //});
+
+        //Validation onclick
+        $("#Individual_PreferredFirstName").on('input', function (event) {
+            if ($("#Individual_PreferredFirstName").val() == "") {
+                //$("#h4Warning").text("Missing PreferredFirstName. Please try again");
+                //$('#mdWarning').modal('show');
+                //return false;
+                //alert("Missing Preferred First Name. Please try again");
+                return false;
+            }
+        });
+
+
+        //---------------------------------------------------------//
+        //Handler for Save button
+        $('#btnEmployeeEditSave').on('click', function (event) {
+            event.preventDefault();
+
+            //$('#mdWarning').on('hidden', function () {
+            //    $(this).removeData('bs-modal', null);
+            //});
+
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+
+            //Validation
+            if ($("#Individual_FirstName").val().trim() == "") {
+                //$("#h4Warning").text("Missing Preferred First Name. Please try again");
+                //$('#mdWarning').modal('show');
+                ////alert("Missing First Name. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing First Name</li>";
+            }
+
+            if ($("#Individual_LastName").val().trim() == "") {
+                //$("#h4Warning").text("Missing Last Name. Please try again");
+                //$('#mdWarning').modal('show');
+                ////alert("Missing Last Name. Please try again");
+                ////return false;
+                //$('.dvAlert').removeClass('hidden').addClass('show');
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Last Name</li>";
+            }
+
+            if ($("#Individual_PreferredFirstName").val().trim() == "") {
+                ////$("#h4Warning").text("Missing Preferred First Name. Please try again");
+                ////$('#mdWarning').modal('show');
+                //alert("Missing Preferred First Name. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Preferred First Name</li>";
+            }
+
+            if ($("#ddlSupervisor").val() == "") {
+                //$("#h4Warning").text("Missing Supervisor/Manager. Please try again");
+                //$('#mdWarning').modal('show');
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Supervisor/Manager</li>";
+            }
+
+            if ($("#ddlJobTitles").val() == "") {
+                ////$("#h4Warning").text("Missing Job Title. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Missing Job Title. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Job Title</li>";
+            }
+            if ($("#ddlWorkLocations").val() == "") {
+                ////$("#h4Warning").text("Missing Work Location. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Missing Work Location. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Work Location</li>";
+            }
+            if ($("#ddlCostCenter").val() == "") {
+                ////$("#h4Warning").text("Missing Cost Center. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Missing Cost Center. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Cost Center</li>";
+            }
+            if ($("#ddlEmploymentType").val() == "") {
+                //$("#h4Warning").text("Missing Employment Type. Please try again");
+                //$('#mdWarning').modal('show');
+                //return false;
+                //alert("Missing Employment Type. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Employment Type</li>";
+            }
+            if ($("#ddlFLSAStatus").val() == "") {
+                ////$("#h4Warning").text("Missing FLSA Status. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Missing FLSA Status. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing FLSA Status</li>";
+            }
+
+            if ($("#Individual_StartDate").val() == "") {
+                ////$("#h4Warning").text("Start Date is a required field. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Start Date is a required field. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Start Date is a required field</li>";
+            }
+
+            if ($("#tbEmployeeInformation_realHoursPerWeek").val().trim() == "") {
+                ////$("#h4Warning").text("Hours Per Week is a required field. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Hours Per Week is a required field. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Hours Per Week is a required field</li>";
+            }
+
+
+            if ($("#tbEmployeeInformation_realMaxTimeOffPerWeek").val().trim() == "") {
+                ////$("#h4Warning").text("Max Time Off Per Week is a required field. Please try again");
+                ////$('#mdWarning').modal('show');
+                ////return false;
+                //alert("Max Time Off Per Week is a required field. Please try again");
+                //return false;
+                validateError = 1;
+                textMessageHtmlContent += "<li>Max Time Off Per Week is a required field</li>";
+            }
+
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#h4Warning").empty();
+                $("#h4Warning").html(textHtml);
+                $('#mdWarning').modal('show');
+                return false;
+            }
+
+
+            //Bind hidden data for drop down list and date fields
+            $("#EmployeeInformation_realHoursPerWeek").val($("#tbEmployeeInformation_realHoursPerWeek").val());
+            $("#EmployeeInformation_realMaxTimeOffPerWeek").val($("#tbEmployeeInformation_realMaxTimeOffPerWeek").val());
+            $("#hfEmployeeInformation_CompanyCodeId").val($("#ddlCompanyCodes").val());
+            $("#hfEmployeeInformation_JobTitleID").val($("#ddlJobTitles").val());
+            $("#hfEmployeeInformation_WorkLocationID").val($("#ddlWorkLocations").val());
+            $("#hfIndividual_StartDate").val($("#Individual_StartDate").val());
+            $("#hfIndividual_TermDate").val($("#Individual_TermDate").val());
+            if ($("#ddlSupervisor").val() == "" && $("#hfIndividual_ManagerIndividualId").val() < 0) {
+                $("#hfIndividual_ManagerIndividualId").val();
+            } else {
+                $("#hfIndividual_ManagerIndividualId").val($("#ddlSupervisor").val());
+            }
+
+            $("#hfEmployeeInformation_EmploymentTypeID").val($("#ddlEmploymentType").val());
+            $("#hfEmployeeInformation_CostCenterID").val($("#ddlCostCenter").val());
+            $("#hfEmployeeInformation_PTOEligible").val($("#cbPTOEligible")[0].checked);
+            $("#hfEmployeeInformation_ExcludeFromReminderEmails").val($("#cbExcludeFromReminderEmails")[0].checked);
+            $("#hfIsUserTSUser").val($("#cbIsUserTSUser")[0].checked);
+            $("#hfIndividual_IsEmployee").val($("#cbIsAnEmployee")[0].checked);
+            $("#hfIsUserTSHRAdmin").val($("#cbIsUserTSHRAdmin")[0].checked);
+            $("#hfFLSAStatus").val($("#ddlFLSAStatus").val()); //Data field is IsNonExempt
+            $("#hfEmployeeInformation_OnCallEligible").val($("#cbOnCallEligible")[0].checked);
+
+            var postdata = $('#formEditEmployeeInformation').serialize();
+            
+            $.ajax({
+                url: '@Url.Action("EditSave", "EmployeeAdministration")',
+                type: "POST",
+                cache: false,
+                data: postdata,
+                beforeSend: function (event) {
+                    $("#dvMessageLoading").text("Reloading...").attr("class", " text-success glyphicon glyphicon-refresh");
+                },
+                success: function (data) {
+                    //$('#dvEmployeeList').empty();
+                    //$('#dvEmployeeList').html(data);
+                    //$('#modalEmployeeInformation').empty();
+                    //$('#dvMessageLoading').text("").attr("class", "text-success");
+                    //window.location.href = window.location.href;
+                    //window.location.reload(true);
+                    $("#modalEmployeeInformation").modal('hide');
+                }
+            });
+        });
+    });
+
+
+    //function OnChangeWorkLocation() {
+    //    NotImplemented();
+    //}
+
+    //function OnChangeCostCenter() {
+    //    NotImplemented();
+    //}
+
+    //function OnChangeJobTitle() {
+    //    NotImplemented();
+    //}
+
+    //function OnChangeCompanyCode() {
+    //    NotImplemented();
+    //}
+
+    //function OnChangeEmploymentType() {
+    //    NotImplemented();
+    //}
+
+    //function NotImplemented() {
+    //    alert('Not yet implemented');
+    //    return false;
+    //}
+
+</script>

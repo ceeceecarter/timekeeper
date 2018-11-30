@@ -1,0 +1,34 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.YearAndPayPeriodViewModel
+@{
+    ViewBag.Title = "Header Of Timesheet";
+    ViewBag.CurrentLoginUserName = User.Identity.Name;
+}
+<div class="container">
+    <br />
+    <div id="dvTimesheetHeader">
+        @Html.Partial("_YearAndPayPeriod", Model)
+    </div>
+</div>
+
+<script type="text/javascript">
+    //initialization
+    $("#dvTimesheetHeader").attr("class", "hidden");
+    //$("#dvManagementHeader").attr("class", "hidden");
+    $("#CurrentPayPeriod_StartDate").attr('disabled', 'disabled');
+    $("#CurrentPayPeriod_EndDate").attr('disabled', 'disabled');
+
+    $(document).ready(function () {
+        var currentDocumentPage = $(document).find("title").text();
+
+        if (currentDocumentPage == "Timesheet") {
+            $("#dvTimesheetHeader").attr("class", "show");
+        }
+
+        //if (currentDocumentPage == "Management") {
+        //    $("#dvManagementHeader").attr("class", "show");
+        //}
+    });
+
+</script>
+
+

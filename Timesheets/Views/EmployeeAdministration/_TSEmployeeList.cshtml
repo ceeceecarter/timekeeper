@@ -1,0 +1,173 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.EmployeeAdministrationViewModel
+
+
+@helper RenderEmployeeStatusText(int EmployeeStatus)
+{
+string result = string.Empty;
+foreach (var item in Model.Employee.EmployeeStatusList)
+{
+    if (int.Parse(item.Value) == EmployeeStatus)
+    {
+        result = item.Text.ToString().Replace("_", " ");
+        break;
+    }
+}
+    @result;
+}
+
+@using GridMvc.Html
+ 
+
+<div class="container-fluid">
+    @*<div class="row">
+            <div class="col-lg-12">
+                <h3>Employees</h3>
+            </div>
+        </div>*@
+    @if (Model.Employees != null)
+    {
+        <div class="row">
+            <div class="col-lg-12">
+                @Html.Grid(Model.Employees.OrderBy(i => i.LastName), "_Grid").Named("empGrid").Columns(col =>
+           {
+           col.Add(m => m.IndividualId, true);
+           col.Add(m => m.EmployeeInfoId, true);
+           col.Add(m => m.MasterUserId, false);
+           col.Add(m => m.FileNumber, "FileNumber")
+                .Titled("File Number")
+                .Sortable(true);
+           col.Add(m => m.FirstName, "FirstName")
+                .Titled("First Name")
+                .Sortable(true)
+                .Filterable(true);
+           col.Add(m => m.LastName, "LastName")
+                .Titled("Last Name")
+                .Sortable(true)
+                .Filterable(true);
+           col.Add(m => m.CompanyCode, "CompanyCode")
+               .Titled("Company Code")
+               .Sortable(true)
+               .Filterable(true);
+           col.Add(m => m.EmploymentTypeCode, "EmploymentTypeCode")
+               .Titled("Employment Type")
+               .Sortable(true)
+               .Filterable(true);
+           col.Add(m => m.EmployeeStatus, "EmployeeStatus")
+               .Titled("Status")
+               .RenderValueAs(m => RenderEmployeeStatusText((int)m.EmployeeStatus));
+           col.Add()
+                 //.Titled("Edit")
+                 .Encoded(false)
+                 .Sanitized(false)
+                 .SetWidth(30)
+                 .Css("hidden-xs") //hide on phones
+                                   //.RenderValueAs(i => i.IndividualId != 0 ? Ajax.ActionLink(" ", "GetEmployeeIndividual", "EmployeeInformation", new { IndividualId = i.IndividualId }, new AjaxOptions { HttpMethod = "POST", OnSuccess = "PopModal", UpdateTargetId = "dvEmployeeInfoEdit", InsertionMode = InsertionMode.Replace }, new { id = "linkEditEmployee", @class = "glyphicon glyphicon-pencil", title = "Edit Employee Information" }).ToHtmlString() : null);
+                 .RenderValueAs(i =>
+                @<b>
+                    @Html.ActionLink(" ", "Edit", new { id = i.IndividualId }, new { @class = "glyphicon glyphicon-pencil modal-link", id = "linkEditEmployee", title = "Edit Employee Information" })
+                </b>
+             );
+           }).WithPaging(20)
+            </div>
+        </div>
+    }
+
+</div>
+
+
+<script type="text/javascript">
+    /*Employee Information Administration JS*/
+
+    $(function () {
+        ////Initialize modal dialog
+        ////Attach modal-EmployeeInformationContainer bootstrap attributes to link with .modal-link class
+        ////when a link is clicked with these attributes, bootstrap will display the href content in a modal dialog
+        //$('body').on('click', '.modal-link', function (e) {
+        //    e.preventDefault();
+        //    debugger;
+        //    var url = $(this).attr('href');
+        //    $.get(url, function (data) {
+        //        debugger;
+        //        //$('#dvEmployeeInfoEdit').html(data);
+        //        $('#dvEmployeeInformation').empty();
+        //        $('#dvEmployeeInformation').html(data);
+        //        $('#modalEmployeeInformationContainer').modal('show');
+        //    });
+        //    return false;
+        //    //$(this).attr('data-target', '#modalEmployeeInformationContainer');
+        //    //$(this).attr('data-toggle', 'modal');
+        //});
+
+        $('.modal-link').on('click', function (event) {
+            //event.preventDefault();
+            var lastSlash = $(this).attr('href').lastIndexOf('/') + 1;
+            var individualId = $(this).attr('href').slice(lastSlash);
+            $.ajax({
+                url: '@Url.Action("Edit", "EmployeeAdministration")',
+                type: "POST",
+                cache: false,
+                data: { id: individualId }
+            }).done(function (data) {
+                $('#dvEmployeeInformation').empty();
+                $('#dvEmployeeInformation').html(data);
+                $('#modalEmployeeInformation').modal('show');
+                //$('#modalEmployeeInformationContainer').modal('show');
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert("Request failed: " + textStatus + " " + errorThrown + " " + EventException);
+            });
+            return false;
+        });
+
+        //var url = $(this).attr('href');
+        //$.get(url, function (data) {
+        //    $('#dvEmployeeInfoEdit').empty();
+        //    $('#dvEmployeeInfoEdit').html(data);
+        //    $('#modalEmployeeInformation').modal('show');
+        //    $('#modalEmployeeInformationContainer').modal('show');
+        //});
+
+
+        @*//Handler when selecting item on the employee grid
+        pageGrids.empGrid.onRowSelect(function (event) {
+            var lastSlash = $('.modal-link').attr('href').lastIndexOf('/') + 1;
+            var url = $('.modal-link').attr('href').slice(1, lastSlash).concat(event.row.IndividualId);
+            var individualId = parseInt(event.row.IndividualId);
+            
+            $.ajax({
+                url: '@Url.Action("Edit", "EmployeeAdministration")',
+                type: "POST",
+                cache: false,
+                data: { id: individualId }
+            }).done(function (data) {
+                $('#dvEmployeeInfoEdit').empty();
+                $('#dvEmployeeInfoEdit').html(data);
+                $('#modalEmployeeInformation').modal('show');
+                //$('#modalEmployeeInformationContainer').modal('show');
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert("Request failed: " + textStatus + " " + errorThrown + " " + EventException);
+            });
+        });*@
+
+
+        ////Attach listener to .close so that when the button is pressed the modal dialog disappears
+        //$('body').on('click', '.close', function () {
+        //    
+        //    $('#modalEmployeeInformation').modal('hide');
+        //});
+
+        ////clear modal cache, so that new content can be loaded
+        //$('#modalEmployeeInformation').on('hidden.bs.modal', function () {
+        //    
+        //    $(this).removeData('bs-modal');
+        //});
+
+        //$('#modalEmployeeInformation').on('hidden.bs.modal', function () {
+        //    
+        //    $('#Individual_FirstName').val('');
+        //});
+
+        //$('#modal-link').on('hidden.bs.modal', function () {
+        //    $(this).removeData('bs-modal');
+        //});
+    });
+</script>

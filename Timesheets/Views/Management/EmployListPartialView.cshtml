@@ -1,0 +1,221 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.ManagerViewModel
+
+@helper RenderPartColumn(int MilitaryTime)
+{
+    if (MilitaryTime > 0)
+    {
+        int hours = MilitaryTime / 100;
+        int minutes = MilitaryTime - hours * 100;
+        DateTime result = DateTime.MinValue;
+            @result.AddHours(hours).AddMinutes(minutes).ToString("hh:mm tt");
+    }
+    else
+    {
+        int result = 0;
+        @result;
+    }
+}
+
+<div id="employeeTimeSheetList">
+
+    <!--Approve All button is hidden as requested by HR-->
+    @*@Html.ActionLink("Approve All", "ApproveAll", new { managerID = Model.ManagerIndividualID }, new { @class = "btn btn-primary" })*@
+    @using GridMvc.Html
+
+@if (Model.EmployeeList.Count > 0)
+{
+    <div class="NmarqGrid-Header">
+        <b>Employee Time Entries for Approval</b>
+    </div>
+    <div class="well">
+        <div class="container-fluid">
+            <div class="form-inline">
+
+                @foreach (var employeeTimesheet in Model.EmployeeList)
+                {
+                    if (employeeTimesheet.EmployeeTimesheet.TimesheetHours != null)
+                    {
+                        <div class="row">
+                            <div class="col-xs-8 col-sm-7 col-md-5 col-lg-4">
+                                <h5><label class="label label-default">Employee:</label>  @employeeTimesheet.FirstName @employeeTimesheet.LastName</h5>
+                            </div>
+                            @*<div class="col-xs-6 col-sm-5 col-md-4 col-lg-2">
+                                <h5><label class="label label-default">ID:</label>  @employeeTimesheet.IndividualId.ToString()</h5>
+                            </div>*@
+                        </div>
+                        @*
+                            @Html.Label("Select All:")
+                            @Html.CheckBox("cbSelectApproveAll", false, new { @class = "form-control", @empId = employeeTimesheet.EmployeeTimesheet.EmployeeInfoId })
+                        *@
+                if (employeeTimesheet.EmployeeTimesheet.TimesheetHours.Count > 0)
+                {
+                            @Html.ActionLink("Approve All Submitted for " + @employeeTimesheet.FirstName, "ApproveAllForEmployee", new { empInfoID = @employeeTimesheet.EmployeeInfoId, managerID = Model.ManagerIndividualID, delegateID = 0 }, new { @class = "btn btn-primary" })
+                }
+                        @Html.Grid(employeeTimesheet.EmployeeTimesheet.TimesheetHours, "_Grid").Columns(col =>
+                   {
+                   col.Add(m => m.EmployeeInfoID, true); //hidden
+                   col.Add(m => m.TimesheetHoursID, true); //hidden
+                   col.Add(m => m.Date.Day, "Day")
+                           .Titled("Day")
+                           .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                   col.Add(m => m.Date, "Date")
+                                  .Titled("Date")
+                                  .Sortable(true)
+                                  .Filterable(true)
+                                  .Format("{0:MM/dd/yyyy}");
+                   col.Add(m => m.tblTSHoursType.HoursType, "Type")
+                                  .Titled("Type")
+                                  .Sortable(true)
+                                  .Filterable(true);
+                   col.Add(m => m.TimeStart, !employeeTimesheet.EmployeeTimesheet.IsUserNonExempt)
+                                  .Titled("Start Time")
+                                  .RenderValueAs(m => RenderPartColumn(m.TimeStart));
+                   col.Add(m => m.TimeEnd, !employeeTimesheet.EmployeeTimesheet.IsUserNonExempt)
+                                  .Titled("End Time")
+                                  .RenderValueAs(m => RenderPartColumn(m.TimeEnd));
+                   col.Add(m => m.Hours, "Hours")
+                                  .Titled("Hours")
+                                  .Format("{0:0.00}");
+                   col.Add(m => m.tblTSStatusType.StatusType, "Status")
+                                  .Titled("Status")
+                                  .Sortable(true)
+                                  .Filterable(true);
+                   col.Add()
+                                  .Encoded(false)
+                                  .Sanitized(false)
+                                  .SetWidth(30)
+                                  //.Css("hidden-xs") //hidden on phones
+                                  .RenderValueAs(i =>
+                                    @<b>
+                                        @if (i.StatusTypeID == 3) //Approver can approve submitted or non-submitted time
+                                        {
+                                            @*@Html.CheckBox("cbApprove" + employeeTimesheet.EmployeeTimesheet.EmployeeInfoId.ToString(), false, new { @class = "form-control cbApprove" })*@
+
+                                            @*<button type="button" class="btnApprove2 btn btn-success" id="btnApprove1" data-url="@Url.Action("Approve", "Approve", new { id = i.TimesheetHoursID, managerID = Model.ManagerIndividualID })" >Approve</button>*@
+                                            @Html.ActionLink("Approve", "Approve", new { timeSheetHoursID = i.TimesheetHoursID, empInfoID = @employeeTimesheet.EmployeeInfoId, managerID = Model.ManagerIndividualID, delegateID = 0 }, new { @class = "btn btn-success", @id = "approveBtn" })
+                                        }
+                                        else if (i.StatusTypeID == 4) //Approver can approve submitted or non-submitted time
+                                        {
+                                            @Html.ActionLink("Submit", "Submit", new { id = i.TimesheetHoursID, managerID = Model.ManagerIndividualID }, new { @class = "btn btn-default", @id = "submitBtn" })
+                                        }
+                                        else if (i.StatusTypeID == 2 || i.StatusTypeID == 3) //Approve is able to move a submitted time back to non-submitted
+                                        {
+                                            @Html.ActionLink("Reject", "Reject", new { id = i.TimesheetHoursID, managerID = Model.ManagerIndividualID }, new { @class = "btn btn-warning", @id = "rejectBtn" })
+                                        }
+                                    </b>
+                                        );
+                 }).WithPaging(20).Sortable(true)
+                    }
+                    <br />
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.DelegatedToEmployeeList.Count > 0)
+{
+    <div class="NmarqGrid-Header">
+        <b>Delegate Employee Time Entries for Approval</b>
+    </div>
+    <div class="well">
+        <div class="container-fluid">
+            <div class="form-inline">
+            @foreach (var employeeTimesheet in Model.DelegatedToEmployeeList)
+            {
+                if (employeeTimesheet.EmployeeTimesheet != null)
+                {
+                    if (employeeTimesheet.EmployeeTimesheet.TimesheetHours != null)
+                    {
+                        <div  id="accordion" class="row" >
+                            <div class="col-xs-8 col-sm-7 col-md-5 col-lg-4">
+                                <h5><label class="label label-default">Employee:</label>  @employeeTimesheet.Individual.FirstName @employeeTimesheet.Individual.LastName</h5>
+                            </div>
+                            @*<div class="col-xs-6 col-sm-5 col-md-4 col-lg-2">
+                                <h5><label class="label label-default">ID:</label>  @employeeTimesheet.Individual.IndividualID.ToString()</h5>
+                            </div>*@
+                            <div class="col-xs-6 col-sm-5 col-md-4 col-lg-2">
+                                <h5><label class="label label-default">Manager:</label>  @employeeTimesheet.IndividualsManager.FirstName @employeeTimesheet.IndividualsManager.LastName</h5>
+                            </div>
+                            @*<div class="col-xs-6 col-sm-5 col-md-4 col-lg-2">
+                                <h5><label class="label label-default">Manager ID:</label>  @employeeTimesheet.IndividualsManager.IndividualID.ToString()</h5>
+                            </div>*@
+                        </div>
+                        <div id="accordion">
+                        @if (employeeTimesheet.EmployeeTimesheet.TimesheetHours.Count > 0)
+                        {
+                            @Html.ActionLink("Approve All Submited for " + @employeeTimesheet.Individual.FirstName, "ApproveAllForEmployee", new { empInfoID = @employeeTimesheet.EmployeeInfoId, managerID = employeeTimesheet.IndividualsManager.IndividualID, delegateID = Model.ManagerIndividualID }, new { @class = "btn btn-primary" })
+                        }
+                        @Html.Grid(employeeTimesheet.EmployeeTimesheet.TimesheetHours, "_Grid").Columns(col =>
+                        {
+                        col.Add(m => m.EmployeeInfoID, true); //hidden
+                        col.Add(m => m.TimesheetHoursID, true); //hidden
+                        col.Add(m => m.Date.Day, "Day")
+                           .Titled("Day")
+                           .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                        col.Add(m => m.Date, "Date")
+                           .Titled("Date")
+                           .Sortable(true)
+                           .Filterable(true)
+                           .Format("{0:MM/dd/yyyy}");
+                        col.Add(m => m.tblTSHoursType.HoursType, "Type")
+                           .Titled("Type")
+                           .Sortable(true)
+                           .Filterable(true);
+                        col.Add(m => m.TimeStart, !employeeTimesheet.EmployeeTimesheet.IsUserNonExempt)
+                           .Titled("Start Time")
+                           .RenderValueAs(m => RenderPartColumn(m.TimeStart));
+                        col.Add(m => m.TimeEnd, !employeeTimesheet.EmployeeTimesheet.IsUserNonExempt)
+                           .Titled("End Time")
+                           .RenderValueAs(m => RenderPartColumn(m.TimeEnd));
+                        col.Add(m => m.Hours, "Hours")
+                           .Titled("Hours")
+                           .Format("{0:0.00}");
+                        col.Add(m => m.tblTSStatusType.StatusType, "Status")
+                           .Titled("Status")
+                           .Sortable(true)
+                           .Filterable(true);
+                        col.Add()
+                               .Encoded(false)
+                               .Sanitized(false)
+                               .SetWidth(30)
+                               //.Css("hidden-xs") //hidden on phones
+                               .RenderValueAs(i =>
+                                @<b>
+                                    @if (i.StatusTypeID == 3) //Approver can approve submitted or non-submitted time
+                                            {
+                                        @Html.ActionLink("Approve", "Approve", new { timeSheetHoursID = i.TimesheetHoursID, empInfoID = @employeeTimesheet.EmployeeInfoId, managerID = employeeTimesheet.IndividualsManager.IndividualID, delegateID = Model.ManagerIndividualID }, new { @class = "btn btn-success", @id = "approveBtn" })
+                                    }
+                                    else if (i.StatusTypeID == 4) //Approver can approve submitted or non-submitted time
+                                    {
+                                        @Html.ActionLink("Submit", "Submit", new { id = i.TimesheetHoursID, managerID = Model.ManagerIndividualID }, new { @class = "btn btn-default", @id = "submitBtn" })
+                                    }
+                                    else if (i.StatusTypeID == 2 || i.StatusTypeID == 3) //Approve is able to move a submitted time back to non-submitted
+                                    {
+                                        @Html.ActionLink("Reject", "Reject", new { id = i.TimesheetHoursID, managerID = Model.ManagerIndividualID }, new { @class = "btn btn-warning", @id = "rejectBtn" })
+                                    }
+                                </b>
+                            );
+                        }).WithPaging(20).Sortable(true)
+                        </div>
+                        }
+                    }
+                @*<br />*@
+                }
+            </div>
+        </div>
+    </div>
+}
+</div>
+
+
+@*<script type="text/javascript">
+    $(function () {
+        $("#btnApprove").click(function (e) {
+            e.preventDefault();
+            var url = $(item).data("url");
+            window.alert("partial btnApprove:  " + url);
+            $('#employeeTimeSheetList').load(url);
+        });
+    });
+</script>*@

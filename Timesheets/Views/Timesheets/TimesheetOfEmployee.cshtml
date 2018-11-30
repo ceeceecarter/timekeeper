@@ -1,0 +1,152 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div id="dvPanelView">
+                <div id="dvPanelContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--MODAL DIALOG: edit time entry-->
+<!--//Begin Modal Edit Time Entry-->
+<div id="dvTimeEntryEdit"></div>
+<!--//End Modal Edit Time-->
+<!--MODAL DIALOG: Delete time entry-->
+<!--//Begin Modal Delete Time-->
+<div id="dvTimeEntryDelete"></div>
+<!--//End Modal delete-->
+<!--MODAL DIALOG: edit on call entry-->
+<!--Begin Modal edit on call entry-->
+<div id="dvOnCallEntryEdit"></div>
+
+<!--MODAL DIALOG: Delete on call entry-->
+<!--Begin Modal delete On Call entry-->
+<div id="dvOnCallEntryDelete"></div>
+
+<!--MODAL DIALOG: edit Mileage entry-->
+<!--Begin Modal edit Mileage entry-->
+<div id="dvMileageEntryEdit"></div>
+
+<!--MODAL DIALOG: Delete Mileage entry-->
+<!--Begin Modal delete Mileage entry-->
+<div id="dvMileageEntryDelete"></div>
+
+<!--MODAL DIALOG: Submit Approval time entry-->
+<!--//Begin Modal Submit Approval Time-->
+<div id="dvTimeEntrySubmitApproval">
+    <!--This html will get replaced by the partial view return by $.ajax-->
+    <div class="container">
+        <div id="mdTimeEntrySubmitApproval" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--//End Modal Submit Approval-->
+<!--MODAL DIALOG: Submit Approval time entry-->
+<!--//Begin Modal Submit Approval Time-->
+<div id="dvTimeEntryApprove">
+    <!--This html will get replaced by the partial view return by $.ajax-->
+    <div class="container">
+        <div id="mdTimeEntryApprove" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        Loading...
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--//End Modal Submit Approval-->
+<!--MODAL DIALOG: Submit Reject time entry-->
+<!--//Begin Modal Submit Reject Time-->
+<div id="dvTimeEntryReject"></div>
+
+<div id="dvTimeEntryRejectLoading">
+    <div class="container">
+        <div id="mdLoadingModal" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--//End Modal Submit Approval-->
+<!--Prompt for Warning Message-->
+<div class="modal fade bs-modal-sm" id="mdWarning" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color:#b50022">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-target="#mdWarning">&times;</button>
+                <h5 class="modal-title" style="color:#ffffff">Warning</h5>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff">
+                <div class="text-danger text-danger" id="dvWarningMessage">
+                    <h4 id="h4WarningMessage">Missing information on fields. Please try again</h4>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseWarning" type="button" class="btn btn-default" data-dismiss="modal" data-target="#mdWarning">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End Prompt for Warning Message-->
+
+
+<script type="text/javascript">
+    $(function () {
+        var params = getURLParams();
+        var indId = params["individualId"];
+        var selYear = params["selectedYear"];
+        var selPayPeriod = params["selectedPayPeriod"];
+
+        $.ajax({
+            url: '@Url.Action("GetTimesheetOfEmployee", "Timesheets")',
+            type: 'POST',
+            data: { individualId: indId, selectedYear: selYear, selectedPayPeriod: selPayPeriod },
+            success: function (data) {
+                $("#dvPanelContent").empty();
+                $("#dvPanelContent").html(data);
+            }
+        });
+        
+    });
+
+    function getURLParams() {
+        var params = {};
+        $.each(document.location.search.substr(1).split('&'), function (c, q) {
+            var i = q.split('=');
+            params[i[0].toString()] = i[1].toString();
+        });
+        return params;
+    }
+</script>
+
+
+

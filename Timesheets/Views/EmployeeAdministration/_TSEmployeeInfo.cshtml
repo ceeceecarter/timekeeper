@@ -1,0 +1,70 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.EmployeeIndividualViewModel
+
+
+<div class="container-fluid">
+    <div id="modalEmployeeInformationContainer" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" style="color:#ffffff">Edit Employee Information</h4> 
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container">
+                        @using (Html.BeginForm("EditSave", "EmployeeAdministration", FormMethod.Post, new { id = "formEditEmployeeInfo" }))
+                        {
+                            <div class="row">
+                                @Html.HiddenFor(m => m.Individual.IndividualID)
+                                @Html.HiddenFor(m => m.IndividualId)
+                                @Html.HiddenFor(m => m.EmployeeInfoId)
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-horizontal">
+                                        @Html.Label("First Name:")
+                                        @Html.EditorFor(m => m.Individual.FirstName)
+                                        @Html.Label("Last Name:")
+                                        @Html.EditorFor(m => m.Individual.LastName)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="btnEmployeeInfoSave" class="btn btn-sm">Save</button>
+                    <button type="button" id="btnEmployeeInfoClose" class="btn btn-sm" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //handler to save employee info changes
+        $('#btnEmployeeInfoSave').on("click", function () {
+            
+            //$('#modal-EmployeeInformationContainer').modal('hide');
+            var postData = $('#formEditEmployeeInfo').serialize();
+            $.ajax({
+                url: '@Url.Action("EditSave", "EmployeeAdministration")',
+                type: "POST",
+                cache: false,
+                data: postData,
+                success: function (data) {
+                    
+                    //alert("success");
+                    $('dvEmployeeList').html(data);
+                    $('#dvEditEmployeeInfo').empty();
+                }
+            });
+        });
+
+        //handler to close modal dialog
+        $('#btnEmployeeInfoClose').click(function () {
+            $(this).removeData('bs-modal');
+        });
+    });
+</script>
+

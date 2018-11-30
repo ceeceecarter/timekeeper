@@ -1,0 +1,240 @@
+﻿@model List<NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetHoursViewModel>
+@using GridMvc.Html
+<div class="container">
+    <div id="mdDeletingMultipleTimeEntries" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dissmiss="modal">&times;</button>
+                    @if (Model.Any(i => i.HoursTypeID != 8))
+                    {
+                        <h4 class="modal-title" style="color:#ffffff">Delete Time Entry</h4>
+                    }
+                    else
+                    {
+                        <h4 class="modal-title" style="color:#ffffff">Delete Mileage Entry</h4>
+                    }
+
+                </div>
+                <div class="modal-body" style="background-color:#ffffff;">
+                    @using (Html.BeginForm("DeleteSelectedTimeEntries", "Timesheets", FormMethod.Post, new { id = "formDeleteMultipleTimeEntries" }))
+                    {
+                        foreach (var item in Model)
+                        {
+                            @Html.HiddenFor(m => item.TimesheetHoursID, new { @class = "hdTimesheetsIds" })
+                        }
+                        @Html.HiddenFor(m => Model.First().EmployeeInfoID, new { id = "hfEmployeeInfoId" })
+                        @Html.HiddenFor(m => Model.FirstOrDefault().PayPeriodID, new { id = "hfDeleteTimeEntries_PayPeriodID" })
+                        @Html.HiddenFor(m => Model.FirstOrDefault().Date, new { id = "hfRefreshTimeOffSummary_TimeDate" })
+                        <div class="container-fluid">
+                            @Html.ValidationSummary(true)
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h3>Are you sure you want to delete?</h3>
+                                </div>
+                            </div>
+                            @if (Model != null)
+                            {
+                                if (Model.Where(i => i.HoursTypeID != 8 && i.HoursTypeID != 11 && i.HoursTypeID != 12).Count() > 0)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="NmarqGrid-SubHeader" style="padding:5px;"><span class="NmarqGrid-Spacer"></span><strong>Hours</strong></div>
+                                            <div class="well well-sm">
+                                                @Html.Grid(Model.Where(i => i.HoursTypeID != 8 && i.HoursTypeID != 11 && i.HoursTypeID != 12).ToList(), "_Grid").Columns(col =>
+                                                {
+                                                    col.Add(m => m.TimesheetHoursID, true);
+                                                    col.Add(m => m.tblTSHoursType.HoursType)
+                                                        .Titled("Type")
+                                                        .SetWidth(30);
+                                                    col.Add(m => m.Date.Day, "Day")
+                                                        .Titled("Day")
+                                                        .SetWidth(30)
+                                                        .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                                                    col.Add(m => m.Date)
+                                                        .Titled("Date")
+                                                        .SetWidth(30)
+                                                        .Format("{0:MM/dd/yyyy}");
+                                                    col.Add(m => m.Hours)
+                                                        .Titled("Hours")
+                                                        .SetWidth(30);
+                                                })
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                if (Model.Where(i => i.HoursTypeID == 11 || i.HoursTypeID == 12).Count() > 0)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="NmarqGrid-SubHeader" style="padding:5px;">
+                                                <span class="NmarqGrid-Spacer"></span>
+                                                <strong>On Call</strong>
+                                            </div>
+                                            <div class="well well-sm">
+                                                @Html.Grid(Model.Where(i => i.HoursTypeID == 11 || i.HoursTypeID == 12).ToList(), "_Grid").Columns(col =>
+                                                {
+                                                    col.Add(m => m.TimesheetHoursID, true);
+                                                    col.Add(m => m.tblTSHoursType.HoursType)
+                                                        .Titled("Type")
+                                                        .SetWidth(5);
+                                                    col.Add(m => m.Date.Day, "Day")
+                                                        .Titled("Day")
+                                                        .SetWidth(5)
+                                                        .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                                                    col.Add(m => m.Date)
+                                                        .Titled("Date")
+                                                        .SetWidth(5)
+                                                        .Format("{0:MM/dd/yyyy}");
+                                                })
+                                            </div>                                          
+                                        </div>
+                                    </div>
+                                }
+                                if (Model.Where(i => i.HoursTypeID == 8).Count() > 0)
+                                {
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="NmarqGrid-SubHeader" style="padding:5px;">
+                                                <span class="NmarqGrid-Spacer"></span>
+                                                <strong>Mileage</strong>
+                                            </div>
+                                            <div class="well well-sm">
+                                                @Html.Grid(Model.Where(i => i.HoursTypeID == 8).ToList(), "_Grid").Columns(col =>
+                                                {
+                                                    col.Add(m => m.TimesheetHoursID, true);
+                                                    col.Add(m => m.tblTSHoursType.HoursType)
+                                                        .Titled("Type")
+                                                        .SetWidth(5);
+                                                    col.Add(m => m.Date, "Date")
+                                                        .Titled("Date")
+                                                        .Format("{0:MM/dd/yyyy}")
+                                                        .SetWidth(30);
+                                                    col.Add(m => m.MileageDescription, "MileageDescription")
+                                                        .Titled("Location - Reason")
+                                                        .SetWidth(30);
+                                                    col.Add(m => m.MileageMiles)
+                                                        .Titled("Miles")
+                                                        .Format("{0:0.00}")
+                                                        .SetWidth(5);
+                                                })
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <input id="inpDeleteTimeEntries" type="submit" class="btn btn-default" value="Yes, delete" />
+                    <input id="inpCancelDeletingMultipleTimeEntries" type="submit" class="btn btn-default" value="No, cancel" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-------------------------------------------------Delete Multiple Time Entries---------------------------------------------------------->
+<script type="text/javascript">
+
+    //-----------------------------Cancel Delete Modal---------------------------------//
+    $(function () {
+        $("#inpCancelDeletingMultipleTimeEntries").on('click', function (event) {
+            //var hfFLSAStatus = $("#hfFLSAStatus").val();
+            //if (hfFLSAStatus == 1) {
+            //    $(".tsTimeEntryCheckBox").prop('checked', false);
+            //    $("#cbCheckedAllBoxes").prop('checked', false);
+            //}
+
+            $(".tsTimeEntryCheckBox").prop('checked', false);
+            $("#cbCheckedAllBoxes").prop('checked', false);
+            $("#mdDeletingMultipleTimeEntries").modal('hide');
+        });
+    });
+    //-----------------------------Cancel Delete Modal---------------------------------//
+
+    $(function () {
+        //Handler for deleting multiple time entries
+        $("#inpDeleteTimeEntries").on("click", function (event) {
+            event.preventDefault();
+
+            $("#mdDeletingMultipleTimeEntries").modal('hide');
+
+            var list = new Array;
+            var employeeInfoId = $("#hfEmployeeInfoId").val();
+            var selPayPeriodId = $("#hfDeleteTimeEntries_PayPeriodID").val();
+            var selectedDate = $("#hfRefreshTimeOffSummary_TimeDate").val();
+
+            for (var i = 0; i < $(".hdTimesheetsIds").length; i++) {
+                list.push($(".hdTimesheetsIds")[i].value);
+            }
+
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeInfoId;
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel });
+
+            //Handler to delete time entries
+            $.ajax({
+                url: '@Url.Action("PostDelete", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                    //$('#dvLoadMessage').text("Reloading...").attr("class", "text-success glyphicon glyphicon-refresh");
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+
+                    //refresh the Pay Period Hours Type Summary for NonExempt time entries
+                    $.ajax({
+                        url: '@Url.Action("GetRefreshAfterDelete_PayPeriodSummary", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { selectedPayPeriodId: selPayPeriodId, employeeInfoId: $("#EmployeeInfoId").val() },
+                        beforeSend: function (event) {
+                            var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                            $('#dvLoadMessage').html(textHtml);
+                            //$('#dvLoadMessage').text("Reloading...").attr("class", "text-success glyphicon glyphicon-refresh");
+                        },
+                        success: function (ppData) {
+                            $('#dvLoadMessage').empty();
+                            $("#dvPayPeriodHoursTypeSummary").empty();
+                            $("#dvPayPeriodHoursTypeSummary").html(ppData);
+
+                            $('#dvTSWeeklyView').empty();
+                            $('#dvTSWeeklyView').html(data);
+                        }
+                    });
+
+                    //refresh the TimeOff Summary YTD
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { startDate: selectedDate, employeeInfoId: $("#EmployeeInfoId").val(), individualId: 0 },
+                        success: function (ytdData) {
+                            $("#dvHoursTypeSummary").empty();
+                            $("#dvHoursTypeSummary").html(ytdData);
+                        }
+                    });
+
+                    $("#mdDeletingMultipleTimeEntries").modal('hide');
+                    return false;
+                }
+            });
+        });
+    });
+</script>

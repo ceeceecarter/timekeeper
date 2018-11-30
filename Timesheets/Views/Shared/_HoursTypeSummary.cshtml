@@ -1,0 +1,33 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@using GridMvc.Html
+<div class="NmarqGrid-SubHeader text-center">
+    <b>Summary By Hour Type (YTD)</b>
+</div>
+<div class="well">
+    @*<div class="container-fluid">*@
+        <div class="row">
+            @if (Model.HoursTypeSummary != null)
+            {
+
+                @Html.Grid(Model.HoursTypeSummary, "_Grid").Columns(col =>
+                    {
+                        col.Add(m => m.HoursTypeName, "Type")
+                                .Titled("Type");
+                        col.Add(m => m.NonSubmitted, "NonSubmitted")
+                                .Titled("Non-Submitted")
+                                .Format("{0:0.00}");
+                        col.Add(m => m.Submitted, "Submitted")
+                                .Titled("Submitted")
+                                .Format("{0:0.00}");
+                        col.Add(m => m.Approved, "Approved")
+                                .Titled("Approved")
+                                .Format("{0:0.00}");
+                        col.Add(m => m.Processed, "Processed")
+                                .Titled("Processed")
+                                .Format("{0:0.00}");
+                    })
+            }
+        </div>
+    @*</div>*@
+</div>

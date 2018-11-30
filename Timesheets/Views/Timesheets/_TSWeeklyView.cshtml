@@ -1,0 +1,1061 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@helper RenderPartColumn(int MilitaryTime, int HourTypeId)
+{
+if (MilitaryTime > 0)
+{
+    int hours = MilitaryTime / 100;
+    int minutes = MilitaryTime - hours * 100;
+    DateTime result = DateTime.MinValue;
+        @result.AddHours(hours).AddMinutes(minutes).ToString("h:mm tt");
+    }
+    else
+    {
+        if (HourTypeId == 1)
+        {
+            DateTime result = DateTime.MinValue;
+            @result.AddHours(0).AddMinutes(0).ToString("h:mm tt");
+        }
+        else
+        {
+            var result = "-";
+            @result;
+        }
+    }
+
+}
+@helper RenderOnCallColumn(string OnCall)
+{
+//var result = !string.IsNullOrEmpty(OnCall) ? string.Format("${0}", double.Parse(OnCall).ToString("N2")) : "-";
+var result = !string.IsNullOrEmpty(OnCall) ? string.Format("{0:C}", double.Parse(OnCall)) : "-";
+    @result;
+}
+
+
+@using GridMvc.Html
+
+@if (Model != null)
+{
+    @Html.HiddenFor(m => m.EmployeeInfoId, new { id = "hfEmployeeInfoId" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.FLSAStatus, new { id = "hfFLSAStatus" })
+    @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "hfIsUserNonExempt" })
+    @Html.HiddenFor(m => m.IsUserHRAdmin, new { id = "hfIsUserHRAdmin" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.IsUserTSManager, new { id = "hfIsUserTSManager" })
+    @Html.HiddenFor(m => m.LoggedInUser.IsUserDelegate, new { id = "hfLoggedInUser_IsUserDelegate" })
+    @Html.HiddenFor(m => m.LoggedInUser.EmployeeInfoID, new { id = "hfLoggedInUser_EmployeeInfoId" })
+
+    @Html.HiddenFor(m => m.NonExemptTimesheetStatus, new { id = "hfNonExemptTimesheetStatus" })
+    @Html.HiddenFor(m => m.LoggedInUser.IsUserTSHRAdmin, new { id = "hfLoggedInUser_IsUserTSHRAdmin" })
+    @Html.HiddenFor(m => m.LoggedInUser.IsUserTSManager, new { id = "hfLoggedInUser_IsUserTSManager" })
+    @Html.HiddenFor(m => m.LoggedInUser.IsUserTSUser, new { id = "hfLoggedInUser_IsUserTSUser" })
+    @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hfSelectedPayPeriodId" })
+    @Html.HiddenFor(m => m.SelectedPayPeriod.txtStatus, new { id = "hfSelectedPayPeriod_txtStatus" })
+    @Html.HiddenFor(m => m.YearAndPayPeriod.CurrentPayPeriod.txtStatus, new { id = "hfCurrentPayPeriod_txtStatus" })
+
+}
+<!--Exempt Time Entry Grid-->
+@if (Model.EmployeeIndividual.FLSAStatus == 0)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="NmarqGrid-SubHeader NmarqGrid-Spacer">
+                <span class="NmarqGrid-Spacer"></span>
+                <b>Time Entry Details</b>
+            </div>
+            <div class="well">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="form-inline" style="padding-left:10px;">
+                            <input id="cbCheckedAllBoxes" type="checkbox" class="checkbox" />
+                            @Html.Label("Select All", new { id = "lblSelectAll" })
+                        </div>
+                        @if (Model.TimesheetHours != null)
+                        {
+                            @Html.Grid(Model.TimesheetHours.OrderByDescending(i => i.Date).ToList(), "_Grid").Named("timeGrid").Columns(col =>
+                       {
+                           col.Add(m => m.EmployeeInfoID, true); //hidden
+                           col.Add(m => m.TimesheetHoursID, true); //hidden
+                           if (Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSManager)
+                           {
+                               col.Add()
+                               .Encoded(false)
+                               .Sanitized(false)
+                               .SetWidth(30)
+                               .Titled("")
+                               .RenderValueAs(o =>
+                                o.tblTSStatusType.StatusType == "Approved" ? Html.CheckBox("cbApprovedTimeID", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                                o.tblTSStatusType.StatusType == "Submitted" ? Html.CheckBox("cbSubmittedTimeID", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                                o.tblTSStatusType.StatusType == "Non-Submitted" ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                                MvcHtmlString.Create(string.Empty));
+                           }
+                           else
+                           {
+                               col.Add()
+                                   .Encoded(false)
+                                   .Sanitized(false)
+                                   .SetWidth(30)
+                                   .Titled("")
+                                   .RenderValueAs(o =>
+                                    o.tblTSStatusType.StatusType == "Non-Submitted" ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                                    MvcHtmlString.Create(string.Empty));
+                           }
+
+                           col.Add(m => m.Date.Day, "Day")
+                                   .Titled("Day")
+                                   .SetWidth(30)
+                                   .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                           col.Add(m => m.Date, "Date")
+                                   .Titled("Date")
+                                   .SetWidth(30)
+                                   .Sortable(false)
+                                   .Format("{0:MM/dd/yyyy}");
+                           col.Add(m => m.tblTSHoursType.HoursType, "Type")
+                                   .Titled("Type")
+                                   .SetWidth(30)
+                                   .Sortable(false);
+                           col.Add(m => m.TimeStart, !Model.IsUserNonExempt)
+                                   .Titled("Start Time")
+                                   .SetWidth(30)
+                                   .RenderValueAs(m => RenderPartColumn(m.TimeStart, m.HoursTypeID));
+                           col.Add(m => m.TimeEnd, !Model.IsUserNonExempt)
+                                   .Titled("End Time")
+                                   .SetWidth(30)
+                                   .RenderValueAs(m => RenderPartColumn(m.TimeEnd, m.HoursTypeID));
+                           col.Add(m => m.Hours, "Hours")
+                                   .Titled("Hours")
+                                   .SetWidth(30)
+                                   .Css("NmarqGrid-TextRightAlign")
+                                   .Format("{0:0.00}");
+                           if (Model.IsUserNonExempt)
+                           {
+                               col.Add(m => m.OnCallDayRate)
+                                    .Titled("On Call")
+                                   .SetWidth(30)
+                                    .Sortable(false)
+                                    .Filterable(false)
+                                    .RenderValueAs(m => m.OnCallDayRate.ToString());//TODO add oncall rate
+
+                           }
+                           col.Add(m => m.tblTSStatusType.StatusType, "Status")
+                               .Titled("Status")
+                               .SetWidth(30)
+                               .Sortable(false);
+                           col.Add()
+                                   .Encoded(false)
+                                   .Sanitized(false)
+                                   .SetWidth(30)
+                                   .Css("hidden-xs") //hidden on phones
+                                   .RenderValueAs(i =>
+                                @<b>
+                                    @if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin) ||
+                                         (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                         (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                         (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                                    {
+                                        @Html.ActionLink(" ", "Edit", new { id = i.TimesheetHoursID, hoursTypeId = i.HoursTypeID }, new { @class = "dialog-edit glyphicon glyphicon-pencil" })
+                                    }
+                                </b>
+                         );
+                       col.Add()
+                           .Encoded(false)
+                           .Sanitized(false)
+                           .SetWidth(30)
+                           .Css("hidden-xs") //hidden on phones
+                           .RenderValueAs(i =>
+                        @<b>
+                            @if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                        (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                        (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                            {
+                                @Html.ActionLink(" ", "ConfirmDelete", new { id = i.TimesheetHoursID }, new { @class = "dialog-delete glyphicon glyphicon-trash" })
+
+                            }
+                        </b>
+                          );
+                       }).Sortable(false)//.WithPaging(2).Sortable().Filterable().WithMultipleFilters()
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<!--NonExempt Time Entry Grid-->
+@if (Model.EmployeeIndividual.FLSAStatus == 1)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="NmarqGrid-SubHeader">
+                <span class="NmarqGrid-Spacer"></span>
+                <b>Week One @Html.Label(Model.WeeklyDateRange.WeekOneStartDate.ToShortDateString()) - @Html.Label(Model.WeeklyDateRange.WeekOneEndDate.ToShortDateString())</b>
+            </div>
+            <div class="well">
+                <div class="form-inline" style="padding-left:25px;">
+                    <input id="cbCheckedAllBoxes" type="checkbox" class="checkbox" />
+                    @Html.Label("Select All", new { id = "lblSelectAll" })
+                </div>
+                <div class="container-fluid">
+                    @if (Model.EmployeeIndividual.FLSAStatus == 1)
+                {
+                    if (Model.WeekOneTimeEntries != null)
+                    {
+                            @Html.Grid(Model.WeekOneTimeEntries.OrderBy(i => i.Date).ThenBy(i => i.TimeStart), "_Grid").Named("weekOneGrid").Columns(col =>
+                       {
+                       col.Add(m => m.EmployeeInfoID, true); //hidden
+                       col.Add(m => m.TimesheetHoursID, true); //hidden
+                                                               //col.Add(true)
+                                                               //    .Titled("SubmittedTimesheetHours")
+                                                               //    .RenderValueAs(o => o.tblTSStatusType.StatusType == "Submitted" ? Html.TextBox("SubmittedTimeID", o.TimesheetHoursID.ToString(), new { id = "SubmittedTimeID" }) : MvcHtmlString.Create(string.Empty));
+
+                       col.Add(false)
+                           .Encoded(false)
+                           .Sanitized(false)
+                           .SetWidth(30)
+                           .Titled("")
+                           .RenderValueAs(o =>
+                            o.tblTSStatusType.StatusType == "Approved" ? Html.CheckBox("cbApprovedTimeID", false, new { @class = "tsTimeEntryCheckBoxNonExempt", id = o.TimesheetHoursID }) :
+                            o.tblTSStatusType.StatusType == "Submitted" ? Html.CheckBox("cbSubmittedTimeID", false, new { @class = "tsTimeEntryCheckBoxNonExempt", id = o.TimesheetHoursID }) :
+                            o.tblTSStatusType.StatusType == "Non-Submitted" ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                            MvcHtmlString.Create(string.Empty));
+                       //col.Add(true)
+                       //    .Encoded(false)
+                       //    .Sanitized(false)
+                       //    .SetWidth(30)
+                       //    .RenderValueAs(m => m.StatusTypeID > 3 ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = m.TimesheetHoursID }) : MvcHtmlString.Create(string.Empty));
+
+                       col.Add(m => m.Date.Day, "Day")
+                           .Titled("Day")
+                           .SetWidth(80)
+                           .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                       col.Add(m => m.Date, "Date")
+                               .Titled("Date")
+                               .SetWidth(30)
+                               .Sortable(true)
+                               .Format("{0:MM/dd/yyyy}");
+                       col.Add(m => m.tblTSHoursType.HoursType, "Type")
+                               .Titled("Type")
+                               .SetWidth(80)
+                               .Sortable(true);
+                       col.Add(m => m.TimeStart, "TimeStart")
+                               .Titled("Start Time")
+                               .SetWidth(30)
+                               .RenderValueAs(m => RenderPartColumn(m.TimeStart, m.HoursTypeID));
+                       col.Add(m => m.TimeEnd, "TimeEnd")
+                               .Titled("End Time")
+                               .SetWidth(30)
+                               .RenderValueAs(m => RenderPartColumn(m.TimeEnd, m.HoursTypeID));
+                       col.Add(m => m.Hours, "Hours")
+                               .Titled("Hours")
+                               .SetWidth(30)
+                               .Format("{0:0.00}");
+
+                       if (Model.IsUserNonExempt && (Model.EmployeeIndividual.EmployeeInformation.OnCallEligible ?? false))
+                       {
+                           col.Add(m => m.OnCallDayRate)
+                                .Titled("On Call")
+                                .SetWidth(30)
+                                .Sortable(false)
+                                .Filterable(false)
+                                .RenderValueAs(m => RenderOnCallColumn(m.OnCallDayRate.ToString()).ToHtmlString());//TODO add oncall rate
+
+                       }
+                       col.Add(m => m.tblTSStatusType.StatusType, "Status")
+                           .Titled("Status")
+                           .SetWidth(80)
+                           .Sortable(true);
+                       col.Add()
+                               .Encoded(false)
+                               .Sanitized(false)
+                               .SetWidth(30)
+                               .Css("hidden-xs") //hidden on phones
+                               .RenderValueAs(i =>
+                            @<b>
+                                @if (Model.SelectedPayPeriod.txtStatus == "Open")
+                                {
+                                    if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin) || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                        (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                        (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                                    {
+                                        @Html.ActionLink(" ", "Edit", new { id = i.TimesheetHoursID, hoursTypeId = i.HoursTypeID }, new { @class = "dialog-edit glyphicon glyphicon-pencil" })
+                                    }
+                                }
+                            </b>
+                                );
+                       col.Add()
+                           .Encoded(false)
+                           .Sanitized(false)
+                           .SetWidth(30)
+                           .Css("hidden-xs") //hidden on phones
+                           .RenderValueAs(i =>
+                        @<b>
+                            @if (Model.SelectedPayPeriod.txtStatus == "Open")
+                            {
+                                if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                    (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                    (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                                {
+                                    @Html.ActionLink(" ", "ConfirmDelete", new { id = i.TimesheetHoursID }, new { @class = "dialog-delete glyphicon glyphicon-trash" })
+
+                                }
+                            }
+                        </b>
+                                );
+
+                       }).Sortable(true)
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="NmarqGrid-SubHeader">
+                <span class="NmarqGrid-Spacer"></span>
+                <b>Week Two @Html.Label(Model.WeeklyDateRange.WeekTwoStartDate.ToShortDateString()) - @Html.Label(Model.WeeklyDateRange.WeekTwoEndDate.ToShortDateString())</b>
+            </div>
+            <div class="well">
+                @*<div class="form-inline" style="padding-left:10px;">
+                        <input id="cbCheckedAllBoxesHolder" type="checkbox" class="checkbox" />
+                        @Html.Label("Select All", new { id = "lblSelectAllHolder" })
+                    </div>*@
+                <div class="container-fluid">
+                    @if (Model.EmployeeIndividual.FLSAStatus == 1)
+                {
+                    if (Model.WeekTwoTimeEntries != null)
+                    {
+                            @Html.Grid(Model.WeekTwoTimeEntries.OrderBy(i => i.Date).ThenBy(i => i.TimeStart), "_Grid").Named("weekTwoGrid").Columns(col =>
+                       {
+                       col.Add(m => m.EmployeeInfoID, true); //hidden
+                       col.Add(m => m.TimesheetHoursID, true); //hidden
+                                                               //col.Add(true)
+                                                               //    .Titled("SubmittedTimesheetHours")
+                                                               //    .RenderValueAs(o => o.tblTSStatusType.StatusType == "Submitted" ? Html.TextBox("SubmittedTimeID", o.TimesheetHoursID.ToString(), new { id = "SubmittedTimeID" }) : MvcHtmlString.Create(string.Empty));
+                       col.Add(false)
+                           .Encoded(false)
+                           .Sanitized(false)
+                           .SetWidth(30)
+                           .Titled("")
+                           .RenderValueAs(o =>
+                            o.tblTSStatusType.StatusType == "Approved" ? Html.CheckBox("cbApprovedTimeID", false, new { @class = "tsTimeEntryCheckBoxNonExempt", id = o.TimesheetHoursID }) :
+                            o.tblTSStatusType.StatusType == "Submitted" ? Html.CheckBox("cbSubmittedTimeID", false, new { @class = "tsTimeEntryCheckBoxNonExempt", id = o.TimesheetHoursID }) :
+                            o.tblTSStatusType.StatusType == "Non-Submitted" ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = o.TimesheetHoursID }) :
+                            MvcHtmlString.Create(string.Empty));
+                       //col.Add(true)
+                       //.Encoded(false)
+                       //.Sanitized(false)
+                       //.SetWidth(30)
+                       //.RenderValueAs(m => m.tblTSStatusType.StatusType == "Non-Submitted" ? Html.CheckBox("checked", false, new { @class = "tsTimeEntryCheckBox", id = m.TimesheetHoursID }) : MvcHtmlString.Create(string.Empty));
+                       col.Add(m => m.Date.Day, "Day")
+                            .Titled("Day")
+                            .SetWidth(80)
+                            .RenderValueAs(m => m.Date.DayOfWeek.ToString());
+                       col.Add(m => m.Date, "Date")
+                               .Titled("Date")
+                               .SetWidth(30)
+                               .Sortable(true)
+                               .Format("{0:MM/dd/yyyy}");
+                       col.Add(m => m.tblTSHoursType.HoursType, "Type")
+                               .Titled("Type")
+                               .SetWidth(80)
+                               .Sortable(true);
+                       col.Add(m => m.TimeStart, "TimeStart")
+                               .Titled("Start Time")
+                               .SetWidth(30)
+                               .RenderValueAs(m => RenderPartColumn(m.TimeStart, m.HoursTypeID));
+                       col.Add(m => m.TimeEnd, "TimeEnd")
+                               .Titled("End Time")
+                               .SetWidth(30)
+                               .RenderValueAs(m => RenderPartColumn(m.TimeEnd, m.HoursTypeID));
+                       col.Add(m => m.Hours, "Hours")
+                               .Titled("Hours")
+                               .SetWidth(30)
+                               .Format("{0:0.00}");
+                       if (Model.IsUserNonExempt && (Model.EmployeeIndividual.EmployeeInformation.OnCallEligible ?? false))
+                       {
+                           col.Add(m => m.OnCallDayRate)
+                                .Titled("On Call")
+                                .SetWidth(30)
+                                .Sortable(false)
+                                .RenderValueAs(m => RenderOnCallColumn(m.OnCallDayRate.ToString()).ToHtmlString());//TODO add oncall rate
+
+                       }
+                       col.Add(m => m.tblTSStatusType.StatusType, "Status")
+                           .Titled("Status")
+                           .SetWidth(80)
+                           .Sortable(true);
+                       col.Add()
+                               .Encoded(false)
+                               .Sanitized(false)
+                               .SetWidth(30)
+                               .Css("hidden-xs") //hidden on phones
+                               .RenderValueAs(i =>
+                            @<b>
+                                @if (Model.SelectedPayPeriod.txtStatus == "Open")
+                                {
+                                    if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin) || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                        (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                        (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                                    {
+                                        @Html.ActionLink(" ", "Edit", new { id = i.TimesheetHoursID, hoursTypeId = i.HoursTypeID }, new { @class = "dialog-edit glyphicon glyphicon-pencil" })
+                                    }
+                                }
+                            </b>
+                                );
+                       col.Add()
+                           .Encoded(false)
+                           .Sanitized(false)
+                           .SetWidth(30)
+                           .Css("hidden-xs") //hidden on phones
+                           .RenderValueAs(i =>
+                        @<b>
+                            @if (Model.SelectedPayPeriod.txtStatus == "Open")
+                            {
+                                if (i.StatusTypeID > 3 || (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSHRAdmin && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                    (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserDelegate && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId) ||
+                                    (i.StatusTypeID > 1 && Model.LoggedInUser.IsUserTSManager && Model.LoggedInUser.EmployeeInfoID != Model.EmployeeIndividual.EmployeeInfoId))
+                                {
+                                    @Html.ActionLink(" ", "ConfirmDelete", new { id = i.TimesheetHoursID }, new { @class = "dialog-delete glyphicon glyphicon-trash" })
+
+                                }
+                            }
+                        </b>
+                                );
+
+                       }).Sortable(true)
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+<br />
+<div class="row">
+    @if (Model.MileageEntries != null && Model.IsUserNonExempt)
+    {
+        <div id="dvTSMileageView" class="grid-header-title">
+            @Html.Partial("_TSMileageView", Model)
+        </div>
+    }
+</div>
+<br />
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="col-sm-12 well text-center">
+            @if (Model.IsUserNonExempt)
+            {
+                if (Model.SelectedPayPeriod != null)
+                {
+                    if (Model.SelectedPayPeriod.txtStatus != "Processed")
+                    {
+                        if (Model.NonExemptTimesheetStatus == "Non-Submitted")
+                        {
+                            if ((Model.LoggedInUser.EmployeeInfoID == Model.EmployeeIndividual.EmployeeInfoId && Model.EmployeeIndividual.IsUserTSUser) || Model.LoggedInUser.IsUserTSHRAdmin)
+                            {
+                                <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" />
+                            }
+                            if ((Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSManager) &&
+                                (Model.LoggedInUser.EmployeeInfoID != Model.EmployeeInfoId))
+                            {
+                                <input id="inpConfirmApprovedTimeEntries" type="button" class="btn btn-success" data-dismiss="modal" value="Approve" />
+                                <input id="inpConfirmRejectTimeEntries" type="button" class="btn btn-warning" data-dismiss="modal" value="Reject" disabled />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                            }
+                            else
+                            {
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                            }
+                        }
+                        else if (Model.NonExemptTimesheetStatus == "Submitted")
+                        {
+                            if ((Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSManager) &&
+                                (Model.LoggedInUser.EmployeeInfoID != Model.EmployeeInfoId))
+                            {
+                                <input id="inpConfirmApprovedTimeEntries" type="button" class="btn btn-success" data-dismiss="modal" value="Approve" />
+                                <input id="inpConfirmRejectTimeEntries" type="button" class="btn btn-warning" data-dismiss="modal" value="Reject" />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                            }
+                            else
+                            {
+                                <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" disabled />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" disabled />
+                            }
+                        }
+                        else if (Model.NonExemptTimesheetStatus == "Approved")
+                        {
+                            if ((Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSManager) &&
+                                (Model.LoggedInUser.EmployeeInfoID != Model.EmployeeInfoId))
+                            {
+                                <input id="inpConfirmApprovedTimeEntries" type="button" class="btn btn-success" data-dismiss="modal" value="Approve" disabled />
+                                <input id="inpConfirmRejectTimeEntries" type="button" class="btn btn-warning" data-dismiss="modal" value="Reject" />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                            }
+                            else
+                            {
+                                <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" disabled />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" disabled />
+                            }
+                        }
+                        else if (Model.NonExemptTimesheetStatus == "Processed")
+                        {
+                            if ((Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSManager) &&
+                                (Model.LoggedInUser.EmployeeInfoID != Model.EmployeeInfoId))
+                            {
+                                <input id="inpConfirmApprovedTimeEntries" type="button" class="btn btn-success" data-dismiss="modal" value="Approve" disabled />
+                                <input id="inpConfirmRejectTimeEntries" type="button" class="btn btn-warning" data-dismiss="modal" value="Reject" disabled />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" disabled />
+                            }
+                            else
+                            {
+                                <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" disabled />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" disabled />
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (!Model.IsUserNonExempt)
+                {
+                    if (Model.LoggedInUser.IsUserDelegate || Model.LoggedInUser.IsUserTSHRAdmin || Model.LoggedInUser.IsUserTSManager)
+                    {
+                        if (Model.LoggedInUser.EmployeeInfoID != Model.EmployeeInfoId)
+                        {
+                            if (Model.LoggedInUser.IsUserTSHRAdmin)
+                            {
+                                <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" />
+                            }
+                            <input id="inpConfirmApprovedTimeEntries" type="button" class="btn btn-success" data-dismiss="modal" value="Approve" />
+                            <input id="inpConfirmRejectTimeEntries" type="button" class="btn btn-warning" data-dismiss="modal" value="Reject" />
+                                <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                        }
+                        else
+                        {
+                            <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" />
+                            <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                        }
+                    }
+                    else
+                    {
+                        <input id="inpSubmitForApproval" type="button" class="btn btn-info" data-dismiss="modal" value="Submit" />
+                        <input id="inpConfirmDeletingTimeEntries" type="button" class="btn btn-danger" data-dismiss="modal" value="Delete" style="padding-left:1em; padding-right:1em;" />
+                    }
+                }
+            }
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        ////styling of Hours and Oncall column
+        //$(".grid-header-title>a:contains('Hours')").css("text-align", "right");
+        //$(".grid-header-title>a:contains('On Call')").css("text-align", "right");
+
+        var selectedPayPeriodStatus = $("#hfSelectedPayPeriod_txtStatus").val();
+        var iFLSAStatus = $("#hfFLSAStatus").val();
+
+        //Handler of Select All checkbox ('cbCheckedAllBoxes') to toggle check/uncheck time entry checkboxes
+        $("#cbCheckedAllBoxes").change(function () {
+            $(".tsTimeEntryCheckBox").prop('checked', $(this).prop('checked'));
+            $(".tsTimeEntryCheckBoxNonExempt").prop('checked', $(this).prop('checked'));
+        });
+
+        if ((selectedPayPeriodStatus != "Open" && iFLSAStatus == 1)) {
+            $("#cbCheckedAllBoxes").hide();
+            $(".tsTimeEntryCheckBox").hide();
+            $(".tsTimeEntryCheckBoxNonExempt").hide();
+            $("#lblSelectAll").hide();
+        }
+
+        if ($(".tsTimeEntryCheckBoxNonExempt").is(":visible") == false && $(".tsTimeEntryCheckBox").is(":visible") == false) {
+            $("#cbCheckedAllBoxes").hide(); $("#lblSelectAll").hide();
+        }
+        else {
+            $("#cbCheckedAllBoxes").show(); $("#lblSelectAll").show();
+        }
+
+        if ($("#hfEmployeeInfoId").val() == $("#hfLoggedInUser_EmployeeInfoId").val()) {
+            if ($(".tsTimeEntryCheckBoxNonExempt").is(":visible")) { $("#cbCheckedAllBoxes").hide(); $("#lblSelectAll").hide(); }
+            $(".tsTimeEntryCheckBoxNonExempt").hide();
+        }
+
+        //Hide Checkboxes when time entry status is approved for Exempt Employees
+        if ($("#hfIsUserNonExempt").val() == 'False' && $("#hfLoggedInUser_IsUserTSHRAdmin").val() != 'True') {
+            $(".tsTimeEntryCheckBox").prop('checked', $(this).prop('checked')).each(function () {
+                if (this.name != 'checked') {
+                    $(this).hide();
+                };
+            });
+        }
+
+        //if ($("#hfIsUserNonExempt").val() == 'False' && $("#hfLoggedInUser_IsUserTSHRAdmin").val() != 'True') {
+        //    //Hide Approved Time checkbox
+        //    $("input[name='cbApprovedTimeID']").each(function () {
+        //        $(this).hide();
+        //    });
+        //}
+
+
+        if (($("#hfLoggedInUser_IsUserTSHRAdmin").val() == 'True' && $("#hfEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val()) ||
+            ($("#hfLoggedInUser_IsUserDelegate").val() == 'True' && $("#hfEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val()) ||
+            ($("#hfLoggedInUser_IsUserTSManager").val() == 'True' && $("#hfEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val())) {
+            $("input[name='cbApprovedTimeID']").each(function () {
+                $(this).show();
+            });
+        }
+        else {
+            $("input[name='cbApprovedTimeID']").each(function () {
+                $(this).hide();
+            });
+        }
+
+        if (($("#hfLoggedInUser_IsUserTSHRAdmin").val() == 'True' && $("#hfEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val()) ||
+            ($("#hfLoggedInUser_IsUserDelegate").val() == 'True' && $("#hfEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val()) ||
+            ($("#hfLoggedInUser_IsUserTSManager").val() == 'True' && $("#hfEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val())) {
+            $("input[name='cbSubmittedTimeID']").each(function () {
+                $(this).show();
+            });
+        }
+        else {
+            $("input[name='cbSubmittedTimeID']").each(function () {
+                $(this).hide();
+            });
+        }
+
+        if (($("#hfLoggedInUser_IsUserTSHRAdmin").val() == 'True' && $("#hfEmployeeInfoId").val() == $("#hfLoggedInUser_EmployeeInfoId").val())) {
+            //Hide Approved Time checkbox
+            $("input[name='cbApprovedTimeID']").each(function () {
+                $(this).hide();
+            });
+            $("input[name='cbSubmittedTimeID']").each(function () {
+                $(this).hide();
+            });
+        }
+
+        //if ($("#hfSelectedPayPeriod_txtStatus").val() != "Open") {
+        //    $("input[name='cbApprovedTimeID']").each(function () {
+        //        $(this).hide();
+        //    });
+        //    $("input[name='cbSubmittedTimeID']").each(function () {
+        //        $(this).hide();
+        //    });
+        //    $("input[name='checked']").each(function () {
+        //        $(this).hide();
+        //    });
+        //}
+
+
+        //Show Modal Dialog Edit Time Entry
+        $(".dialog-edit").on("click", function (event) {
+            event.preventDefault();
+            var url = $(this).attr('href');
+            //strip off hoursTypeID from URL
+            //if ID is double digit, we need length - 2
+            if ($.isNumeric(url.substr(url.length - 2))) {
+                var HoursType = url.substr(url.length - 2);
+            }
+            else {
+                var HoursType = url.substr(url.length - 1);
+            }
+            var substringEnd = url.lastIndexOf("?");
+            url = url.substr(0, substringEnd);
+
+            //Time entry hour types: 1, 2, 3, 4, 5, 6, 9, 10
+            //Mileage entry hour type: 8
+            //ON call entry hour type: 7, 11, 12
+            var timeEntryIDs = ['1', '2', '3', '4', '5', '6', '9', '10'];
+            var mileageEntryIDs = ['8'];
+            var onCallEntryIDs = ['7', '11', '12'];
+
+            if ($.inArray(HoursType, timeEntryIDs) >= 0) {
+                $.get(url, function (data) {
+                    $('#dvTimeEntryEdit').empty();
+                    $('#dvTimeEntryEdit').html(data);
+                    $('#mdTimeEntryEdit').modal('show');
+                });
+            }
+            else if ($.inArray(HoursType, mileageEntryIDs) > -1) {
+                $.get(url, function (data) {
+                    $('#dvMileageEntryEdit').empty();
+                    $('#dvMileageEntryEdit').html(data);
+                    $('#mdMileageEntryEdit').modal('show');
+                });
+            }
+            else if ($.inArray(HoursType, onCallEntryIDs) > -1) {
+                $.get(url, function (data) {
+                    $('#dvOnCallEntryEdit').empty();
+                    $('#dvOnCallEntryEdit').html(data);
+                    $('#mdOnCallEntryEdit').modal('show');
+                });
+            }
+            return false;
+        });
+
+        //Show Modal Confirm delete time entry
+        $(".dialog-delete").on("click", function (event) {
+            var url = $(this).attr('href');
+            $.get(url, function (data) {
+                $('#dvTimeEntryDelete').html(data);
+                //$('#mdTimeEntryDelete').modal('show');
+                $('#mdDeletingMultipleTimeEntries').modal('show');
+            });
+            return false;
+        });
+
+    });
+
+
+    //-------------------Submit non-submitted time entries----------------------//
+    $(function () {
+        $("#inpSubmitForApproval").on("click", function (event) {
+            event.preventDefault();
+            var list = new Array();
+            var employeeId = $("#hfEmployeeInfoId").val();
+            var selPayPeriodId = $("#hfSelectedPayPeriodId").val();
+            var hfFLSAStatus = $("#hfFLSAStatus").val();
+
+
+
+            //note: Property Name must be the same name as the View Model class
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeId.toString();
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+
+            //Refactor code for the following business rules
+            // If NonExempt - automatically select all checkboxes to submit all non-submitted time entries
+            // If Exempt - only submit time entries that were checked
+            if (hfFLSAStatus == 1) {
+                $(".tsTimeEntryCheckBox").prop('checked', true);
+                $("#cbCheckedAllBoxes").prop('checked', true);
+            }
+
+            //Add selected id to the list array
+            $("input[name='checked']:checked").each(function () {
+                if (this.checked) { list.push(this.id) };
+            });
+
+            //Exit and show warning when no time entries selected
+            if (list == null || list == '') {
+                $("#h4WarningMessage").text("No time entries selected to be submitted. Please try again.");
+                $(".bs-modal-sm").modal('show');
+                return false;
+            }
+            //Add each item from the list to the SelectedTimeEntryViewModel.Values
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+
+            //note: object name should be the same name of the ConfirmBeforeSubmittingApproval method's parameter
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel });
+            //alert("Submit - PostData: " + postData.toString());
+
+            $("#mdLoadingModal").modal('show');
+
+            //Get the modal dialog to confirm approval submission
+            $.ajax({
+                url: '@Url.Action("ConfirmBeforeSubmittingApproval", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                success: function (data) {
+                    $(".dvLoadMessage").text("");
+                    $("#dvTimeEntrySubmitApproval").empty();
+                    $("#dvTimeEntrySubmitApproval").html(data);
+                    $("#mdTimeEntrySubmitApproval").modal('show');
+                    $("#mdLoadingModal").modal('hide');
+
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+                $("#mdLoadingModal").modal('hide');
+            });
+        });
+        //clear cache mode when Submit Approval modal is close
+        //$('#mdTimeEntrySubmitApproval').on('hidden.bs.modal', function () {
+        //    //alert("Clear cache mode when Submit Approval modal is close");
+        //});
+    });
+
+    //-----------------------Approve Submitted Time Entries--------------------------------------//
+    $(function () {
+        $("#inpConfirmApprovedTimeEntries").on("click", function (event) {
+            event.preventDefault();
+            var list = new Array();
+            var employeeId = $("#hfEmployeeInfoId").val();
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            var selPayPeriodId = $("#hfSelectedPayPeriodId").val();
+            var approverEmployeeInfoId = $("#hfLoggedInUser_EmployeeInfoId").val();
+            var loggedInUserIsUserDelegate = $("#hfLoggedInUser_IsUserDelegate").val();
+            var loggedInUserIsTSHRAdmin = $("#hfLoggedInUser_IsUserTSHRAdmin").val();
+
+            //note: Property Name must be the same name as the View Model class
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeId.toString();
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+
+            //|| loggedInUserIsUserDelegate == "True" || loggedInUserIsTSHRAdmin == "True"
+            if ($("#hfFLSAStatus").val() == 1) {
+                $(".tsTimeEntryCheckBox").prop('checked', true);
+                $(".tsTimeEntryCheckBoxNonExempt").prop('checked', true);
+            }
+
+            //Add selected id to the list array (Non-Submitted)
+            $("input[name='checked']:checked").each(function () {
+                if (this.checked) { list.push(this.id) };
+            });
+
+            //Add Submitted time to the list Array to be Approved (Submitted)
+            $("input[name='cbSubmittedTimeID']:checked").each(function () {
+                if (this.checked) { list.push(this.id) };
+            });
+
+            //Exit and show warning when no time entries selected
+            if (list == null || list == '') {
+                $("#h4WarningMessage").text("No time entries selected to be approved. Please try again");
+                $(".bs-modal-sm").modal('show');
+                return false;
+            }
+            //Add each item from the list to the SelectedTimeEntryViewModel.Values
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+
+            //note: object name should be the same name of the ConfirmBeforeSubmittingApproval method's parameter
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel, ApproverEmployeeInfoID: approverEmployeeInfoId });
+            //alert("Approve - PostData: " + postData.toString());
+
+            $("#mdLoadingModal").modal('show');
+
+            //Get the modal dialog to confirm approval submission
+            //Commented out
+            $.ajax({
+                url: '@Url.Action("ConfirmBeforeApproving", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                success: function (data) {
+                    //alert("Return Data:  " + data.toString());
+                    $(".dvLoadMessage").text("");
+                    $("#dvTimeEntryApprove").empty();
+                    $("#dvTimeEntryApprove").html(data);
+                    $("#mdTimeEntryApprove").modal('show');
+                    $("#mdLoadingModal").modal('hide');
+
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+                $("#mdLoadingModal").modal('hide');
+            });
+        });
+        //clear cache mode when Submit Approval modal is close
+        $('#mdTimeEntryApprove').on('hidden.bs.modal', function () {
+            //alert("Clear cache mode when Submit Approval modal is close");
+        });
+    });
+
+    //-----------------------------Reject Submitted Time Entries------------------------------//
+    $(function () {
+        $("#inpConfirmRejectTimeEntries").on("click", function (event) {
+            event.preventDefault();
+            var list = new Array();
+
+            var employeeId = $("#hfEmployeeInfoId").val();
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            var selPayPeriodId = $("#hfSelectedPayPeriodId").val();
+            var approverEmployeeInfoId = $("#hfLoggedInUser_EmployeeInfoId").val();
+            var loggedInUserIsUserDelegate = $("#hfLoggedInUser_IsUserDelegate").val();
+            var loggedInUserIsTSHRAdmin = $("#hfLoggedInUser_IsUserTSHRAdmin").val();
+            var loggedInUserIsUserTSManager = $("#hfLoggedInUser_IsUserTSManager").val();
+            //note: Property Name must be the same name as the View Model class
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeId.toString();
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+
+            //if ($("#hfLoggedInUser_IsUserDelegate").val() == "True" || $("#hfLoggedInUser_IsUserTSHRAdmin").val() == "True") {
+            //    $(".tsTimeEntryCheckBox").prop('checked', true);
+            //}
+
+            //Add selected id to the list array
+            $("input[name='ApprovedTimeID']").each(function () {
+                //alert("SubmittedTimeID - this.getAttribute(value):  " + this.getAttribute("value") + "this.getAttribute(name):  " + this.getAttribute("name"));
+                if (this.getAttribute("name") == "ApprovedTimeID") {
+                    list.push(this.getAttribute("value"));
+                }
+            });
+
+            if ($("#hfFLSAStatus").val() == 1) {
+                $(".tsTimeEntryCheckBox").prop('checked', true);
+                $(".tsTimeEntryCheckBoxNonExempt").prop('checked', true);
+            }
+
+            //Add Approved time to the list Array to be Rejected
+            if (loggedInUserIsTSHRAdmin == "True" || loggedInUserIsUserTSManager == "True" || loggedInUserIsUserDelegate == "True") {
+                $("input[name='cbApprovedTimeID']:checked").each(function () {
+                    if (this.checked) { list.push(this.id) };
+                });
+            }
+
+            //Add Submitted time to the list Array to be Rejected
+            $("input[name='cbSubmittedTimeID']:checked").each(function () {
+                if (this.checked) { list.push(this.id) };
+            });
+
+            //Exit and show warning when no time entries selected
+            if (list == null || list == '') {
+                $("#h4WarningMessage").text("No time entries selected to be rejected. Please try again");
+                $(".bs-modal-sm").modal('show');
+                return false;
+            }
+            //Add each item from the list to the SelectedTimeEntryViewModel.Values
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+
+            //note: object name should be the same name of the ConfirmBeforeSubmittingApproval method's parameter
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel, ApproverEmployeeInfoID: approverEmployeeInfoId });
+            //alert("Reject - PostData: " + postData.toString());
+
+            $("#mdLoadingModal").modal('show');
+
+            //Get the modal dialog to confirm approval submission
+            //Commented out
+            $.ajax({
+                url: '@Url.Action("ConfirmBeforeRejecting", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                success: function (data) {
+                    $(".dvLoadMessage").empty();
+                    $("#dvTimeEntryReject").empty();
+                    $("#dvTimeEntryReject").html(data);
+                    $("#mdTimeEntryReject").modal('show');
+                    $("#mdLoadingModal").modal('hide');
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+                $("#mdLoadingModal").modal('hide');
+            });
+        });
+        //clear cache mode when Submit Reject modal is close
+        $('#mdTimeEntryReject').on('hidden.bs.modal', function (event) {
+            //alert("Clear cache mode when Submit Approval modal is close");
+        });
+    });
+
+    //---------------------------Delete selected time entries-----------------------------//
+    $(function () {
+        $("#inpConfirmDeletingTimeEntries").on("click", function (event) {
+            event.preventDefault();
+            var list = new Array();
+            var employeeId = $("#hfEmployeeInfoId").val();
+            var selPayPeriodId = $("#hfSelectedPayPeriodId").val();
+            var loggedInUserIsUserDelegate = $("#hfLoggedInUser_IsUserDelegate").val();
+            var loggedInUserIsTSHRAdmin = $("#hfLoggedInUser_IsUserTSHRAdmin").val();
+            var loggedInUserIsTSManager = $("#hfLoggedInUser_IsUserTSManager").val();
+            var loggedInUserEmployeeInfoId = $("#hfLoggedInUser_EmployeeInfoId").val();
+
+            //note: Property Name must be the same name as the View Model class
+            SelectedTimeEntryViewModel = {};
+            SelectedTimeEntryViewModel.Values = [];
+            SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+            SelectedTimeEntryViewModel.EmployeeInfoId = employeeId.toString();
+            SelectedTimeEntryViewModel.SelectedPayPeriodId = selPayPeriodId;
+
+            //TODO: If NonExempt - automatically select all checkboxes to submit all non-submitted time entries
+            //TODO: If Exempt - only submit time entries that were checked
+            if ($("#hfFLSAStatus").val() == 1 || loggedInUserIsUserDelegate == "True" || loggedInUserIsTSHRAdmin == "True") {
+                $(".tsTimeEntryCheckbox").prop('checked', true);
+            }
+
+            //Add selected id to the list array
+            $("input[name='checked']:checked").each(function () {
+                if (this.checked) { list.push(this.id) };
+            });
+
+            if ((loggedInUserIsTSHRAdmin == "True" && loggedInUserEmployeeInfoId != employeeId) ||
+                (loggedInUserIsTSManager == "True" && loggedInUserEmployeeInfoId != employeeId) ||
+                (loggedInUserIsUserDelegate == "True" && loggedInUserEmployeeInfoId != employeeId)) {
+                //Add Approved time to the list Array to be Deleted
+                $("input[name='cbApprovedTimeID']:checked").each(function () {
+                    if (this.checked) { list.push(this.id) };
+                });
+                //Add Submitted time to the list Array to be Deleted
+                $("input[name='cbSubmittedTimeID']:checked").each(function () {
+                    if (this.checked) { list.push(this.id) };
+                });
+            }
+
+            //Exit and show warning when no time entries selected
+            if (list == null || list == '') {
+                $("#h4WarningMessage").text("Either no time entries selected or time selected not allowed to be deleted. Please try again.");
+                $(".bs-modal-sm").modal('show');
+                return false;
+            }
+
+            //Add each item from the list to the SelectedTimeEntryViewModel.Values
+            for (var item in list) {
+                SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+            }
+
+            //note: object name should be the same as the controller parameter
+            var postData = JSON.stringify({ SelectedTimeEntries: SelectedTimeEntryViewModel });
+            $("#mdLoadingModal").modal('show');
+            //Get the modal dialog to confim deleting multiple time entries
+            $.ajax({
+                url: '@Url.Action("ConfirmBeforeDeletingTimeEntries", "Timesheets")',
+                type: "POST",
+                contentType: "application/json",
+                dataType: "html",
+                cache: false,
+                data: postData,
+                success: function (data) {
+                    $(".dvLoadMessage").empty();
+                    $("#dvTimeEntryDelete").empty();
+                    $("#dvTimeEntryDelete").html(data);
+                    $("#mdDeletingMultipleTimeEntries").modal('show');
+                    $("#mdLoadingModal").modal('hide');
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Delete Multiple Request failed: " + errors.Message);
+                window.location.reload(true);
+                $("#mdLoadingModal").modal('hide');
+            });
+        });
+        ////clear cache mode when Confirm Delete modal is close
+        //$('#mdDeletingMultipleTimeEntries').on('hidden.bs.modal', function () {
+        //    $(this).find("input,textbox").val('').end();
+        //});
+    });
+
+</script>

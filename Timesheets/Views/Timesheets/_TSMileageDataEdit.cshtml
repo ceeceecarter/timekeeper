@@ -1,0 +1,195 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@*@helper RenderTimePart(int MilitaryTime, bool isHour)
+    {
+    if (MilitaryTime > 0)
+    {
+        int hours = MilitaryTime / 100;
+        int minutes = MilitaryTime - hours * 100;
+        DateTime result = DateTime.MinValue;
+        if (isHour)
+        {
+                @result.AddHours(hours).Hour.ToString("0#");
+            }
+            else
+            {
+                @result.AddMinutes(minutes).ToString("mm");
+            }
+        }
+    }*@
+
+
+@helper RenderColumn(int intColumn)
+{
+string result = intColumn.ToString();
+    @result;
+}
+
+@{
+    var displayCurrentPayPeriod = string.Format("{0} - {1}", Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString(), Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString());
+}
+
+<div class="container">
+    <div id="mdMileageEntryEdit" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h5 class="modal-title" style="color:#ffffff">Edit Mileage Entry</h5>
+                </div>
+                <div class="modal-body" style="background-color:#ffffff">
+                    <div class="container" style="width: 100%;">
+                        @using (Html.BeginForm("EditSave", "Timesheets", FormMethod.Post, new { id = "formEditMileageEntry" }))
+
+                        {
+                            <div class="row">
+                                @Html.HiddenFor(m => m.EditTimesheetHourId)
+                                @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "hfMileageEdit_IsUserNonExempt" })
+                                @Html.HiddenFor(m => m.EmployeeInfoId, new { id = "hfMileageEdit_EmployeeInfoId" })
+                                @Html.HiddenFor(m => m.MasterUserId)
+                                @Html.HiddenFor(m => m.SelectedHoursType)
+                                @Html.HiddenFor(m => m.EditSelectedDateEntry)
+                                @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hfMileageEdit_SelectedPayPeriodId" })
+                                @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id = "hfMileageEdit_IndividualId" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodStart, new { id = "hfMileageEditSelectedPayPeriod_dtmPeriodStart" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodEnd, new { id = "hfMileageEditSelectedPayPeriod_dtmPeriodEnd" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm1stReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm2ndReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.txtLastPeriodOfYear)
+                                @Html.HiddenFor(m => m.SelectedPayPeriodYear)
+                                @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId)
+                                @Html.HiddenFor(m => m.EmployeeIndividual.FLSAStatus)
+
+                            </div>
+
+                            <table style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th style="width: 50%">Location - Reason</th>
+                                        <th>Miles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="rowOneMileage">
+                                        <td style="padding-right: 5px">@Html.TextBox("editMileageDate", Model.MileageDate.ToShortDateString(), new { @id = "editMileageDate", @class = "form-control dp" })</td>
+                                        @Html.HiddenFor(m => m.MileageDate, new { @id = "hfMileageDate" })
+                                        <td style="padding-right: 5px">@Html.TextBox("editMileageDescription", Model.MileageDescription, new { @style = "max-width: 100%", @id = "editMileageDescription", @class = "form-control" })</td>
+                                        @Html.HiddenFor(m => m.MileageDescription, new { @id = "hfMileageDescription" })
+                                        <td style="padding-right: 5px">@Html.TextBox("editMileageMiles", Model.MileageMiles, new { @id = "editMileageMiles", @class = "form-control" })</td>
+                                        @Html.HiddenFor(m => m.MileageMiles, new { @id = "hfMileageMiles" })
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+                    @if (Model.TimesheetHours.FirstOrDefault().StatusTypeID == 3)
+                    {
+                        <div class="text-right">
+                            <br />
+                            <span class="well-sm text-warning">Continue to update this record will change the status to Non-Submitted.</span>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <input id="inpMileageEditSave" type="submit" class="btn btn-default" data-dismiss="modal" value="Save" />
+                    <input id="inpMileageEditCancel" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //-----------------------------Mileage Entry Edit Modal---------------------------------//
+    $(function () {
+
+        if ($("#editMileageMiles").val() != "" || $("#editMileageMiles").val() != "undefined") {
+            var editMilesValue = parseFloat($("#editMileageMiles").val()).toFixed(2);
+            $("#editMileageMiles").val(editMilesValue);
+        }
+
+        $("#editMileageDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        }).on('changeDate', function (e) {
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#editMileageDate").val());
+            var isUserNonExempt = $("#hfMileageEdit_IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedDate == "") {
+                    $("#h4WarningMessage").text("You must select a date. Please try again.");
+                    $('.bs-modal-sm').modal('show');
+                    return false;
+                }
+            }
+        });
+
+        $("#inpMileageEditCancel").on('click', function (event) {
+            event.preventDefault();
+            $("#mdMileageEntryEdit").modal('hide');
+        });
+
+        //Handler to save mileage entry changes
+        $("#inpMileageEditSave").on("click", function (event) {
+            event.preventDefault();
+            //Required field
+            var selectedDate = $("#editMileageDate").val();
+            var isUserNonExempt = $("#hfMileageEdit_IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedDate == "") {
+                    $("#h4WarningMessage").text("You must select a date. Please try again.");
+                    $('.bs-modal-sm').modal('show');
+                    return false;
+                }
+            }
+            if ($.trim($("#editMileageDescription").val()).length === 0) {
+                $("#h4WarningMessage").text("Location and reason is required.  Please enter a description.");
+                $('.bs-modal-sm').modal('show');
+                return false;
+            }
+
+            if ($.trim($("#editMileageMiles").val()).length === 0) {
+                $("#h4WarningMessage").text("Miles is required.  Please enter a miles.");
+                $('.bs-modal-sm').modal('show');
+                return false;
+            }
+            $("#hfMileageDate").val($("#editMileageDate").val());
+            $("#hfMileageDescription").val($("#editMileageDescription").val());
+            $("#hfMileageMiles").val($("#editMileageMiles").val());
+            $("#SelectedHoursType").val('8');
+            $("#EditSelectedDateEntry").val(selectedDate);            
+            var postdata = $('#formEditMileageEntry').serialize();
+            $("#mdMileageEntryEdit").modal('hide');
+            $.ajax({
+                url: '@Url.Action("EditSave", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: postdata, //{ id: hourId }
+                success: function (data) {
+                    //refresh the Pay Period Hours Type Summary for NonExempt time entries
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { selectedPayPeriodId: $("#hfMileageEdit_SelectedPayPeriodId").val(), employeeInfoId: $("#hfMileageEdit_EmployeeInfoId").val(), individualId: $("#hfMileageEdit_IndividualId").val() },
+                        success: function (ppData) {
+                            $("#dvPayPeriodHoursTypeSummary").empty();
+                            $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                        }
+                    });
+
+                    $('#dvTSWeeklyView').html(data);
+                    $("#dvMileageEntryEdit").empty();
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+            });
+        });
+    });
+</script>

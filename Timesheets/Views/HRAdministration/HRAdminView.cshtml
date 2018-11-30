@@ -1,0 +1,120 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.HRAdminViewModel
+@{
+    ViewBag.Title = "HRAdminView";
+}
+
+<div class="container-fluid">
+    <br />
+    <div class="row">
+        @Html.HiddenFor(m => m.LoggedInUser.EmployeeInfoID, new { id="hfHRLoggedInUser_EmployeeInfoID" })
+        <div class="container">
+            <ul class="nav nav-pills">
+                <li role="presentation" class="active"> <input type="button" id="btnImportPTOBalances" class = "form-control btn btn-info" value="Import PTO Balances" /> 
+                            @*<a href="#" id="linkImportPTOBalances">Import PTO Balances</a>*@
+                </li>
+                <li role="presentation" class="active hidden"><a href="#">Place Holder 2</a></li>
+                <li role="presentation" class="active hidden"><a href="#">Place Holder 3</a></li>
+            </ul>
+        </div>
+        <div>
+            <br />
+        </div>        
+        <div id="dvTSDetailView" class="col-sm-12">
+            @Html.Partial("_ViewAllPayPeriods", Model)
+        </div>
+    
+    </div>
+    <br />
+</div>
+
+
+<!--START MODAL for Pay Period Employees View-->
+<div id="payPeriodEmployeesModal">
+    <div class="container-fluid">
+        <div id="mdPayPeriodEmployees" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background-color:#f25d55">
+                    <div class="modal-header">Pay Period Employees</div>
+                    <div id="divPayPeriodEditorPartialView" class="modal-body">Body content here</div>
+                    <div class="modal-footer">Please note that some functionality will not be present until the completion of phase 2 development</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--END MODAL for Pay Period Employees View-->
+
+<!-- Modal for importing PTO balances-->
+<div id="dvImportPTOBalancesModal">
+    <div class="container-fluid">
+        <div id="mdImportPTOBalances" class="modal fade" role="dialog" aria-labelledby="basicModal" data-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background-color:#f25d55">
+                    <div class="modal-header">Import PTO Balances</div>
+                    <div id="dvImportPTOBalancesPartialView" class="modal-body"></div>
+                    <div class="modal-footer">
+                        <div class="form-group pull-left">
+                            <input type="submit" value="Preview File" id="inpPreviewFile" class="btn btn-info" />
+                            <input type="submit" value="Process CSV" id="inpProcessCSV" class="btn btn-info" />
+                        </div>
+                        @*<input id="inpImportPTOBalanceUpload" type="submit" class="btn btn-default" data-dismiss="modal" value="Upload" />*@
+                        <input id="inpImportPTOBalanceCancel" type="button" class="btn btn-info" data-dismiss="modal" value="Close" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end Modal importing PTO balances-->
+
+@*<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        //Make the Timesheet nav tab active
+        $("#navTimesheetHRAdmin").addClass("active");
+    });
+
+    @*//Display View all Pay Periods
+    $("#linkViewAllPayPeriods").on("click", function (event) {
+        event.preventDefault();
+        //get all pay periods
+        $.ajax({
+            url: '@Url.Action("GetAllPayPeriods", "HRAdministration")',
+            type: "POST",
+            contentType: "application/json",
+            dataType: "html",
+            cache: false,
+            success: function (data) {
+                $("#dvTSDetailView").html(data);
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            var errors = $.parseJSON(errorThrown);
+            alert("Request failed: " + errors.Message);
+            window.location.reload(true);
+        });
+
+    });*@
+
+    /*--Import PTO Balances --*/
+
+    $(function () {
+
+        $("#btnImportPTOBalances").on("click", function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: '@Url.Action("PTOBalanceFileUpload", "HRAdministration")',
+                type: "POST",
+                contentType: "application/json",
+                cache: false,
+                success: function (data) {
+                    $("#dvImportPTOBalancesPartialView").html(data);
+                    $("#mdImportPTOBalances").modal('show');
+                }
+            });
+           
+        });
+
+    });
+
+</script>
+

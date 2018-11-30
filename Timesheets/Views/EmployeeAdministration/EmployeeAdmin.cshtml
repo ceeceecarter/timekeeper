@@ -1,0 +1,748 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.EmployeeAdministrationViewModel
+@using NM.Web.WebApplication.Timesheets.Infrastructure.Extensions
+@{
+    ViewBag.Title = "EmployeeAdmin";
+}
+
+@Html.ValidationSummary(true)
+<br />
+<div id="dvAddNewEmployee">
+    <input id="inpCreateNewEmployee" type="button" class="btn btn-primary" data-dismiss="modal" value="Create New Employee" />
+</div>
+<!--Begin Employee List-->
+<div>
+    @using (Html.BeginForm("SearchForEmployees", "EmployeeAdministration", FormMethod.Post, new { @id = "SearchEmployeesForm", @name = "SearchEmployeesForm", @class = "SearchEmployeesForm" }))
+    {
+        <div class="container-fluid">
+            <!--Employee Information-->
+            <div class="row">
+                <div class="h4">Search for Employees</div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-3 col-md-2 col-lg-2">
+                        @Html.Label("First Name:", new { @class = "control-label" })
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-2">
+                        <input type="text" name="fName">
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        @Html.Label("Company Code:", new { @class = "control-label" })
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        @Html.DropDownList("compCode", Model.Employee.CompanyCodeList, "--Select One--")
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-3 col-md-2 col-lg-2">
+                        @Html.Label("Last Name:", new { @class = "control-label" })
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-2">
+                        <input type="text" name="lName">
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        @Html.Label("Emp Type:", new { @class = "control-label" })
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        @Html.DropDownList("empTypeCode", Model.Employee.EmploymentTypeList, "--Select One--")
+                        @*<input type="text" name="empTypeCode">*@
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-sm-3 col-md-2 col-lg-2">
+
+                    </div>
+                    <div class="col-sm-3 col-md-3 col-lg-2">
+
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        @Html.Label("Status:", new { @class = "control-label" })
+                    </div>
+                    <div class="col-sm-2 col-md-2 col-lg-2">
+                        @Html.DropDownList("empStatusCode", Model.Employee.EmployeeStatusList, "--Select One--")
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4 col-md-4 col-lg-4">
+                    <button id="btnSearchEmployees" name="btnSearchEmployees" type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+
+            <div id="dvSearchResults" class="well well-lg">
+                <div class="partialContentsSearchResults" data-url="_TSEmployeeList">
+                    <div id="dvMessageLoading">Start Searching...</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@*<div id="dvEmployeeList" class="well well-lg">
+        @Html.Partial("_TSEmployeeList", Model)
+    </div>*@
+<!--End Employee List-->
+<!--Begin Employee Information Modal-->
+<div id="dvEmployeeInformation"></div>
+<div id="dvEmployeeInfoEdit"></div>
+<!--End Employee Information Modal-->
+<!--Begin Create Employee Modal-->
+<div class="container-fluid">
+    <div id="mdCreateEmployee" class="modal fade top" role="dialog" data-backdrop="static" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background-color:#b50022">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" data-target="#mdCreateEmployee">&times;</button>
+                    <h4 class="modal-title" style="color:#ffffff">Create New Employee</h4>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("AddEmployee", "EmployeeAdministration", FormMethod.Post, new { id = "formCreateNewEmployee" }))
+                    {
+                        <div class="container-fluid">
+                            <!--Employee Information-->
+                            <div class="row">
+                                <div class="h4">Employee Detail Information</div>
+                            </div>
+                            <div class="row">
+                                <div class="well">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.RequiredLabelFor(m => m.Employee.Individual.FirstName, new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.FirstName, new { @id = "tbCreateFirstName", @class = "form-control field-required", @required = true })
+                                                            @Html.ValidationMessageFor(m => m.Employee.Individual.FirstName)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.RequiredLabelFor(m => m.Employee.Individual.PreferredFirstName, new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.PreferredFirstName, new { @id = "tbCreatePreferredFirstName", @class = "form-control field-required", @required = true })
+                                                            @Html.ValidationMessageFor(m => m.Employee.Individual.PreferredFirstName)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Middle Initial", new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.MiddleName, new { @class = "form-control" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.RequiredLabelFor(m => m.Employee.Individual.LastName, new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.LastName, new { @class = "form-control field-required", @required = true })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Officer Title", new { @class = "col-sm-6 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.DropDownListFor(m => m.Employee.EmployeeInformation.OfficerTitleID, new SelectList(Model.Employee.OfficerTitleList.OrderBy(i => i.Text), "Value", "Text"), "- Select Officer Title -", new { id = "ddlOfficerTitles", @class = "form-control" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @*<div class="row">
+                                                        <div class="form-group">
+                                                            @Html.Label("Status", new { @class = "col-sm-6 control-label" })
+                                                            <div class="col-sm-6">
+
+                                                                @Html.DropDownListFor(m => m.Employee.EmployeeStatus, new SelectList(Model.Employee.EmployeeStatusList.OrderBy(i => i.Text), "Value", "Text"), "- Select Employee Status -", new { id = "ddlEmployeeStatus", @class = "form-control field-required", @required = true })
+                                                                @Html.DisplayFor(m => m.Employee.EmployeeStatus, new { @class = "form-control" })
+                                                                @Html.ValidationMessageFor(m => m.Employee.EmployeeStatus)
+                                                            </div>
+                                                        </div>
+                                                    </div>*@
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Office Phone", new { @class = "col-sm-4 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.Phone, new { @class = "form-control" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Extension", new { @class = "col-sm-4 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.PhoneExtension, new { @class = "form-control" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Fax", new { @class = "col-sm-4 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.Fax, new { @class = "form-control" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Mobile Phone", new { @class = "col-sm-4 control-label" })
+                                                        <div class="col-sm-6">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.Cell, new { @class = "form-control" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group">
+                                                        @Html.Label("Email", new { @class = "col-sm-4 control-label" })
+                                                        <div class="col-sm-8">
+                                                            @Html.TextBoxFor(m => m.Employee.Individual.Email, new { @class = "form-control" })
+                                                            @Html.ValidationMessageFor(m => m.Employee.Individual.Email)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-horizontal">
+                                                    @Html.Label("Company", new { @class = "control-label required-label" })
+                                                    @Html.DropDownListFor(m => m.Employee.EmployeeInformation.CompanyCodeId, new SelectList(Model.Employee.CompanyCodeList, "Value", "Text"), "- Select Company -", new { id = "ddlCompanyCodes", @class = "form-control field-required", @required = true })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-horizontal">
+                                                    @Html.Label("Job Title", new { @class = "control-label required-label" })
+                                                    @Html.DropDownListFor(m => Model.Employee.EmployeeInformation.JobTitleID, new SelectList(Model.Employee.JobTitleList.OrderBy(i => i.Text), "Value", "Text"), "- Select Job Title -", new { id = "ddlJobTitles", @class = "form-control field-required", @required = true })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-horizontal">
+                                                    @Html.Label("Work Location", new { @class = "control-label required-label" })
+                                                    @Html.DropDownListFor(m => Model.Employee.EmployeeInformation.WorkLocationID, new SelectList(Model.Employee.WorkLocationList, "Value", "Text"), "- Select Work Location -", new { id = "ddlWorkLocations", @class = "form-control field-required", @required = true })
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--HR Information-->
+                            <div class="row">
+                                <div class="h4">HR Information</div>
+                            </div>
+                            <div class="row">
+                                <div class="well">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                @Html.Label("Start Date", new { @class = "control-label required-label" })
+                                                <div class="input-group date">
+                                                    @Html.EditorFor(m => m.Employee.Individual.StartDate, null, "Employee.Individual.StartDate", new { htmlAttributes = new { @class = "form-control field-required", @required = true, type = "date", id = "Employee_Individual_StartDate" } })
+                                                    <span class="input-group-addon" onclick="showDatePicker('Employee_Individual_StartDate')">
+                                                        <span class="glyphicon glyphicon-calendar"></span>
+                                                    </span>
+                                                    @Html.ValidationMessageFor(m => m.Employee.Individual.StartDate)
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    @Html.Label("File Number", new { @class = "control-label" })
+                                                    @Html.TextBoxFor(m => m.Employee.EmployeeInformation.FileNumber, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                @Html.Label("ADP Employee ID", new { @class = "control-label" })
+                                                @Html.TextBoxFor(m => m.Employee.EmployeeInformation.EmployeeID, new { @class = "form-control" })
+                                            </div>
+                                            <div class="col-sm-3">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    @Html.Label("Supervisor", new { @class = "control-label required-label" })
+                                                    @Html.DropDownListFor(m => m.Employee.Individual.ManagerIndividualID, new SelectList(Model.Employee.EmployeeList, "Value", "Text"), "- Select Supervisor/Manager -", new { id = "ddlSupervisor", @class = "form-control field-required", @required = true })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-horizontal">
+                                                    @Html.Label("Cost Center", new { @class = "control-label required-label" })
+                                                    @Html.DropDownListFor(m => Model.Employee.EmployeeInformation.CostCenterID, new SelectList(Model.Employee.CostCenterList, "Value", "Text"), "- Select Cost Center -", new { id = "ddlCostCenter", @class = "form-control field-required", @required = true })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-horizontal">
+                                                    @Html.Label("Employment Type", new { @class = "control-label required-label" })
+                                                    @Html.DropDownListFor(m => Model.Employee.EmployeeInformation.EmploymentTypeID, new SelectList(Model.Employee.EmploymentTypeList, "Value", "Text"), "- Select Employment Type -", new { id = "ddlEmploymentType", @class = "form-control field-required", @required = true })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    @Html.Label("FLSA Status", new { @class = "control-label required-label" })
+                                                    @if (Model.Employee.FLSAStatus == null)
+                                                    {
+                                                        @Html.DropDownListFor(m => m.Employee.FLSAStatus, new SelectList(Model.Employee.FLSAStatusList, "Value", "Text"), "- Select FLSA -", new { id = "ddlFLSAStatus", @class = "form-control field-required", @required = true })
+                                                    }
+                                                    else
+                                                    {
+                                                        @Html.DropDownListFor(m => Model.Employee.FLSAStatus, new SelectList(Model.Employee.FLSAStatusList, "Value", "Text"), "- Select FLSA -", new { id = "ddlFLSAStatus", @class = "form-control field-required", @required = true })
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    @Html.Label("Hours Per Week", new { @class = "control-label required-label" })
+                                                    @Html.TextBoxFor(m => m.Employee.EmployeeInformation.realHoursPerWeek, new { @id = "tbCreateHrsPerWeek", @class = "form-control field-required", @required = true })
+                                                    @Html.ValidationMessageFor(m => m.Employee.EmployeeInformation.realHoursPerWeek)
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    @Html.Label("Max Time Off Per Week", new { @class = "control-label required-label" })
+                                                    @Html.TextBoxFor(m => m.Employee.EmployeeInformation.realMaxTimeOffPerWeek, new { @id = "tbCreateMaxHrsPerWeek", @class = "form-control field-required", @required = true })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @Html.Label("FTE", new { @class = "control-label", id = "lblCreateFTE" })
+                                                <div class="form-group">
+                                                    @Html.TextBox("tbCreateFTE", "", new { @class = "form-control", id = "tbCreateFTE", @style = "width:5em;", @readonly = true })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox("Employee.EmployeeInformation.PTOEligible", Model.Employee.EmployeeInformation.PTOEligible ?? false, new { @class = "form -control" })
+                                                            @Html.Label("PTO Eligible", new { @class = "control-label" })
+                                                            @Html.ValidationMessageFor(m => m.Employee.EmployeeInformation.PTOEligible)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox("Employee.EmployeeInformation.OnCallEligible", Model.Employee.EmployeeInformation.OnCallEligible ?? false, new { @class = "form -control" })
+                                                            @Html.Label("On Call Eligible", new { @class = "control-label" })
+                                                            @Html.ValidationMessageFor(m => m.Employee.EmployeeInformation.OnCallEligible)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox("Employee.EmployeeInformation.ExcludeFromReminderEmails", Model.Employee.EmployeeInformation.ExcludeFromReminderEmails ?? false, new { @class = "form -control" })
+                                                            @Html.Label("Exclude From Reminder Emails")
+                                                            @Html.ValidationMessageFor(m => m.Employee.EmployeeInformation.ExcludeFromReminderEmails)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                @*<div class="col-sm-6 well well-sm">*@
+                                                <div class="h4">TimeKeeper Access</div>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox("Employee.IsUserTSHRAdmin", Model.Employee.IsUserTSHRAdmin, new { @class = "form -control" })
+                                                            @Html.Label("TimeKeeper Admin")
+                                                            @Html.ValidationMessageFor(m => m.Employee.IsUserTSHRAdmin)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox("Employee.IsUserTSUser", Model.Employee.IsUserTSUser, new { @class = "form -control" })
+                                                            @Html.Label("TimeKeeper User")
+                                                            @Html.ValidationMessageFor(m => m.Employee.IsUserTSUser)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-inline">
+                                                            @Html.CheckBox("Employee.Individual.IsEmployee", (Model.Employee.Individual.IsEmployee != null ? (bool)Model.Employee.Individual.IsEmployee : true), new { @class = "form -control" })
+                                                            @Html.Label("Is An Employee")
+                                                            @Html.ValidationMessageFor(m => m.Employee.Individual.IsEmployee)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Timesheet Delegates Begin-->
+                            @*<div class="row">
+                                    <div class="h4">Timesheet Delegates</div>
+                                </div>
+                                <div class="row" id="dvDelegateApproval">
+                                    @Html.Partial("_DelegateTSApprovalAuthorityPartialView", Model.Employee.DelegateViewModel)
+                                </div>
+                                <div class="row">
+                                    <div class="h4">Search for Employees to Add as Delegates</div>
+                                </div>
+                                <div class="row well">
+                                    <div class="container-fluid">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-inline">
+                                                    @Html.Label("First Name:", new { @class = "col-sm-4 control-label" })
+                                                    @Html.TextBox("tbFirstName", "", new { @class = "form-control", @id = "tbFirstName" })
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-inline">
+                                                    @Html.Label("Last Name:", new { @class = "col-sm-4 control-label" })
+                                                    @Html.TextBox("tbLastName", "", new { @class = "form-control", @id = "tbLastName" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <br />
+                                        <div class="row">
+                                            <div class="container-fluid">
+                                                <input id="inpSearchDelegateEmployee" type="button" class="btn btn-info" value="Search For Delegates" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row well">
+                                    <div class="container-fluid">
+                                        <div id="dvDelegateTSSearchResults">
+                                        </div>
+                                    </div>
+                                </div>*@
+
+                            <!--Timesheet Delegates End-->
+
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCreate" type="submit" class="btn btn-info" data-dismiss="modal">Create</button>
+                    <button id="btnCancel" type="button" class="btn btn-info" data-dismiss="modal" data-target="#mdCreateEmployee">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End Create Employee Modal-->
+<!--Prompt for Warning Message-->
+<div class="modal fade bs-modal-sm" id="mdWarningMessage" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="background-color:#b50022">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-target="#mdCreateEmployee">&times;</button>
+                <h5 class="modal-title" style="color:#ffffff">Warning</h5>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff">
+                <div class="text-danger">
+                    <h5 id="h4WarningMessage"></h5>
+                </div>
+                <button type="button" id="btnCloseWarningMessage" class="btn btn-info pull-right" data-target="#mdCreateEmployee">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--End Prompt for Warning Message-->
+
+<script type="text/javascript">
+
+    var site = site || {};
+    site.baseUrl = site.baseUrl || "";
+
+    //Make the Employee Administration nav tab active
+    $(document).ready(function () {
+        $("#navTimesheetEmployeeAdmin").addClass("active");
+        $("#dvEmployeeInformation").empty();
+
+        $("#btnCloseWarningMessage").on('click', function (event) {
+            event.preventDefault();
+            $("#mdWarningMessage").modal('hide');
+        });
+
+        //$("#Employee_Individual_StartDate").on('keyup keydown', function (event) {
+        //    if (event.which == 9) { //tab key code
+        //        var startDate = $("#Employee_Individual_StartDate").val();
+        //        if (startDate = 'NaN/NaN/NaN') {
+        //            var validateError = 1;
+        //            var textMessageHtmlBegin = "<div><ul>";
+        //            var textMessageHtmlContent = "";
+        //            var textMessageHtmlEnd = "</ul></div>";
+
+        //            textMessageHtmlContent += "<li>Start Date must be in this format MM/DD/YYYY i.e " + moment().format("MM/DD/YYYY") + " </li>";
+
+        //            if (validateError > 0) {
+        //                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+        //                $("#h4WarningMessage").empty();
+        //                $("#h4WarningMessage").html(textHtml);
+        //                $("#mdWarningMessage").appendTo('body').modal('show');
+        //            }
+        //        }
+        //    }
+        //});
+
+        //Show modal dialog create employee entry
+        $("#inpCreateNewEmployee").on("click", function (event) {
+            $("#tbCreateFirstName").val("");
+            $("#tbCreatePreferredFirstName").val("");
+            $("#Employee_Individual_MiddelName").val("");
+            $("#Employee_Individual_LastName").val("");
+            $("#ddlOfficerTitles").val("")
+            $("#Employee_Individual_Phone").val("");
+            $("#Employee_Individual_PhoneExtension").val("");
+            $("#Employee_Individual_Fax").val("");
+            $("#Employee_Individual_Cell").val("");
+            $("#Employee_Individual_Email").val("");
+            $("#ddlCompanyCodes").val("");
+            $("#ddlJobTitles").val("");
+            $("#ddlWorkLocations").val("");
+            $("#Employee_Individual_StartDate").val("");
+            $("#Employee_EmployeeInformation_FileNumber").val("");
+            $("#Employee_EmployeeInformation_EmployeeID").val("");
+            $("#ddlSupervisor").val("");
+            $("#ddlCostCenter").val("");
+            $("#ddlEmploymentType").val("");
+            $("#ddlFLSAStatus").val("");
+            $("#tbCreateHrsPerWeek").val("");
+            $("#tbCreateMaxHrsPerWeek").val("");
+
+            $('#mdCreateEmployee').modal('show');
+        });
+
+
+    });
+
+
+
+    function showDatePicker(controlName) {
+        $('#' + controlName).datepicker('show');
+    }
+
+    $(function () {
+
+        //Re-adding the 'modal-open' class back to the bottom modal
+        $("#mdWarningMessage").on('hidden.bs.modal', function (e) {
+            if ($('#mdCreateEmployee').hasClass('in')) {
+                $('body').addClass('modal-open');
+            }
+        });
+
+        //Datepickers
+        $("#Employee_Individual_StartDate").datepicker({
+            format: 'mm/dd/yyyy',
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        $("#Employee_Individual_TermDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        $("#Employee_EmployeeInformation_DateOfEVerify").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        $("#Employee_EmployeeInformation_DateOfBackgroundCheck").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        $("#tbCreateFirstName").on("change",
+            function () {
+                $("#tbCreatePreferredFirstName").val($("#tbCreateFirstName").val());
+            });
+
+        //---------------------------------------------------------//
+        ////Handler for Hours Per Week change event for CREATING a NEW EMP
+        //// When hours per week change
+        ////  1. recalculate FTE = x / 40
+        ////  2. validate hours per week not gt 40
+        ////  3. max time off per week must equal hours per week
+        //---------------------------------------------------------//
+        $("#tbCreateHrsPerWeek").change(function () {
+            var hoursPerWeek = $("#tbCreateHrsPerWeek").val();
+            if (hoursPerWeek > 40) {
+                //reset to max 40 hours
+                $("#tbCreateHrsPerWeek").val(40);
+                $("#tbCreateMaxHrsPerWeek").val(40);
+                alert("Value must not be over 40 hours.");
+            }
+            if (hoursPerWeek >= 0 && hoursPerWeek <= 40) {
+                //recalculate and update FTE
+                var newVal = hoursPerWeek / 40.00;
+                $("#tbCreateFTE").val(newVal);
+                $("#tbCreateMaxHrsPerWeek").val(hoursPerWeek);
+            }
+        });
+
+
+        //---------------------------------------------------------//
+        //Handler to Search approver delegate button
+        $("#inpSearchDelegateEmployee").on('click', function (event) {
+            event.preventDefault();
+            var firstName = $("#tbFirstName").val();
+            var lastName = $("#tbLastName").val();
+            var selectedIndividualId = 0;
+            var url = site.baseUrl + "/employeeadministration/SearchApproverDelegates";
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: { fName: firstName, lName: lastName, individualId: selectedIndividualId },
+                success: function (data) {
+                    $("#dvDelegateTSSearchResults").html(data);
+                },
+                error: function (xhr, ajaxOptions, throwError) {
+                    alert(throwError);
+                }
+            });
+        });
+
+        //Handler for Close button
+        $("#btnCancel").on('click', function () {
+            $(this).removeData('bs-modal');
+        });
+
+
+        $("#btnCreate").on("click", function (event) {
+            event.preventDefault();
+
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+
+            if ($("#tbCreateFirstName").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing First Name</li>";
+            }
+
+            if ($("#tbCreatePreferredFirstName").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing PreferredFirstName</li>";
+            }
+            if ($("#Employee_Individual_LastName").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing LastName</li>";
+            }
+
+            if ($("#Employee_Individual_StartDate").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Start Date</li>";
+            }
+
+            if ($("#tbCreateHrsPerWeek").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Hours Per Week</li>";
+            }
+
+            if ($("#tbCreateMaxHrsPerWeek").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Max Time Off Per Week</li>";
+            }
+
+            if ($("#ddlEmploymentType").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Employment Type</li>";
+            }
+
+            if ($("#ddlCompanyCodes").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Company Code</li>";
+            }
+            if ($("#ddlWorkLocations").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Work Location</li>";
+            }
+            if ($("#ddlSupervisor").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Supervisor/Manager</li>";
+            }
+            if ($("#ddlJobTitles").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Job Title</li>";
+            }
+            if ($("#ddlCostCenter").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing Cost Center</li>";
+            }
+            if ($("#ddlFLSAStatus").val() == "") {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing FLSA Status </li>";
+            }
+
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#h4WarningMessage").empty();
+                $("#h4WarningMessage").html(textHtml);
+                $('#mdWarningMessage').appendTo('body').modal('show');
+                return false;
+            }
+
+            var postdata = $('#formCreateNewEmployee').serialize();
+
+            $.ajax({
+                url: '@Url.Action("AddEmployee", "EmployeeAdministration")',
+                type: "POST",
+                cache: false,
+                data: postdata,
+                success: function (data) {
+                    window.location.href = window.location.href;
+                }
+            });
+        });
+    });
+
+
+    ////Show modal dialog for Adding Delegates entry
+    //$("#inpEmployeeSearch").on("click", function (event) {
+    //    $('#mdEmployeeSearch').modal('show');
+    //});
+
+    $("#btnSearchEmployees").on("click", function (e) {
+        e.preventDefault(); //This prevent the regular form submit
+        var postdata = $("#SearchEmployeesForm").serialize();
+        //var url = site.baseUrl + "/_TSEmployeeListTest";
+        $("#dvMessageLoading").text("Loading...");
+        //alert("URL:  " + url.toString() + ", postdata: " + postdata.toString());
+        $.ajax({
+            url: '@Url.Action("SearchForEmployees", "EmployeeAdministration")',
+            type: "POST",
+            data: postdata,
+            success: function (data) {
+                //window.alert("partialContentsDelegates successful callback data" + data);
+                $(".partialContentsSearchResults").html(data);
+                $("#dvMessageLoading").text("");
+
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                // do some javascript on error
+                $("#dvMessageLoading").text("ERROR LOADING...");
+            }
+        });
+    });
+</script>

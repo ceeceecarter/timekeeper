@@ -1,0 +1,72 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.PTOBalancesDataViewModel
+@using System.Data;
+
+@{
+    var lastUpdateDate = "";
+    if (Model != null)
+    {
+        lastUpdateDate = Model.LastUpdateOfPTOBalances == null ? "" : Model.LastUpdateOfPTOBalances.ToShortDateString();
+    }
+}
+@using (Html.BeginForm("", "HRAdministration", FormMethod.Post, new { enctype = "multipart/form-data", id = "fileUploadSection" }))
+{
+    @*@Html.AntiForgeryToken();*@
+    @Html.ValidationSummary();
+    <div id="dvCustomValidationSummary" class="text-warning" style="color:#E4002B"></div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group form-inline">
+                @Html.Label("Select CSV File")
+                <input type="file" id="dataFile" name="csvfileUpload" />
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group form-inline">
+                <div>&nbsp;</div>
+                <div id="dvSelectedFileName"></div>
+            </div>           
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <span class="text-info">Please indicate the position number on the following columns from the CSV file <strong class="text-info">(to exclude Accrual Rate column leave it blank)</strong> </span>
+        </div>
+    </div>
+    <br />
+
+    foreach (var item in Model.ColumnsToImport)
+    {
+        <div class="row" style="padding-bottom:5px;">
+            <div class="form-group form-inline">
+                <div class="col-sm-4">
+                    @Html.Label(item.PTOBalanceColumnDisplayName)
+                </div>
+                <div class="col-sm-3 pull-left">
+                    @Html.TextBox(item.PTOBalanceColumnName.ToString(), item.ColumnPositionNumber.ToString(), new { @class = "form-control", id = "tb_" + item.PTOBalanceColumnName, style = "width:50px;", maxlength = 3 })
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row" style="padding-bottom:5px;">
+        <div class="form-group form-inline">
+            <div class="col-sm-3">
+                @Html.Label("Last Update Date:")
+            </div>
+            <div class="col-sm-3 pull-left">
+                <div class="input-group date">
+                    @Html.EditorFor(m => lastUpdateDate, null, "LastUpdateOfPTOBalances", new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                    @*@Html.HiddenFor(m => Model.LastUpdateOfPTOBalances, new { id = "hfLastUpdateOfPTOBalances" })*@
+                    <span class="input-group-addon" onclick="showDatePicker('LastUpdateOfPTOBalances')">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div id="dvMessage"></div>
+    <div id="dvDisplayCSVData">
+        @Html.Partial("_PTOBalancesDisplayCSVData", Model.DataTable)
+    </div>
+}

@@ -1,0 +1,1988 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@{
+    var displayCurrentPayPeriod = Model.SelectedPayPeriod != null ? string.Format("{0} - {1}", Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString(), Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString()) : string.Empty;
+    var displayFirstName = string.IsNullOrEmpty(Model.EmployeeIndividual.Individual.PreferredFirstName) ? Model.EmployeeIndividual.FirstName.Trim() : Model.EmployeeIndividual.Individual.PreferredFirstName.Trim();
+}
+
+@{ //FormatDate to display for initial load for EditorFor control
+    var dtPeriodStart = Model.SelectedPayPeriod != null ? Model.SelectedPayPeriod.dtmPeriodStart.ToShortDateString() : DateTime.Now.ToShortDateString();
+    var dtPeriodEnd = Model.SelectedPayPeriod != null ? Model.SelectedPayPeriod.dtmPeriodEnd.ToShortDateString() : DateTime.Now.ToShortDateString();
+}
+@if (Model.EmployeeIndividual != null)
+{
+    @Html.HiddenFor(m => m.EmployeeIndividual.FLSAStatus, new { id = "EmployeeIndividual_FLSAStatus" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id = "hdIndividualId" })
+    @Html.HiddenFor(m => m.EmployeeInfoId, new { id = "hdEmployeeInfoId" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.IsUserDelegate, new { id = "hdTimeEntryManageView_IsUserDelegate" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.IsUserTSManager, new { id = "hdTimeEntryManageView_IsUserTSManager" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.IsUserTSUser, new { id = "hdTimeEntryManageView_IsUserTSUser" })
+    @Html.HiddenFor(m => m.EmployeeIndividual.IsUserTSHRAdmin, new { id = "hdTimeEntryManageView_IsUserTSHRAdmin" })
+    @Html.HiddenFor(m => m.LoggedInUser.IsUserTSUser, new { id = "hdTimeEntryManageView_LoggedInUser_IsUserTSUser" })
+    @Html.HiddenFor(m => m.LoggedInUser.EmployeeInfoID, new { id = "hdTimeEntryManageView_LoggedInUser_EmployeeInfoID" })
+    @Html.HiddenFor(m => m.SelectedPayPeriod.txtStatus, new { id = "hdTimeEntryManagementView_SelectedPayPeriod_txtStatus" })
+}
+
+<div class="row" id="dvTimeEntrySummaryPanel">
+    @Html.Partial("_TSTimeEntrySummaryView", Model)
+</div>
+
+<!--Time Entry View panel is uncollapsable-->
+<div class="row" id="dvTimeEntryManage">
+    <div class="panel-group" id="dvTimeEntryManagePanel" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-summaryhead">
+            <div id="pnlTimeEntryManagementHeading" class="panel-heading" role="tab">
+                <h4 class="panel-title NmarqGrid-Header">
+                    <b>Time Entry</b> <span class="pull-right">@Html.DisplayFor(m => displayFirstName) @Html.DisplayFor(m => m.EmployeeIndividual.LastName)</span>
+                    @*<a role="button" class="remove-underline-link" data-parent="#dvTimeEntryManagePanel" href="#pnlTimeEntryManageContent" aria-expanded="true" aria-controls="pnlTimeEntryManageContent">
+                            <span class="glyphicon glyphicon-list"></span>
+                            <b>Time Entry Manage</b>
+                        </a>*@
+                </h4>
+            </div>
+            <div id="pnlTimeEntryManageContent" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="timeEntryManagement">
+                <div class="panel panel-body">
+                    <div class="row">
+                        <div class="col-sm-5" id="dvTimeEntryMenuSummary">
+                            <div class="NmarqGrid-SubHeader NmarqGrid-Spacer text-center">
+                                @if (Model.IsUserNonExempt)
+                                {
+                                    <b>Select Pay Period</b>
+                                }
+                                else
+                                {
+                                    <b>Filter By Year</b>
+                                }
+                            </div>
+                            <div class="well">
+                                <div class="row">
+                                    <div class="col-sm-8">
+                                        <div class="form-group">
+                                            @if (Model.EmployeeIndividual.FLSAStatus == 1)
+                                            {
+                                                @Html.Label(" Select Year")
+                                                @Html.DropDownListFor(m => Model.SelectedPayPeriodYear, new SelectList(Model.PayPeriodYearList, "Value", "Text"), "- Select Year -", new { id = "ddlYears", @class = "form-control" })
+                                            }
+                                            else
+                                            {
+                                                @Html.Label(" Select Year")
+                                                @Html.DropDownListFor(m => Model.PayPeriodYearList @*.FirstOrDefault().Value*@, new SelectList(Model.PayPeriodYearList, "Value", "Text", Model.YearAndPayPeriod.CurrentYear.ToString()), "Show All", new { id = "ddlYears", @class = "form-control" })
+                                            }
+                                        </div>
+                                        @if (Model.EmployeeIndividual.FLSAStatus == 1)
+                                        {
+                                            <div class="form-group">
+                                                @Html.Label(" Select Pay Period")
+                                                @Html.DropDownListFor(m => Model.SelectedPayPeriod.PayPeriodID, new SelectList(Model.SelectedYearPayPeriods, "Value", "Text"), "- Select PayPeriod -", new { id = "ddlSelectedYearPayPeriods", @class = "form-control" })
+                                            </div>
+                                        }
+                                    </div>
+                                    <div id="dvAddEntryMenu" class="col-sm-4">
+                                        <br />
+                                        <ul class="nav nav-pills">
+                                            <li class="dropdown active">
+                                                <a data-toggle="dropdown" data-target="#" href="http://www.google.com">Add Entry<span class="caret"></span></a>
+                                                <ul class="dropdown-menu">
+                                                    <li><a href="#"><input id="inpAddTimeEntry" class="btn btn-default btn-link" value="Time" /></a></li>
+                                                    <!--If user is non-exempt, then show mileage options.  otherwise hide-->
+                                                    @if (Model.IsUserNonExempt)
+                                                    {
+                                                        <li><a href="#"><input id="inpAddMileage" class="btn btn-default btn-link" value="Mileage" /></a></li>
+                                                    }
+                                                    @if (Model.EmployeeIndividual.EmployeeInformation.OnCallEligible == true && (Model.EmployeeIndividual.FLSAStatus == 1 || Model.IsUserNonExempt))
+                                                    {
+                                                        <li><a href="#"><input id="inpAddOnCall" class="btn btn-default btn-link" value="On Call" /></a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-sm-7" id="dvPPHoursTypeSummary">
+                            @if (Model.IsUserNonExempt)
+                            {
+                                <div class="row">
+                                    <div id="dvPayPeriodHoursTypeSummary">
+                                        @Html.Partial("_PayPeriodHoursTypeSummary", Model)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div id="dvLoadMessage"></div>
+                        </div>
+                        @*<div class="col-sm-6">
+                            <div id="dvRefreshWeeklyView" class="pull-right btn btn-link">Refresh <span class="glyphicon glyphicon-refresh"></span></div>
+                        </div>*@
+                    </div>
+                    <div class="row" id="dvTimeEntryWeeklyView">
+                        <div class="col-sm-12">
+                            <div id="dvTSWeeklyView">
+                                @Html.Partial("_TSWeeklyView", Model)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.EmployeeIndividual != null && Model.EmployeeIndividual.FLSAStatus != -1)
+{
+
+    <!--MODAL DIALOG: add time entry-->
+    <!--//Begin Modal Add Time-->
+    <div class="container">
+        <div id="mdAddTimeEditor" class="modal fade" role="dialog" aria-labelledby="basicModal" data-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background-color:#b50022">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" style="color:#ffffff">Add Time</h4>
+                    </div>
+                    <div class="modal-body" style="background-color:#ffffff">
+                        @using (Html.BeginForm("PostAddTime", "Timesheets", FormMethod.Post, new { id = "formAddTimeSection" }))
+                        {
+                            @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "IsUserNonExempt" })
+                            @Html.HiddenFor(m => m.EmployeeInfoId)
+                            @Html.HiddenFor(m => m.MasterUserId)
+                            @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "SelectedPayPeriodID" })
+                            @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id = "EmployeeIndividual_IndividualId" })
+                            @Html.HiddenFor(m => m.EmployeeIndividual.EmployeeInformation.realMaxTimeOffPerWeek, new { id = "hdTimeEntryManageView_EmployeeInfo_MaxTimeOffPerWeek" })
+                            @Html.HiddenFor(m => m.EmployeeIndividual.EmployeeInformation.EmployeeInfoId, new { id = "EmployeeIndividual_EmployeeInformation_EmployeeInfoId" })
+                            <div class="form-inline">
+                                @if (Model.IsUserNonExempt)
+                                {
+                                    @Html.Label("Selected Pay Period: ")<span id="dvDisplaySelectedPayPeriodForTime" style="padding-left:10px;"></span>
+                                }
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.PayPeriodID)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.txtLastPeriodOfYear)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm1stReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtm2ndReminder)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodStart, new { id = "CurrentPayPeriodStartDate" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodEnd, new { id = "CurrentPayPeriodEndDate" })
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodDue)
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.dtmPeriodPayDay)
+                            </div>
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    @Html.Label("Type: ")
+                                    @Html.DropDownList("SelectedHoursType", new SelectList(Model.HoursType, "Value", "Text"), new { id = "ddlHourTypes", @class = "form-control" })
+                                </div>
+                                <div class="form-group">
+                                    <span style="padding-left:5px;"></span>
+                                    @Html.Label("Date:", new { @id = "tbDateSingleEntryLabel" })
+                                    @Html.TextBox("tbDateSingleEntry", "", new { @class = "form-control" })
+                                    <span style="padding-left:5px;"></span>
+                                    @Html.Label("Range: ")
+                                    @Html.CheckBox("cbDateRange", false, new { @class = "form-control" })
+                                </div>
+                                <div id="dvDateRangeStartEndDate" class="form-group" style="padding-top:20px;">
+                                    @Html.Label("Start Date:")
+                                    @Html.TextBox("tbDateRangeStart", "", new { @class = "form-control" })
+                                    <span style="padding-left:10px;"></span>
+                                    @Html.Label("End Date:")
+                                    @Html.TextBox("tbDateRangeEnd", "", new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-inline">
+                                <div id="dvCbDays" class="form-group" style="padding-left:10px;">
+                                    @Html.Label("Select All:")
+                                    @Html.CheckBox("cbSelectAll", false, new { @class = "form-control" })
+                                    <span style="padding-right:20px;"></span>
+                                    @Html.Label("Sun: ")
+                                    @Html.CheckBox("cbSunday", false, new { @class = "form-control cbDays" })
+                                    <span style="padding-right:15px;"></span>
+                                    @Html.Label("Mon: ")
+                                    @Html.CheckBox("cbMonday", false, new { @class = "form-control cbDays" })
+                                    <span style="padding-right:15px;"></span>
+                                    @Html.Label("Tue: ")
+                                    @Html.CheckBox("cbTuesday", false, new { @class = "form-control cbDays" })
+                                    <span style="padding-right:15px;"></span>
+                                    @Html.Label("Wed: ")
+                                    @Html.CheckBox("cbWednesday", false, new { @class = "form-control cbDays" })
+                                    <span style="padding-right:15px;"></span>
+                                    @Html.Label("Thu: ")
+                                    @Html.CheckBox("cbThursday", false, new { @class = "form-control cbDays" })
+                                    <span style="padding-right:15px;"></span>
+                                    @Html.Label("Fri: ")
+                                    @Html.CheckBox("cbFriday", false, new { @class = "form-control cbDays" })
+                                    <span style="padding-right:15px;"></span>
+                                    @Html.Label("Sat: ")
+                                    @Html.CheckBox("cbSaturday", false, new { @class = "form-control cbDays" })
+                                </div>
+                            </div>
+                            <br />
+                            if ((bool)Model.EmployeeIndividual.EmployeeInformation.IsNonExempt)
+                            {
+                                //selectedValue 24 is: ""
+                                <div id="infoIcon" class="glyphicon glyphicon-info-sign" style="color: blue; font-size: 1.2em; " title="Enter time in chronological order.  Time should not overlap"></div>
+                                <div id="dvAMTime">
+                                    <div class="form-inline">
+                                        <div id="dvAMStartTime" class="form-group">
+                                            @Html.Label("Start Time Hour:")
+                                            @Html.DropDownList("ddlAMTimeStart", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: "24"), new { id = "ddlAMTimeStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAMTimeStart)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlAMMinutesStart", new SelectList(Model.PickerMinutes, "Value", "Text"), new { id = "ddlAMMinutesStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAMMinutesStart)
+                                        </div>
+                                        <div id="dvAMEndTime" class="form-group">
+                                            @Html.Label("End Time Hour:")
+                                            @Html.DropDownList("ddlAMTimeEnd", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: "24"), new { id = "ddlAMTimeEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAMTimeEnd)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlAMMinutesEnd", new SelectList(Model.PickerMinutes, "Value", "Text"), new { id = "ddlAMMinutesEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAMMinutesEnd)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dvPMTime">
+                                    <div class="form-inline" style="padding-top:20px;">
+                                        <div id="dvPMStartTime" class="form-group">
+                                            @Html.Label("Start Time Hour:")
+                                            @Html.DropDownList("ddlPMTimeStart", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: "24"), new { id = "ddlPMTimeStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedPMTimeStart)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlPMMinutesStart", new SelectList(Model.PickerMinutes, "Value", "Text"), new { id = "ddlPMMinutesStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedPMMinutesStart)
+                                        </div>
+                                        <div id="dvPMEndTime" class="form-group">
+                                            @Html.Label("End Time Hour:")
+                                            @Html.DropDownList("ddlPMTimeEnd", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: "24"), new { id = "ddlPMTimeEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedPMTimeEnd)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlPMMinutesEnd", new SelectList(Model.PickerMinutes, "Value", "Text"), new { id = "ddlPMMinutesEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedPMMinutesEnd)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dvAdditionalTime">
+                                    <div class="form-inline" style="padding-top:20px;">
+                                        <div id="dvAdditionalStartTime" class="form-group">
+                                            @Html.Label("Start Time Hour:")
+                                            @Html.DropDownList("ddlAdditionalTimeStart", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: "24"), new { id = "ddlAdditionalTimeStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAdditionalTimeStart)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlAdditionalMinutesStart", new SelectList(Model.PickerMinutes, "Value", "Text"), new { id = "ddlAdditionalMinutesStart", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAdditionalTimeMinutesStart)
+                                        </div>
+                                        <div id="dvAdditionalTimeEnd" class="form-group">
+                                            @Html.Label("End Time Hour:")
+                                            @Html.DropDownList("ddlAdditionalTimeEnd", new SelectList(Model.PickerHours, "Value", "Text", selectedValue: "24"), new { id = "ddlAdditionalTimeEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAdditionalTimeEnd)
+                                            @Html.Label("Minutes:")
+                                            @Html.DropDownList("ddlAdditionalTimeMinutesEnd", new SelectList(Model.PickerMinutes, "Value", "Text"), new { id = "ddlAdditionalTimeMinutesEnd", @class = "form-control" })
+                                            @Html.HiddenFor(m => m.SelectedAdditionalTimeMinutesEnd)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="form-inline" style="padding-top:20px;">
+                                <div id="dvTimeHourMinuteInDecimal" class="form-group">
+                                    @Html.Label("Hours:")
+                                    @Html.DropDownList("ddlTimeHourMinuteInDecimal", new SelectList(Model.PickerHourMinuteInDecimal, "Value", "Text", selectedValue: "8"), new { id = "ddlTimeHourMinuteInDecimal", @class = "form-control" })
+                                    @Html.HiddenFor(m => m.SelectedHourMinuteInDecimal)
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <input id="inpSubmitAddTime" type="submit" class="btn btn-info" data-dismiss="modal" value="Add Time" />
+                        <input id="inpAddTimeCancel" type="button" class="btn btn-info" value="Cancel" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--//End Modal Add Time-->
+
+    <!--MODAL DIALOG: add mileage entry-->
+    <!--//Begin Modal Add Time-->
+    <div class="container">
+        <div id="mAddMileageEditor" class="modal fade" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background-color:#b50022">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" style="color:#ffffff">Add Mileage Entry</h4>
+                    </div>
+                    <div class="modal-body" style="background-color:#ffffff">
+                        @using (Html.BeginForm("PostAddMileage", "Timesheets", FormMethod.Post, new { id = "formAddMileageSection" }))
+                        {
+                            @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "IsUserNonExempt" })
+                            @Html.HiddenFor(m => m.EmployeeInfoId)
+                            @Html.HiddenFor(m => m.MasterUserId)
+                            @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hdMileageAdd_SelectedPayPeriodID" })
+                            @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId)
+                            <div class="form-inline">
+                                @Html.Label("Selected Pay Period: ")<span id="dvDisplaySelectedPayPeriodForMileage" style="padding-left:10px;"></span>
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.PayPeriodID, new { id = "SelectedPayPeriod_PayPeriodId" })
+                            </div>
+                            <table style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        @*<th>From</th>
+                                            <th>To</th>*@
+                                        <th style="width: 50%">Location - Reason</th>
+                                        <th>Miles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="rowOneMileage">
+                                        <td style="padding-right: 5px">@Html.TextBox("Date", "mm/dd/yyyy", new { @id = "MileageDate", @class = "form-control dp" })</td>
+                                        @*<td style="padding-right: 5px">@Html.TextBox("MileageFrom", "", new { @id = "MileageFrom", @class = "form-control" })</td>
+                                            <td style="padding-right: 5px">@Html.TextBox("MileageTo", "", new { @id = "MileageTo", @class = "form-control" })</td>*@
+                                        <td style="padding-right: 5px">@Html.TextBox("MileageDescription", "", new { @style = "max-width: 100%", @id = "MileageDescription", @class = "form-control" })</td>
+                                        <td style="padding-right: 5px">@Html.TextBox("MileageMiles", "", new { @id = "MileageMiles", @class = "form-control" })</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <input id="inpSubmitAddMileage" type="submit" class="btn btn-info" data-dismiss="modal" value="Add Mileage" />
+                        <input id="inpAddMileageCancel" type="button" class="btn btn-info" data-dismiss="modal" value="Cancel" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--//End Modal Add Mileage-->
+
+    <!--MODAL DIALOG: add on call entry -->
+    <!--Begin Modal add on call-->
+    <div class="container">
+        <div id="mAddOnCallEditor" class="modal fade" role="dialog" aria-labelledby="basicModal" data-backdrop="static" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background-color:#b50022">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" style="color:#ffffff">Add On Call Entry</h4>
+                    </div>
+                    <div class="modal-body" style="background-color:#ffffff">
+                        @using (Html.BeginForm("PostAddOnCall", "Timesheets", FormMethod.Post, new { id = "formAddOnCallSection" }))
+                        {
+                            @Html.HiddenFor(m => m.IsUserNonExempt, new { id = "IsUserNonExempt" })
+                            @Html.HiddenFor(m => m.EmployeeInfoId)
+                            @Html.HiddenFor(m => m.MasterUserId)
+                            @Html.HiddenFor(m => m.SelectedPayPeriodID, new { id = "hdOnCallAdd_SelectedPayPeriodID" })
+                            @Html.HiddenFor(m => m.EmployeeIndividual.IndividualId, new { id = "EmployeeIndividual_IndividualId" })
+                            <div class="form-inline">
+                                @Html.Label("Selected Pay Period: ")<span id="dvDisplaySelectedPayPeriodForOnCall" style="padding-left:10px;"></span>
+                                @Html.HiddenFor(m => m.SelectedPayPeriod.PayPeriodID)
+                            </div>
+
+                            <div class="container">
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        @Html.DropDownList("SelectedHoursType", new SelectList(Model.HoursTypeOnCall, "Value", "Text"), new { id = "ddlOnCallTypes", @class = "form-control" })
+                                    </div>
+
+                                    <div class="form-group date" data-date-format="mm/dd/yyyy">
+                                        <span style="padding-left:5px;"></span>
+                                        @Html.Label("Date:")
+                                        @Html.TextBox("Date", "mm/dd/yy", new { @id = "tbOnCallDateSingleEntry", @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="modal-footer">
+                        <input id="inpSubmitAddOnCall" type="submit" class="btn btn-info" data-dismiss="modal" value="Add On Call" />
+                        <input id="inpAddOnCallCancel" type="button" class="btn btn-info" data-dismiss="modal" value="Cancel" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //Make the Timesheets nav tab active
+        $("#navTimesheet").addClass("active");
+
+        //Disable current selected pay period Start and End date control
+        $("#SelectedPayPeriod_StartDate").attr('disabled', 'disabled');
+        $("#SelectedPayPeriod_EndDate").attr('disabled', 'disabled');
+
+        //If the employee individual is a manager or delegate but not marked as user or as admin of TimeKeeper then hide the Time Entry panels
+        if (($("#hdTimeEntryManageView_IsUserTSManager").val() == 'True' || $("#hdTimeEntryManageView_IsUserDelegate").val() == 'True') && ($("#hdTimeEntryManageView_IsUserTSUser").val() == 'False' && $("#hdTimeEntryManageView_IsUserTSHRAdmin").val() == 'False')) {
+            $("#dvTimeEntrySummaryPanel").hide();
+            $("#dvTimeEntryManage").hide();
+        }
+        else {
+            if ($("#hdTimeEntryManageView_LoggedInUser_IsUserTSUser").val() == 'False' && $("#hdTimeEntryManageView_LoggedInUser_EmployeeInfoID").val() == $("#hdEmployeeInfoId").val()) {
+                $("#dvTimeEntrySummaryPanel").hide();
+                $("#dvTimeEntryManage").hide();
+            }
+            else {
+                $("#dvTimeEntrySummaryPanel").show();
+                $("#dvTimeEntryManage").show();
+            }
+        }
+
+        ////dvRefreshWeeklyView: Only show Refresh button for Exempt 
+        //if ($("#EmployeeIndividual_FLSAStatus").val() != 0) {
+        //    //hide for nonexempt employee
+        //    $("#dvRefreshWeeklyView").hide();
+        //}
+        //else {//show for exempt employee
+        //    $("#dvRefreshWeeklyView").show();
+        //}
+    });
+    //------------------------------------------------------------------//
+    //Hide Add Entry Menu when the NonExempt time entries are submitted/approved/processed
+    $(function () {
+        //Hide when time entries are submitted/approved/processed for NonExempt that is not a Admin or Delegate
+        if ($("#hfIsUserNonExempt").val() == "True") { //&& ($("#hfLoggedInUser_IsUserTSHRAdmin").val() != "True" || $("#hfIsUserDelegate").val() != "True") && ($("#hdEmployeeInfoId").val() != $("#hfLoggedInUser_EmployeeInfoId").val())) {
+            if ($("#hfNonExemptTimesheetStatus").val() != "Non-Submitted") {
+                $("#dvAddEntryMenu").hide();
+            }
+        }
+
+        if ($("#hdTimeEntryManagementView_SelectedPayPeriod_txtStatus").val() != "Open" &&
+                $("#hdTimeEntryManagementView_SelectedPayPeriod_txtStatus").val() != "" &&
+                $("#hfIsUserNonExempt").val() == "True") {
+            //hide Add Entry Menu when selected pay period status is not open - critical changes for non-exempt only
+            $("#dvAddEntryMenu").hide();
+        }
+        else {
+            $("#dvAddEntryMenu").show();
+        }
+
+        $("#btnCloseWarning").on('click', function (event) {
+            event.preventDefault();
+            $("#h4WarningMessage").empty();
+            $("#mdTimeEntryWarning").modal('hide');
+        });
+
+        $("#btnXCloseTimeEntryWarning").on('click', function (event) {
+            event.preventDefault();
+            $("#h4WarningMessage").empty();
+            $("#mdTimeEntryWarning").modal('hide');
+        });
+
+    });
+
+    //------------------------------------------------------------------//
+    $(function () {
+        $.ajaxSetup({ cache: false });
+
+        //Re-adding the 'modal-open' class back to the bottom modal
+        $("#mdWarning").on('hidden.bs.modal', function (e) {
+            if ($('#mdTimeEntrySubmitApproval').hasClass('in')) {
+                $('body').addClass('modal-open');
+            }
+            if ($('#mdTimeEntryEdit').hasClass('in')) {
+                $('body').addClass('modal-open');
+            }
+            if ($('#mdTimeEntryApprove').hasClass('in')) {
+                $('body').addClass('modal-open');
+            }
+        });
+
+
+        //clear modal cache add time Editor
+        $('#mdAddTimeEditor').on('hidden.bs.modal', function () {
+            $('#tbDateSingleEntry').val('');
+            $('#tbDateRangeStart').val('');
+            $('#tbDateRangeEnd').val('');
+            $('#cbDateRange').prop("checked", false);
+            $('#cbSunday').prop("checked", false);
+            $('#cbMonday').prop("checked", true);
+            $('#cbTuesday').prop("checked", true);
+            $('#cbWednesday').prop("checked", true);
+            $('#cbThursday').prop("checked", true);
+            $('#cbFriday').prop("checked", true);
+            $('#cbSaturday').prop("checked", false);
+            $('#ddlHourTypes option:eq(0)').attr('selected', 'selected');
+            $("#dvDateRangeStartEndDate").attr("class", "hidden");
+            $("#dvCbDays").attr("class", "hidden");
+        });
+
+
+        //Show Modal Dialog Add Time Entry
+        $("#inpAddTimeEntry").on("click", function (event) {
+            if ($("#ddlSelectedYearPayPeriods :selected").val() != undefined || $("#IsUserNonExempt").val() == "True") {
+                var payperiodTextArray = $("#ddlSelectedYearPayPeriods :selected").text().split(" ");
+                $("#CurrentPayPeriodStartDate").val(payperiodTextArray[0]);
+                $("#CurrentPayPeriodEndDate").val(payperiodTextArray[2]);
+                $('#cbDateRange').prop("checked", false);
+                $('#cbSunday').prop("checked", false);
+                $('#cbMonday').prop("checked", true);
+                $('#cbTuesday').prop("checked", true);
+                $('#cbWednesday').prop("checked", true);
+                $('#cbThursday').prop("checked", true);
+                $('#cbFriday').prop("checked", true);
+                $('#cbSaturday').prop("checked", false);
+                $('#ddlHourTypes').val("1");
+                $("#dvAMTime").attr("class", "show");
+                $("#dvPMTime").attr("class", "show");
+                $("#dvAdditionalTime").attr("class", "show");
+                $("#dvDisplaySelectedPayPeriodForTime").text($("#ddlSelectedYearPayPeriods :selected").text());
+                $("#SelectedPayPeriodID").val($("#ddlSelectedYearPayPeriods :selected").val());
+                $("#SelectedPayPeriod_PayPeriodID").val($("#ddlSelectedYearPayPeriods :selected").val());
+                $("#ddlAMTimeStart").val("24");
+                $("#ddlAMMinutesStart").val("00");
+                $("#ddlAMTimeEnd").val("24");
+                $("#ddlAMMinutesEnd").val("00");
+                $("#ddlPMTimeStart").val("24");
+                $("#ddlPMMinutesStart").val("00");
+                $("#ddlPMTimeEnd").val("24");
+                $("#ddlPMMinutesEnd").val("00");
+                $("#ddlAdditionalTimeStart").val("24");
+                $("#ddlAdditionalMinutesStart").val("00");
+                $("#ddlAdditionalTimeEnd").val("24");
+                $("#ddlAdditionalTimeMinutesEnd").val("00");
+                $("#ddlTimeHourMinuteInDecimal").val("8");
+                $("#SelectedHourMinuteInDecimal").val("8")
+                $("#dvTimeHourMinuteInDecimal").attr("class", "hidden");
+                $("#infoIcon").attr("class", "show");
+            }
+            if ($("#IsUserNonExempt").val() == "False") {
+                $('#cbSunday').prop("checked", false);
+                $('#cbMonday').prop("checked", true);
+                $('#cbTuesday').prop("checked", true);
+                $('#cbWednesday').prop("checked", true);
+                $('#cbThursday').prop("checked", true);
+                $('#cbFriday').prop("checked", true);
+                $('#cbSaturday').prop("checked", false);
+            }
+            $('#mdAddTimeEditor').modal('show');
+        });
+
+
+
+        //Add Entry Mileage Modal
+        $("#inpAddMileage").on("click", function (event) {
+            if ($("#ddlSelectedYearPayPeriods :selected").val() != undefined || $("#IsUserNonExempt").val() == "True") {
+                var payperiodTextArray = $("#ddlSelectedYearPayPeriods :selected").text().split(" ");
+                $("#CurrentPayPeriodStartDate").val(payperiodTextArray[0]);
+                $("#CurrentPayPeriodEndDate").val(payperiodTextArray[2]);
+                $("#dvDisplaySelectedPayPeriodForMileage").text($("#ddlSelectedYearPayPeriods :selected").text());
+                $("#SelectedPayPeriodID").val($("#ddlSelectedYearPayPeriods :selected").val());
+                $("#SelectedPayPeriod_PayPeriodID").val($("#ddlSelectedYearPayPeriods :selected").val());
+            }
+            $('#mAddMileageEditor').modal('show');
+            $("#MileageDescription").val("");
+            $("#MileageDate").val("mm/dd/yyyy");
+            $("#MileageMiles").val("");
+        });
+
+        //Add On Call Entry Modal
+        $('#inpAddOnCall').on("click", function (event) {
+            $('#tbOnCallDateSingleEntry').val("");
+            if ($("#ddlSelectedYearPayPeriods :selected").val() != undefined || $("#IsUserNonExempt").val() == "True") {
+                var payperiodTextArray = $("#ddlSelectedYearPayPeriods :selected").text().split(" ");
+                $("#CurrentPayPeriodStartDate").val(payperiodTextArray[0]);
+                $("#CurrentPayPeriodEndDate").val(payperiodTextArray[2]);
+                $("#dvDisplaySelectedPayPeriodForOnCall").text($("#ddlSelectedYearPayPeriods :selected").text());
+                $("#SelectedPayPeriodID").val($("#ddlSelectedYearPayPeriods :selected").val());
+                $("#SelectedPayPeriod_PayPeriodID").val($("#ddlSelectedYearPayPeriods :selected").val());
+            }
+            $('#mAddOnCallEditor').modal('show');
+        })
+
+
+
+        //Setting Date controls
+        $("#tbDateSingleEntry").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        }).on('changeDate', function (e) {
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#tbDateSingleEntry").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodEndDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the selected pay period
+                if (selectedDate < currentPPStartDate || selectedDate > currentPPEndDate) {
+                    $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').appendTo('body').modal('show');
+                    return false;
+                }
+            }
+        }).on('click', function (e) {
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            //this is where to set the calendar month based on the selected payperiod start date for non-exempt
+            if (isUserNonExempt != 'False') {
+                $("#tbDateSingleEntry").datepicker("update", currentPPStartDate);
+                $("#tbDateSingleEntry").val("");
+            }
+            else {
+                var currentDate = moment().format('MM/DD/YYYY');
+                $("#tbDateSingleEntry").datepicker("update", currentDate);
+                $("#tbDateSingleEntry").val("");
+            }
+        });
+
+
+
+        $("#tbDateRangeStart").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        }).on('changeDate', function (e) {
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#tbDateRangeStart").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodEndDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedDate < currentPPStartDate || selectedDate > currentPPEndDate) {
+                    $("#h4WarningMessage").text("Start Date must be within the current pay period. Please try again.");
+                    $('.bs-modal-sm').appendTo('body').modal('show');
+                    return false;
+                }
+            }
+        }).on('click', function (e) {
+            //this is where to set the calendar month based on the selected payperiod start date for non-exempt
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                $("#tbDateRangeStart").datepicker("update", currentPPStartDate);
+                $("#tbDateRangeStart").val("");
+            }
+            else {
+                currentDate = moment().format("MM/DD/YYYY");
+                $("#tbDateRangeStart").datepicker("update", currentDate);
+                $("#tbDateRangeStart").val("");
+            }
+        });
+
+        $("#tbDateRangeEnd").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        }).on('changeDate', function (e) {
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#tbDateRangeEnd").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodEndDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the current pay period
+                if (selectedDate < currentPPStartDate || selectedDate > currentPPEndDate) {
+                    $("#h4WarningMessage").text("End Date must be within the current pay period. Please try again.");
+                    $('.bs-modal-sm').appendTo('body').modal('show');
+                    return false;
+                }
+            }
+        }).on('click', function (e) {
+            //this is where to set the calendar month based on the selected payperiod start date for non-exempt
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                $("#tbDateRangeEnd").datepicker("update", currentPPEndDate);
+                $("#tbDateRangeEnd").val("");
+            }
+            else {
+                currentDate = moment().format("MM/DD/YYYY");
+                $("#tbDateRangeEnd").datepicker("update", currentDate);
+                $("#tbDateRangeEnd").val("");
+            }
+        });
+
+        //Business: Mileage is not tied to a pay period
+        $("#MileageDate").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true
+        });
+
+        $("#tbOnCallDateSingleEntry").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoclose: true,
+            dateFormat: 'mm/dd/yy',
+            dateonly: true,
+            onclose: function (dateText, ints) {
+                //debugger;
+                $(this).datepicker('option', 'dateFormat', 'mm/dd/yy');
+            }
+        }).on('click', function (e) {
+            //this is where to set the calendar month based on the selected payperiod start date for non-exempt
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if (isUserNonExempt != 'False') {
+                $("#tbOnCallDateSingleEntry").datepicker("update", currentPPStartDate);
+                $("#tbOnCallDateSingleEntry").val("");
+            }
+            else {
+                currentDate = moment().format("MM/DD/YYYY");
+                $("#tbOnCallDateSingleEntry").datepicker("update", currentDate);
+                $("#tbDateRangeEnd").val("");
+            }
+        });
+        //.on('changeDate', function (e) {
+        //    debugger;
+        //    var selectedDate = oncallSelectedDate; //$.datepicker.parseDate('mm/dd/yy', $("#tbOnCallDateSingleEntry").val());
+        //    var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+        //    var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodEndDate").val());
+        //    var isUserNonExempt = $("#IsUserNonExempt").val();
+
+        //    if (e.date.valueOf() > currentPPStartDate) {
+        //        var newDate = new Date(currentPPStartDate);
+        //    }
+
+        //    if (isUserNonExempt != 'False') {
+        //        //for non-exempt validate selected date it must be within the selected pay period
+        //        if (selectedDate < currentPPStartDate || selectedDate > currentPPEndDate) {
+        //            $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+        //            $('.bs-modal-sm').modal('show');
+        //            return false;
+        //        }
+        //    }
+        //});
+
+        //$(".dp").on('change', function () {
+        //    $('.datepicker').hide();
+        //});
+
+
+        //hide modal start and end Date (initial load
+        $("#dvDateRangeStartEndDate").attr("class", "hidden");
+        $("#dvCbDays").attr("class", "hidden");
+
+        //Default: Hide modal control from the dvTimeHourMinuteInDecimal section if the selected value from ddlHourTypes is Regular
+        var selectedValue = $("#ddlHourTypes").val();
+        if (selectedValue == 1) {
+            $("#dvTimeHourMinuteInDecimal").hide();
+        } else {
+            $("#dvTimeHourMinuteInDecimal").show();
+        };
+
+        //Show/Hide modal control from dvTimeHourMinuteInDecimal section whether ddlHourTypes is Regular (hidden) or Non-Regular(show)
+        $("#ddlHourTypes").change(function () {
+            var selectVal = $("#ddlHourTypes").val();
+            if (selectVal == 1) {
+                $("#dvTimeHourMinuteInDecimal").attr("class", "hidden");
+                $("#dvDateRangeStartEndDate").attr("class", "hidden");
+                $("#dvCbDays").attr("class", "hidden");
+                $("#dvAMTime").attr("class", "show");
+                $("#dvPMTime").attr("class", "show");
+                $("#infoIcon").attr("class", "show");
+                $("#dvAdditionalTime").attr("class", "show");
+                $("#cbDateRange").prop("checked", false);
+                $("#tbDateSingleEntryLabel").css("visibility", "visible");
+                $("#tbDateSingleEntry").css("visibility", "visible");
+                $("#infoIcon").attr("class", "show");
+            }
+            else {
+                $("#dvTimeHourMinuteInDecimal").attr("class", "show");
+                $("#dvDateRangeStartEndDate").attr("class", "hidden");
+                $("#dvCbDays").attr("class", "hidden");
+                $("#dvAMTime").attr("class", "hidden");
+                $("#dvPMTime").attr("class", "hidden");
+                $("#infoIcon").attr("class", "hidden");
+                $("#dvAdditionalTime").attr("class", "hidden");
+                $("#cbDateRange").prop("checked", false);
+                $("#tbDateSingleEntryLabel").css("visibility", "visible");
+                $("#tbDateSingleEntry").css("visibility", "visible");
+                $("#infoIcon").attr("class", "hidden");
+            };
+        });
+
+        //Date Range on change event
+        $("#cbDateRange").on("click", function (event) {
+            if (this.checked) {
+                $("#dvDateRangeStartEndDate").val("");
+                $("#tbDateRangeStart").val("");
+                $("#tbDateRangeEnd").val("");
+                $("#dvDateRangeStartEndDate").attr("class", "show");
+                $("#dvCbDays").attr("class", "show");
+                $("#dvAMTime").attr("class", "show");
+                $("#dvPMTime").attr("class", "show");
+                $("#dvAdditionalTime").attr("class", "show");
+                $("#tbDateSingleEntry").val("");
+                $("#tbDateSingleEntry").css("visibility", "hidden");
+                $("#tbDateSingleEntryLabel").css("visibility", "hidden")
+                $("#ddlAMTimeStart").val("24");
+                $("#ddlAMMinutesStart").val("00");
+                $("#ddlAMTimeEnd").val("24");
+                $("#ddlAMMinutesEnd").val("00");
+                $("#ddlPMTimeStart").val("24");
+                $("#ddlPMMinutesStart").val("00");
+                $("#ddlPMTimeEnd").val("24");
+                $("#ddlPMMinutesEnd").val("00");
+                $("#ddlAdditionalTimeStart").val("24");
+                $("#ddlAdditionalMinutesStart").val("00");
+                $("#ddlAdditionalTimeEnd").val("24");
+                $("#ddlAdditionalTimeMinutesEnd").val("00");
+                $("#ddlTimeHourMinuteInDecimal").val("8");
+                $("#SelectedHourMinuteInDecimal").val("8")
+                if ($('#ddlHourTypes').val() != "1") {
+                    $("#dvTimeHourMinuteInDecimal").attr("class", "show");
+                    $("#dvAMTime").attr("class", "hidden");
+                    $("#dvPMTime").attr("class", "hidden");
+                    $("#dvAdditionalTime").attr("class", "hidden");
+                    $("#infoIcon").attr("class", "show");
+                }
+                else {
+                    $("#dvTimeHourMinuteInDecimal").attr("class", "hidden");
+                    $("#dvAMTime").attr("class", "show");
+                    $("#dvPMTime").attr("class", "show");
+                    $("#dvAdditionalTime").attr("class", "show");
+                    $("#infoIcon").attr("class", "show");
+                }
+            } else {
+                $("#dvDateRangeStartEndDate").attr("class", "hidden");
+                $("#dvCbDays").attr("class", "hidden");
+                $("#dvAMTime").attr("class", "hidden");
+                $("#dvPMTime").attr("class", "hidden");
+                $("#dvAdditionalTime").attr("class", "hidden");
+                $("#tbDateRangeStart").val("");
+                $("#tbDateRangeEnd").val("");
+                $("#tbDateSingleEntryLabel").css("visibility", "visible");
+                $("#tbDateSingleEntry").css("visibility", "visible")
+                if ($('#ddlHourTypes').val() != "1") {
+                    $("#dvTimeHourMinuteInDecimal").attr("class", "show");
+                    $("#dvAMTime").attr("class", "hidden");
+                    $("#dvPMTime").attr("class", "hidden");
+                    $("#dvAdditionalTime").attr("class", "hidden");
+                    $("#infoIcon").attr("class", "show");
+                }
+                else {
+                    $("#dvTimeHourMinuteInDecimal").attr("class", "hidden");
+                    $("#dvAMTime").attr("class", "show");
+                    $("#dvPMTime").attr("class", "show");
+                    $("#dvAdditionalTime").attr("class", "show");
+                    $("#infoIcon").attr("class", "show");
+                }
+            }
+        }).focus(function () {
+            CSS: {
+                    outline: 0;
+            }
+        });
+        //Reset fields when cancelling Add Time
+        $("#inpAddTimeCancel").on("click", function () {
+            //reset the datepickers
+            $("#cbDateRange").prop('checked', false);
+            $("#dvDateRangeStartEndDate").attr("class", "hidden");
+            $("#cbSelectAll").prop('checked', false); //uncheck it
+            $("#dvCbDays").children().prop('checked', false); //uncheck it
+            $("#dvCbDays").attr("class", "hidden");
+            $("#tbDateRangeStart").val("");
+            $("#tbDateRangeEnd").val("");
+            $("#tbDateSingleEntry").val("");
+            $("#tbDateSingleEntryLabel").css("visibility", "visible");
+            $("#tbDateSingleEntry").css("visibility", "visible");
+            $("#ddlAMTimeStart").val("24");
+            $("#ddlAMMinutesStart").val("00");
+            $("#ddlAMTimeEnd").val("24");
+            $("#ddlAMMinutesEnd").val("00");
+            $("#ddlPMTimeStart").val("24");
+            $("#ddlPMMinutesStart").val("00");
+            $("#ddlPMTimeEnd").val("24");
+            $("#ddlPMMinutesEnd").val("00");
+            $("#ddlAdditionalTimeStart").val("24");
+            $("#ddlAdditionalMinutesStart").val("00");
+            $("#ddlAdditionalTimeEnd").val("24");
+            $("#ddlAdditionalTimeMinutesEnd").val("00");
+            $("#ddlTimeHourMinuteInDecimal").val("8");
+            $("#SelectedHourMinuteInDecimal").val("8")
+            $("#infoIcon").attr("class", "show");
+            $("#mdAddTimeEditor").modal('hide');
+        });
+        //Reset fields when cancelling Mileage
+        $("#inpAddMileageCancel").on("click", function () {
+            $("#MileageDescription").val("");
+            $("#MileageDate").val("mm/dd/yyyy");
+            $("#MileageMiles").val("");
+        });
+        //Reset fields when cancelling On Call
+        $("#inpAddOnCallCancel").on("click", function () {
+            $("#ddlOnCallTypes").val("12");
+            $("#tbOnCallDateSingleEntry").val("mm/dd/yyyy");
+        });
+        //Select All Days in the Modal Dialogview - this will toggle checked/unchecked
+        $("#cbSelectAll").change(function () {
+            $(".cbDays").prop('checked', $(this).prop("checked"));
+        });
+
+        //$(".modal-body").on('hidden.bs.modal', function () {
+        //    $("#formAddTimeSection").reset();
+        //});
+    });
+    //----------------------------------------Refresh TSWeeklyView Handler -------------------------------//
+
+    $(function () {
+        $("#dvRefreshWeeklyView").on('click', function () {
+
+            var flsaStatus = $('#EmployeeIndividual_FLSAStatus').val();
+            var currentYear = new Date().getFullYear();
+            var selectedYear = ""; //$("#ddlYears").val();
+            var hdIndividualId = $('#hdIndividualId').val();
+            var hfEmployeeInfoId = $('#hdEmployeeInfoId').val();
+            var payPeriodId = $("#ddlSelectedYearPayPeriods").val();
+            var date = new Date();
+            var dd = date.getDate();
+            var mm = date.getMonth() + 1;
+            var yy = date.getFullYear();
+            var currentdate = mm + "-" + dd + "-" + yy
+            
+            //if exempt
+            if (flsaStatus == '0') {
+                //refresh the TSWeekly View for Exempt employees
+                $.ajax({
+                    url: '@Url.Action("GetRefresh_ManageView", "Timesheets")',
+                    type: 'POST',
+                    cache: false,
+                    data: { pIndividualId: hdIndividualId, pSelectedYear: currentYear, pSelectedPayPeriodId: 0 },
+                    beforeSend: function (event) {
+                        var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                        $('#dvLoadMessage').html(textHtml);
+                    },
+                    success: function (data) {
+                        $('#dvLoadMessage').empty();
+                        $('#dvTimeEntryManageView').empty();
+                        $('#dvTimeEntryManageView').html(data);
+                        //$("#dvAddEntryMenu").show();
+
+                        ////hide Add Entry menu when not in current year
+                        //if (currentYear != selectedYear) {
+                        //    $("#dvAddEntryMenu").hide();
+                        //}
+                        //else {
+                        //    $("#dvAddEntryMenu").show();
+                        //}
+
+                        //refresh the Time Off Summary
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { startDate: currentdate, employeeInfoId: hfEmployeeInfoId, individualId: hdIndividualId },
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function (summaryData) {
+                                $('#dvLoadMessage').empty();
+                                $("#dvHoursTypeSummary").empty();
+                                $("#dvHoursTypeSummary").html(summaryData);
+                            }
+                        });
+                    }
+                });
+                return false;
+            }
+
+            @*//if non-exempt - does not apply
+            // re-populate the Selected pay periods based on the selected year
+            if (flsaStatus == '1') {
+
+                //refresh TSWeekly View
+                $.ajax({
+                    url: '@Url.Action("GetRefresh_TSWeeklyView", "Timesheets")',
+                    type: 'POST',
+                    cache: false,
+                    data: { individualId: hdIndividualId, selectedYear: selectedYear, selectedPayPeriodId: payPeriodId },
+                    beforeSend: function (event) {
+                        var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                        $('#dvLoadMessage').html(textHtml);
+                    },
+                    success: function (data) {
+                        $('#dvLoadMessage').empty();
+
+                        //hide AddEntryMenu when NonExempt Timesheet Status is Submitted/Approved/Processed so that no new entries
+                        if ($("#hfIsUserNonExempt").val() == "True" && $("#hfNonExemptTimesheetStatus").val() != "Non-Submitted") {
+                            $("#dvAddEntryMenu").hide();
+                        }
+
+                        //refresh the Pay Period Summary for Non Exempt time entries
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { selectedPayPeriodId: payPeriodId, employeeInfoId: hfEmployeeInfoId, individualId: hdIndividualId },
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function (ppData) {
+                                $('#dvLoadMessage').empty();
+                                $("#dvPayPeriodHoursTypeSummary").empty();
+                                $("#dvPayPeriodHoursTypeSummary").html(ppData);
+
+                                $('#dvTSWeeklyView').empty();
+                                $('#dvTSWeeklyView').html(data);
+                            }
+                        });
+
+                        //refresh Mileage View
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_TSMileageView", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { selectedPayPeriodId: payPeriodId, employeeInfoId: hfEmployeeInfoId },
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function (mlData) {
+                                $('#dvLoadMessage').empty();
+                                $('#dvTSMileageView').empty();
+                                $('#dvTSMileageView').html(mlData);
+                            }
+                        });
+                    }
+                });
+                return false;
+            }*@
+        });
+    });
+
+    //-----------------------------------------Search Employee Handler -------------------------------//
+
+    $(function () {
+
+        //Search Employee button
+        $("#btnSearchEmployees").on("click", function (event) {
+            event.preventDefault();
+            var empFirstName = $("#EmployeeIndividual_FirstName").val();
+            var empLastName = $("#EmployeeIndividual_LastName").val();
+            var empFileNumber = $("#EmployeeIndividual_FileNumber").val();
+            $.ajax({
+                url: '@Url.Action("PostSearchEmployees", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: { firstName: empFirstName, lastName: empLastName, fileNumber: empFileNumber },
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $("#dvSearchEmployeeResults").empty();
+                    $('#dvSearchEmployeeResults').html(textHtml);
+                },
+                success: function (data) {
+                    $("#dvSearchEmployeeResults").empty();
+                    $("#dvSearchEmployeeResults").html(data);
+                }
+            });
+        });
+
+        //Clear Search Employee Button
+
+        $("#btnClearSearch").on("click", function (event) {
+            event.preventDefault();
+            //remove values for all search textboxes
+            $("#EmployeeIndividual_FirstName").val("");
+            $("#EmployeeIndividual_LastName").val("");
+            $("#EmployeeIndividual_FileNumber").val("");
+            //empty html for dvSearchEmployeeResults
+            $("#dvSearchEmployeeResults").empty();
+            //hide the Summary and Time entry panel
+            $("#dvTimeEntrySummaryPanel").hide();
+            $("#dvTimeEntryManage").hide();
+        });
+
+    });
+
+    //------------------------------------Change Event on Select Pay Period Handler--------------------------------------//
+    //OnChange event of the Select Pay Period drop down list; refresh the TSWeeklyView, Pay Period Summary and Mileage View
+
+    $(function () {
+        $("#ddlSelectedYearPayPeriods").change(function () {
+            var selectedYear = $("#ddlYears").val();
+            var hdIndividualId = $('#hdIndividualId').val();
+            var payperiodId = $("#ddlSelectedYearPayPeriods").val();
+            var hfEmployeeInfoId = $("#hdEmployeeInfoId").val();
+            //hide PayPeriodHoursTypesummary and AddEntryMenu
+            $("#dvPayPeriodHoursTypeSummary").empty();
+            $("#dvAddEntryMenu").hide();
+
+            //refresh the TSWeekly View for Exempt employees
+            $.ajax({
+                url: '@Url.Action("GetRefresh_TSWeeklyView", "Timesheets")',
+                type: 'POST',
+                cache: false,
+                data: { individualId: hdIndividualId, selectedYear: selectedYear, selectedPayPeriodId: payperiodId },
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                    $('#dvTSWeeklyView').empty();
+                    //$("#dvLoadMessage").text("Reloading...").attr("class", " text-success glyphicon glyphicon-refresh");
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+                    if (payperiodId != "") {
+                        //refresh the Pay Period Summary for Non Exempt time entries
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { selectedPayPeriodId: payperiodId, employeeInfoId: hfEmployeeInfoId, individualId: hdIndividualId },
+                            success: function (ppData) {
+                                $("#dvPayPeriodHoursTypeSummary").empty();
+                                $("#dvPayPeriodHoursTypeSummary").html(ppData);
+
+                                $('#dvTSWeeklyView').empty();
+                                $('#dvTSWeeklyView').html(data);
+
+                                //TODO: refactor code below later and make this in its own function for reusability
+                                //Hide Add Entry menu if the selected pay period is processed and when time entries are submitted/approved/processed for non exempt
+                                var IsPayPeriodProcessed = $("#ddlSelectedYearPayPeriods :selected").is(':contains("Processed")');
+                                if (IsPayPeriodProcessed || ($("#hfIsUserNonExempt").val() == "True" && $("#hfNonExemptTimesheetStatus").val() != "Non-Submitted")) {
+                                    $("#dvAddEntryMenu").hide();
+                                }
+                                else {
+                                    $("#dvAddEntryMenu").show();
+                                }
+
+                                //Hide when time entries are submitted/approved/processed for non exempt
+                                if ($("#hfIsUserNonExempt").val() == "True" && $("#hfNonExemptTimesheetStatus").val() != "Non-Submitted") {
+                                    $("#dvAddEntryMenu").hide();
+                                }
+                            }
+                        });
+
+                        //refresh Mileage View
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_TSMileageView", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { selectedPayPeriodId: payperiodId, employeeInfoId: hfEmployeeInfoId },
+                            success: function (mlData) {
+                                $('#dvTSMileageView').empty();
+                                $('#dvTSMileageView').html(mlData);
+                            }
+                        });
+                    }
+                    else {
+                        $("#dvPayPeriodHoursTypeSummary").empty();
+                        $('#dvTSWeeklyView').empty();
+                    }
+                }
+            });
+            return false;
+        });
+    });
+
+    //------------------------------------Time Entry: Select Year Handler---------------------------------------------------//
+    $(function () {
+        $("#ddlYears").change(function () {
+            var flsaStatus = $('#EmployeeIndividual_FLSAStatus').val();
+            var currentYear = new Date().getFullYear();
+            var selectedYear = $("#ddlYears").val();
+            var hdIndividualId = $('#hdIndividualId').val();
+            var hfEmployeeInfoId = $('#hdEmployeeInfoId').val();
+            var date = new Date();
+            var dd = date.getDate();
+            var mm = date.getMonth() + 1;
+            var yy = date.getFullYear();
+            var currentdate = mm + "-" + dd + "-" + yy
+
+            if (selectedYear == "" && flsaStatus == '1') {
+                var textHtml = "<span class='text-danger'>Please select a year</span>";
+                $('#dvLoadMessage').html(textHtml);
+                $('#dvTSWeeklyView').empty();
+                $("#ddlSelectedYearPayPeriods").empty();
+                return false;
+            }
+            else {
+                $('#dvLoadMessage').empty();
+            }
+
+            //if exempt
+            if (flsaStatus == '0') {
+                //refresh the TSWeekly View for Exempt employees
+                $.ajax({
+                    url: '@Url.Action("GetRefresh_TSWeeklyView", "Timesheets")',
+                    type: 'POST',
+                    cache: false,
+                    data: { individualId: hdIndividualId, selectedYear: selectedYear, selectedPayPeriodId: 0 },
+                    beforeSend: function (event) {
+                        var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                        $('#dvLoadMessage').html(textHtml);
+                        //$("#dvLoadMessage").text("Reloading...").attr("class", " text-success glyphicon glyphicon-refresh");
+                    },
+                    success: function (data) {
+                        $('#dvLoadMessage').empty();
+                        $('#dvTSWeeklyView').empty();
+                        $('#dvTSWeeklyView').html(data);
+                        $("#dvAddEntryMenu").show();
+
+                        ////hide Add Entry menu when not in current year
+                        //if (currentYear != selectedYear) {
+                        //    $("#dvAddEntryMenu").hide();
+                        //}
+                        //else {
+                        //    $("#dvAddEntryMenu").show();
+                        //}
+
+                        //refresh the Time Off Summary
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { startDate: currentdate, employeeInfoId: hfEmployeeInfoId, individualId: hdIndividualId },
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function (summaryData) {
+                                $('#dvLoadMessage').empty();
+                                $("#dvHoursTypeSummary").empty();
+                                $("#dvHoursTypeSummary").html(summaryData);
+                            }
+                        });
+                    }
+                });
+                return false;
+            }
+
+            //if non-exempt
+            // re-populate the Selected pay periods based on the selected year
+            if (flsaStatus == '1') {
+                $("#ddlSelectedYearPayPeriods").empty();
+                $.ajax({
+                    url: '@Url.Action("GetPayPeriodsBySelectedYear", "Timesheets")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { selectedYear: $("#ddlYears").val() },
+                    beforeSend: function (event) {
+                        var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                        $('#dvLoadMessage').html(textHtml);
+                        //$("#dvLoadMessage").text("Reloading...").attr("class", " text-success glyphicon glyphicon-refresh");
+                    },
+                    success: function (data) {
+                        $('#dvLoadMessage').text("").removeAttr("class", "glyphicon glyphicon-refresh");
+                        $.each(data, function (i, payperiod) {
+                            $("#ddlSelectedYearPayPeriods").append('<option value="' + payperiod.Value + '">' + payperiod.Text + '</option>');
+                        });
+                        $("#ddlSelectedYearPayPeriods option").each(function () {
+                            if ($(this).is(':contains("Open")')) {
+                                this.selected = true;
+                                return;
+                            }
+                        });
+                        var payPeriodId = $("#ddlSelectedYearPayPeriods :selected").val();
+                        var IsPayPeriodProcessed = $("#ddlSelectedYearPayPeriods :selected").is(':contains("Processed")');
+
+                        if (payPeriodId == 0 || IsPayPeriodProcessed == true) {
+                            $("#dvAddEntryMenu").hide();
+                        }
+                        else {
+                            $("#dvAddEntryMenu").show();
+                        }
+
+                        //refresh TSWeekly View
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_TSWeeklyView", "Timesheets")',
+                            type: 'POST',
+                            cache: false,
+                            data: { individualId: hdIndividualId, selectedYear: selectedYear, selectedPayPeriodId: payPeriodId },
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function (data) {
+                                $('#dvLoadMessage').empty();
+
+                                //hide AddEntryMenu is NonExempt Timesheet Status is Submitted/Approved/Processed
+                                if ($("#hfIsUserNonExempt").val() == "True" && $("#hfNonExemptTimesheetStatus").val() != "Non-Submitted") {
+                                    $("#dvAddEntryMenu").hide();
+                                }
+
+                                //refresh the Pay Period Summary for Non Exempt time entries
+                                $.ajax({
+                                    url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary", "Timesheets")',
+                                    type: "POST",
+                                    cache: false,
+                                    data: { selectedPayPeriodId: payPeriodId, employeeInfoId: hfEmployeeInfoId, individualId: hdIndividualId },
+                                    beforeSend: function (event) {
+                                        var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                        $('#dvLoadMessage').html(textHtml);
+                                    },
+                                    success: function (ppData) {
+                                        $("#dvPayPeriodHoursTypeSummary").empty();
+                                        $("#dvPayPeriodHoursTypeSummary").html(ppData);
+
+                                        $('#dvTSWeeklyView').empty();
+                                        $('#dvTSWeeklyView').html(data);
+                                        $('#dvLoadMessage').empty();
+                                    }
+                                });
+
+                                //refresh Mileage View
+                                $.ajax({
+                                    url: '@Url.Action("GetRefresh_TSMileageView", "Timesheets")',
+                                    type: "POST",
+                                    cache: false,
+                                    data: { selectedPayPeriodId: payPeriodId, employeeInfoId: hfEmployeeInfoId },
+                                    beforeSend: function (event) {
+                                        var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                        $('#dvLoadMessage').html(textHtml);
+                                    },
+                                    success: function (mlData) {
+                                        $('#dvTSMileageView').empty();
+                                        $('#dvTSMileageView').html(mlData);
+                                        $('#dvLoadMessage').empty();
+                                    }
+                                });
+                            }
+                        });
+                    },
+                    error: function (ex) {
+                        alert('Failed to retrieved pay period' + ex);
+                    }
+                });
+                return false;
+            }
+        });
+    });
+
+    //------------------------------------------------------------------------------------------------//
+
+    function GetSelectedTimeEntryViewModel() {
+        var list = new Array();
+        var employeeId = $("#hdEmployeeInfoId").val();
+
+        //note: Property Name must be the same name as the View Model class
+        SelectedTimeEntryViewModel = {};
+        SelectedTimeEntryViewModel.Values = [];
+        SelectedTimeEntryViewModel.Name = "SelectedTimeEntry";
+        SelectedTimeEntryViewModel.EmployeeInfoId = employeeId.toString();
+
+        //Add selected id to the list array
+        $("input[name='checked']:checked").each(function () {
+            if (this.checked) { list.push(this.id) };
+        });
+
+        //Add each item from the list to the SelectedTimeEntryViewModel.Values
+        for (var item in list) {
+            SelectedTimeEntryViewModel.Values[parseInt(item)] = list[item];
+        }
+        return SelectedTimeEntryViewModel;
+    }
+
+    /*-------------------------------------------------------------*/
+
+    function showDatePicker(controlName) {
+        if ($("#ddlTimePeriods").val() == "-1") {
+            $('#' + controlName).datepicker('show');
+        }
+        else {
+            $('#' + controlName).datepicker('hide');
+        }
+    }
+    $(document).ready(function () {
+
+
+        $('#SelectedPayPeriod_StartDate').datepicker({
+            format: 'mm/dd/yyyy'
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+
+        $('#SelectedPayPeriod_EndDate').datepicker({
+            format: 'mm/dd/yyyy'
+        })
+        .change(bindDatePicker)
+        .on('changeDate', bindDatePicker);
+    });
+
+    function bindDatePicker(e) {
+        document.getElementById('hfSelectedPayPeriod_StartDate').value = document.getElementById('SelectedPayPeriod_StartDate').value;
+        document.getElementById('hfSelectedPayPeriod_EndDate').value = document.getElementById('SelectedPayPeriod_EndDate').value;
+
+        OnChangeTimePeriodHandler();
+    }
+
+    //----------------------------------Add Time Modal submit-------------------------------//
+    $(function () {
+        $("#inpSubmitAddTime").on("click", function (event) {
+            event.preventDefault();
+            var self = this;
+
+            var AMHrStart = $("#ddlAMTimeStart").val() * 1;
+
+            var AMHrEnd = ($("#ddlAMTimeStart").val() >= $("#ddlAMTimeEnd").val() && $("#ddlAMTimeStart").val() != 0 && ($("#ddlAMTimeEnd").val()) == 0) ? 24 : $("#ddlAMTimeEnd").val();
+
+            var AMMinStart = $("#ddlAMMinutesStart").val();
+            var AMMinEnd = $("#ddlAMMinutesEnd").val();
+            var PMHrStart = $("#ddlPMTimeStart").val() * 1;
+
+            var PMHrEnd = ($("#ddlPMTimeStart").val() >= $("#ddlPMTimeEnd").val() && $("#ddlPMTimeStart").val() != 00 && ($("#ddlPMTimeEnd").val()) == 0) ? 24 : $("#ddlPMTimeEnd").val();
+
+            var PMMinStart = $("#ddlPMMinutesStart").val();
+            var PMMinEnd = $("#ddlPMMinutesEnd").val();
+            var AddHrStart = $("#ddlAdditionalTimeStart").val() * 1;
+
+            var AddHrEnd = ($("#ddlAdditionalTimeStart").val() >= $("#ddlAdditionalTimeEnd").val() && $("#ddlAdditionalTimeStart").val() != 0 && ($("#ddlAdditionalTimeEnd").val()) == 0) ? 24 : $("#ddlAdditionalTimeEnd").val();
+
+            var AddMinStart = $("#ddlAdditionalMinutesStart").val();
+            var AddMinEnd = $("#ddlAdditionalTimeMinutesEnd").val();
+
+            var selectedHoursTypeID = $("#ddlHourTypes").val();
+            if ($("#ddlSelectedYearPayPeriods").val() != undefined) {
+                $("#SelectedPayPeriodID").val($("#ddlSelectedYearPayPeriods").val());
+            }
+
+            $("#SelectedAMTimeStart").val($("#ddlAMTimeStart").val());
+            $("#SelectedAMTimeEnd").val(AMHrEnd);
+            $("#SelectedAMMinutesStart").val($("#ddlAMMinutesStart").val());
+            $("#SelectedAMMinutesEnd").val($("#ddlAMMinutesEnd").val());
+            $("#SelectedPMTimeStart").val($("#ddlPMTimeStart").val());
+            $("#SelectedPMTimeEnd").val(PMHrEnd);
+            $("#SelectedPMMinutesStart").val($("#ddlPMMinutesStart").val());
+            $("#SelectedPMMinutesEnd").val($("#ddlPMMinutesEnd").val());
+            $("#SelectedAdditionalTimeStart").val($("#ddlAdditionalTimeStart").val());
+            $("#SelectedAdditionalTimeEnd").val(AddHrEnd);
+            $("#SelectedAdditionalTimeMinutesStart").val($("#ddlAdditionalMinutesStart").val());
+            $("#SelectedAdditionalTimeMinutesEnd").val($("#ddlAdditionalTimeMinutesEnd").val());
+
+
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><h4>Please review and update your time entry.</h4><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+
+            $("#SelectedHourMinuteInDecimal").val($("#ddlTimeHourMinuteInDecimal").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            AMMinEnd = AMMinEnd / 60;
+            AMMinStart = AMMinStart / 60;
+            PMMinEnd = PMMinEnd / 60;
+            PMMinStart = PMMinEnd / 60;
+            AddMinEnd = AddMinEnd / 60;
+            AddMinStart = AddMinStart / 60;
+            AMHrEnd = AMHrEnd * 1;
+            PMHrEnd = PMHrEnd * 1;
+            AddHrEnd = AddHrEnd * 1;
+
+
+            //Time entry validation
+            //There needs to be time entered into first row
+            if (((AMHrStart + AMMinStart) == (AMHrEnd + AMMinEnd)) && selectedHoursTypeID == 1) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Must have entry on the first row. Please enter start and end time.</li>";
+            }
+            //if (($("#ddlAMTimeEnd").val() == 0) && (parseInt(AMMinEnd)) > 0) {
+            //    validateError = 1;
+            //    textMessageHtmlContent += "<li>You have entered hours worked that overlaps days. <br /> For example, if you select 9/19/16 as the date and enter 11:45pm – 12:15am, your time is crossing over into 9/20/16.  To correct this, enter 11:45pm – 12:00am for 9/19/16 and 12:00am – 12:15am for 9/20/16.</li>";
+            //}
+            if ((AMHrEnd + AMMinEnd) > (AMHrStart + AMMinStart) && ((AMHrEnd + AMMinEnd) > 24)) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Start time cannot be later than end time on the first row entry.</li>";
+                //textMessageHtmlContent += "<li>You have entered hours worked that overlaps days. <br /> For example, if you select 9/19/16 as the date and enter 11:45pm – 12:15am, your time is crossing over into 9/20/16.  To correct this, enter 11:45pm – 12:00am for 9/19/16 and 12:00am – 12:15am for 9/20/16.</li>";
+            }
+            //Entries should be chronological with no overlap
+            if ((AMHrStart + AMMinStart) > (AMHrEnd + AMMinEnd) && (AMHrEnd != 0)) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Start time cannot be later than end time on the first row entry.</li>";
+            }
+
+            //if ((AMHrEnd + AMMinEnd) > (PMHrStart + PMMinStart) || (PMHrEnd + PMMinEnd) > (AddHrStart + AddMinStart)) {
+            //    validateError = 1;
+            //    textMessageHtmlContent += "<li>Time entries must be chronological.</li>";
+            //}
+
+            if ((PMHrStart + PMMinStart) > (PMHrEnd + PMMinEnd) && (PMHrEnd != 0)) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Start time cannot be later than end time on the second row entry.</li>";
+            }
+
+            if ((AddHrStart + AddMinStart) > (AddHrEnd + AddMinEnd)) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Start time cannot be later than end time on the third row entry.</li>";
+            }
+
+
+            //TODO: Troubleshooting needed here
+            if (($("#tbDateSingleEntry").val() == "" && $("#cbDateRange").prop("checked") != true)) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing dates or hours. Please try again</li>";
+            }
+            if (($("#cbDateRange").prop("checked") == true && $("#tbDateRangeStart").val() == "")
+                || (($("#cbDateRange").prop("checked") == true && $("#tbDateRangeEnd").val() == ""))) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Missing dates or hours. Please try again</li>";
+            }
+
+            //if (partialTotalTimeHours > 12) {
+            //    validateError = 1;
+            //    textMessageHtmlContent += "<li>The total hours entered exceeds the amount of time you are allowed to take in a day.</li>";
+            //}
+
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#h4WarningMessage").empty();
+                $("#h4WarningMessage").html(textHtml);
+                $('.bs-modal-sm').appendTo('body').modal('show');
+                return false;
+            }
+
+            //validation before adding time entry
+            var selectedSingleDateEntry = $.datepicker.parseDate('mm/dd/yy', $("#tbDateSingleEntry").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodEndDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+
+            if (isUserNonExempt != 'False') {
+                if (selectedSingleDateEntry != null) {
+                    if (selectedSingleDateEntry < currentPPStartDate || selectedSingleDateEntry > currentPPEndDate) {
+                        //for non-exempt validate selected date it must be within the current pay period
+                        $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+                        $('.bs-modal-sm').appendTo('body').modal('show');
+                        return false;
+                    }
+                }
+            }
+            if (($("#cbDateRange").prop("checked") == true && $("#tbDateRangeStart").val() != "") && isUserNonExempt != 'False') {
+                var dateRangeStart = $.datepicker.parseDate('mm/dd/yy', $("#tbDateRangeStart").val());
+                if (dateRangeDateStart < currentPPStartDate || dateRangeDateStart > currentPPEndDate) {
+                    $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').appendTo('body').modal('show');
+                    return false;
+                }
+            }
+            if (($("#cbDateRange").prop("checked") == true && $("#tbDateRangeEnd").val() != "") && isUserNonExempt != 'False') {
+                var dateRangeEnd = $.datepicker.parseDate('mm/dd/yy', $("#tbDateRangeEnd").val());
+                if (dateRangeEnd < currentPPStartDate || dateRangeEnd > currentPPEndDate) {
+                    $("#h4WarningMessage").text("Date must be within the selected pay period. Please try again.");
+                    $('.bs-modal-sm').appendTo('body').modal('show');
+                    return false;
+                }
+            }
+
+            //if (validateError > 0) {
+            //    var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+            //    $("#h4WarningMessage").empty();
+            //    $("#h4WarningMessage").html(textHtml);
+            //    $('.bs-modal-sm').modal('show');
+            //    return false;
+            //}
+
+            //Set the DateRange Start/End Date when Range is unchecked to the same data value as DateSingleEntry since these fields are required
+            if ($("#cbDateRange").prop("checked") != true) {
+                var singleDateEntry = $("#tbDateSingleEntry").val();
+                $("#tbDateRangeStart").val(singleDateEntry);
+                $("#tbDateRangeEnd").val(singleDateEntry);
+            } else {
+                if ($("#tbDateSingleEntry").val() == "") {
+                    //use the startDate as default for SingleEntry as a workaround
+                    var dateRangeDateStart = $("#tbDateRangeStart").val();
+                    $("#tbDateSingleEntry").val(dateRangeDateStart);
+                }
+            }
+
+            var postData = $('#formAddTimeSection').serialize();
+            $.ajax({
+                url: '@Url.Action("GetCurrentHoursByDate", "Timesheets")',
+                type: "POST",
+                cache: false,
+                dataType: 'json',
+                data: postData,
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+                    if (data.valid) {
+                        //debugger;
+                        $.ajax({
+                            url: '@Url.Action("PostAddTime", "Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: postData,
+                            beforeSend: function (event) {
+                                var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                $('#dvLoadMessage').html(textHtml);
+                            },
+                            success: function (data) {
+                                $('#dvLoadMessage').empty();
+
+                                //refresh the Pay Period Summary for Non Exempt time Entries
+                                if ($('#IsUserNonExempt').val() == 'True') {
+                                    $.ajax({
+                                        url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary","Timesheets")',
+                                        type: "POST",
+                                        cache: false,
+                                        data: { selectedPayPeriodId: $("#SelectedPayPeriodID").val(), employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                                        beforeSend: function (event) {
+                                            var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                                            $('#dvLoadMessage').html(textHtml);
+                                        },
+                                        success: function (ppData) {
+                                            $('#dvLoadMessage').empty();
+                                            $("#dvPayPeriodHoursTypeSummary").empty();
+                                            $("#dvPayPeriodHoursTypeSummary").html(ppData);
+
+                                            //refresh the weekly view
+                                            $('#dvTSWeeklyView').empty();
+                                            $('#dvTSWeeklyView').html(data);
+                                        }
+                                    });
+                                } else {
+                                    //refresh the weekly view
+                                    $('#dvTSWeeklyView').empty();
+                                    $('#dvTSWeeklyView').html(data);
+                                }
+                                //refresh the TimeOff Summary YTD
+                                $.ajax({
+                                    url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                                    type: "POST",
+                                    cache: false,
+                                    data: { startDate: $("#CurrentPayPeriodStartDate").val(), employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                                    success: function (ytdData) {
+                                        $("#dvHoursTypeSummary").empty();
+                                        $("#dvHoursTypeSummary").html(ytdData);
+                                    }
+                                });
+                            }
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            var errors = $.parseJSON(errorThrown);
+                            alert("Request failed: " + errors.Message);
+                            window.location.reload(true);
+                        });
+                    }
+                    else {
+                        $("#dvReloading").text("").removeAttr("class", "glyphicon glyphicon-refresh");
+                        //debugger;
+                        var invalidDateEntries = [];
+                        var textHtmlOverlapping = "";
+                        var textHtmlMaxTimeOff = "";
+                        var textHtmlPTOExceeds = "";
+                        var maxTimeOff = data.maxTimeOff;
+                        var totalTimeOffEntered = data.maxTimeOffToAdd;
+                        //for (i = 0; i < data.invalidDates.length; i++) {
+                        //    invalidDateEntries.push(data.invalidDates[i].substr(0, 9) + "\n")
+                        //}
+
+                        for (i = 0; i < data.invalidDates.length; i++) {
+                            invalidDateEntries.push(data.invalidDates[i].split('#'));
+                        }
+
+                        for (i = 0; i < invalidDateEntries.length; i++) {
+                            if (invalidDateEntries[i][1] == "OverlappingTimeEntry") {
+                                //textHtmlOverlapping += "<li>Time entry error for the following date(s): " + invalidDateEntries[i][0].substr(0, 9).trim() + "<br /> ";
+                                textHtmlOverlapping += "<li>You have entered a duplicate/overlapping time entry on " + invalidDateEntries[i][0].substr(0, 10).trim() + "</li>";
+                            }
+                            else if (invalidDateEntries[i][1] == "Over24Hours") {
+                                textHtmlOverlapping += "<li>Time entry error on these date(s): " + invalidDateEntries[i][0].substr(0, 10).trim() + "<br /> ";
+                                textHtmlOverlapping += "The total time entered for the day exceeds 24 hours. </li>";
+                            }
+                            else if (invalidDateEntries[i][1] == "PTOExceeds12HourADay") {
+                                textHtmlOverlapping += "<li>Time entry error on these date(s): " + invalidDateEntries[i][0].substr(0, 10).trim().trim().split(" ")[0] + "<br /> ";
+                                textHtmlOverlapping += "The total time off entered exceeds the maximum per day of 12 hours. </li>";
+                            }
+                            else if (invalidDateEntries[i][1] == "OverMaxTimeOffWeekOne") {
+                                textHtmlMaxTimeOff += "<li>The total time off entered for the week of " + invalidDateEntries[i][0] + " exceeds the amount of time you are allowed to take in a week. You have entered " + totalTimeOffEntered + " hours time off, but";
+                                textHtmlMaxTimeOff += " your maximum time off per week is only " + maxTimeOff + " hours.</li>";
+                            }
+                            else if (invalidDateEntries[i][1] == "OverMaxTimeOffWeekTwo") {
+                                textHtmlMaxTimeOff += "<li>The total time off entered for the week of " + invalidDateEntries[i][0] + " exceeds the amount of time you are allowed to take in a week. You have entered " + totalTimeOffEntered + " hours time off, but";
+                                textHtmlMaxTimeOff += " your maximum time off per week is only " + maxTimeOff + " hours.</li>";
+                            }
+                        }
+
+                        $("#h4WarningMessage").empty();
+                        var textHtml = "<div class='alert'><h4 id='h4WarningMessage'>Timesheet Error:</h4>";
+                        textHtml += "<strong>Unable to create time entry. Please review error and try again.</strong><br /><br />";
+                        textHtml += "<ul>"
+                        textHtml += textHtmlOverlapping + textHtmlMaxTimeOff;
+                        //textHtml += "<p>Time entry error for the following date(s): " + invalidDateEntries + " <br /> ";
+                        //textHtml += " Either the total hours entered exceeds the amount of time you are allowed to take in a day <br /> or an overlapping time occurred from previous time entries.</p>";
+                        textHtml += "</ul></div>";
+
+
+                        //$("#h4WarningMessage").text("Time entry error for the following date(s): \n" + invalidDateEntries + " Time off cannot exceed 12 hours in a day.");
+                        $("#h4WarningMessage").html(textHtml);
+                        $('.bs-modal-sm').appendTo('body').modal('show');
+                        return false;
+                    };
+                }
+            });
+            //reset the datepickers
+            $("#cbDateRange").prop('checked', false);
+            $("#dvDateRangeStartEndDate").attr("class", "hidden");
+            $("#cbSelectAll").prop('checked', false); //uncheck it
+            $("#dvCbDays").children().prop('checked', false); //uncheck it
+            $("#dvCbDays").attr("class", "hidden");
+            $("#tbDateRangeStart").val("");
+            $("#tbDateRangeEnd").val("");
+            $("#tbDateSingleEntry").val("");
+            $("#tbDateSingleEntryLabel").css("visibility", "visible");
+            $("#tbDateSingleEntry").css("visibility", "visible");
+            $("#ddlAMTimeStart").val("24");
+            $("#ddlAMMinutesStart").val("00");
+            $("#ddlAMTimeEnd").val("24");
+            $("#ddlAMMinutesEnd").val("00");
+            $("#ddlPMTimeStart").val("24");
+            $("#ddlPMMinutesStart").val("00");
+            $("#ddlPMTimeEnd").val("24");
+            $("#ddlPMMinutesEnd").val("00");
+            $("#ddlAdditionalTimeStart").val("24");
+            $("#ddlAdditionalMinutesStart").val("00");
+            $("#ddlAdditionalTimeEnd").val("24");
+            $("#ddlAdditionalTimeMinutesEnd").val("00");
+            $("#ddlTimeHourMinuteInDecimal").val("8");
+            $("#SelectedHourMinuteInDecimal").val("8")
+        });
+    });
+
+    //----------------------------------Add Mileage Modal submit-------------------------------//
+    $(function () {
+        $("#inpSubmitAddMileage").on("click", function (event) {
+            event.preventDefault();
+            var self = this;
+            var hdIndividualId = $('#hdIndividualId').val();
+            var hfEmployeeInfoId = $('#hdEmployeeInfoId').val();
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+
+            if ($("#ddlSelectedYearPayPeriods").val() != undefined) {
+                $("#hdMileageAdd_SelectedPayPeriodID").val($("#ddlSelectedYearPayPeriods").val());
+            }
+
+            if ($("#MileageDate").val() == null || $("#MileageDate").val() == "" || $("#MileageDate").val() == 'mm/dd/yyyy') {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Mileage Date is required. Please select a date within the selected pay period.</li>";
+            }
+            if ($.trim($("#MileageDescription").val()).length === 0) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Location and reason is required.  Please enter a description</li>"
+            }
+
+            if ($.trim($("#MileageMiles").val()).length === 0) {
+                validateError = 1;
+                textMessageHtmlContent += "<li>Miles is required.  Please enter a miles.</li>"
+            }
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#h4WarningMessage").empty();
+                $("#h4WarningMessage").html(textHtml);
+                $('.bs-modal-sm').appendTo('body').modal('show');
+                return false;
+            }
+
+            var postData = $('#formAddMileageSection').serialize();
+            $.ajax({
+                url: '@Url.Action("PostAddMileage", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: postData,
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+
+                    var payPeriodId = $("#hdMileageAdd_SelectedPayPeriodID").val();
+
+                    //refresh the Pay Period Summary for Non Exempt time Entries
+                    if ($('#IsUserNonExempt').val() == 'True') {
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary","Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { selectedPayPeriodId: $("#hdMileageAdd_SelectedPayPeriodID").val(), employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                            success: function (ppData) {
+                                $("#dvPayPeriodHoursTypeSummary").empty();
+                                $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                            }
+                        });
+                    }
+                    $('#dvTSWeeklyView').empty();
+                    $('#dvTSWeeklyView').html(data);
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+            });
+            //Reset fields
+            $("#inpAddMileageCancel").on("click", function () {
+                $("#MileageDescription").val("");
+                $("#MileageDate").val("mm/dd/yyyy");
+                $("#MileageMiles").val("");
+            });
+        });
+    });
+
+    //----------------------------------Add On Call Modal submit-------------------------------//
+    $(function () {
+        $("#inpSubmitAddOnCall").on("click", function (event) {
+            event.preventDefault();
+            var self = this;
+            $("#hdOnCallAdd_SelectedPayPeriodID").val($("#ddlSelectedYearPayPeriods").val());
+            var validateError = 0;
+            var textMessageHtmlBegin = "<div><ul>";
+            var textMessageHtmlContent = "";
+            var textMessageHtmlEnd = "</ul></div>";
+            var selectedDate = $.datepicker.parseDate('mm/dd/yy', $("#tbOnCallDateSingleEntry").val());
+            var currentPPStartDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodStartDate").val());
+            var currentPPEndDate = $.datepicker.parseDate('mm/dd/yy', $("#CurrentPayPeriodEndDate").val());
+            var isUserNonExempt = $("#IsUserNonExempt").val();
+            if ($("#tbOnCallDateSingleEntry").val() == "") {
+                textMessageHtmlContent += "<li>Date is missing and it is required.</li>";
+                validateError = 1;
+            }
+            //debugger;
+            if (isUserNonExempt != 'False') {
+                //for non-exempt validate selected date it must be within the selected pay period
+                if (selectedDate < currentPPStartDate || selectedDate > currentPPEndDate) {
+                    textMessageHtmlContent += "<li>Date must be within the selected pay period.</li>";
+                    validateError = 1;
+                }
+            }
+            if (validateError > 0) {
+                var textHtml = textMessageHtmlBegin + textMessageHtmlContent + textMessageHtmlEnd;
+                $("#h4WarningMessage").empty();
+                $("#h4WarningMessage").html(textHtml);
+                $('.bs-modal-sm').appendTo('body').modal('show');
+                return false;
+            }
+            // debugger;
+            var postData = $('#formAddOnCallSection').serialize();
+            $.ajax({
+                url: '@Url.Action("PostAddOnCall", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: postData,
+                beforeSend: function (event) {
+                    var textHtml = "<span class='glyphicon glyphicon-refresh spinning'></span><span>Reloading...</span>";
+                    $('#dvLoadMessage').html(textHtml);
+                },
+                success: function (data) {
+                    $('#dvLoadMessage').empty();
+                    $('#dvTSWeeklyView').empty();
+                    $('#dvTSWeeklyView').html(data);
+
+                    //refresh the Pay Period Summary for Non Exempt time Entries
+                    if ($('#IsUserNonExempt').val() == 'True') {
+                        $.ajax({
+                            url: '@Url.Action("GetRefresh_PayPeriodHoursTypeSummary","Timesheets")',
+                            type: "POST",
+                            cache: false,
+                            data: { selectedPayPeriodId: $("#hdOnCallAdd_SelectedPayPeriodID").val(), employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                            success: function (ppData) {
+                                $("#dvPayPeriodHoursTypeSummary").empty();
+                                $("#dvPayPeriodHoursTypeSummary").html(ppData);
+                            }
+                        });
+                    }
+                    @*//refresh the TimeOff Summary YTD
+                    $.ajax({
+                        url: '@Url.Action("GetRefresh_TimeOffSummaryYTD", "Timesheets")',
+                        type: "POST",
+                        cache: false,
+                        data: { startDate: $("#CurrentPayPeriodStartDate").val(), employeeInfoId: $("#EmployeeInfoId").val(), individualId: $("#EmployeeIndividual_IndividualId").val() },
+                        success: function (ytdData) {
+                            $("#dvHoursTypeSummary").empty();
+                            $("#dvHoursTypeSummary").html(ytdData);
+                        }
+                    });*@
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                var errors = $.parseJSON(errorThrown);
+                alert("Request failed: " + errors.Message);
+                window.location.reload(true);
+            });
+
+            //Reset fields
+            $("#ddlOnCallTypes").val("12");
+            $("#tbOnCallDateSingleEntry").val("mm/dd/yyyy");
+        });
+    });
+    //------------------------------------------------------------------------------------------------------------//
+
+    function OnChangeTimePeriodHandler() {
+
+        //Date Range is selected then Start/End date picker value does not change
+        var selectedTimePeriodValue = $("#ddlTimePeriods").val();
+        var selStartDate = selectedTimePeriodValue.toString().split("-")[0].trim().split(" ")[0];
+        var selEndDate = selectedTimePeriodValue.toString().split("-")[1].trim().split(" ")[0];
+        var selTimePeriodValue = $("#ddlTimePeriods :selected").text();
+
+        if (selectedTimePeriodValue != "-1") {
+            $("#SelectedPayPeriod_StartDate").val(selStartDate);
+            $("#SelectedPayPeriod_EndDate").val(selEndDate);
+            $("#idSelectedPayPeriod").text(selStartDate + " - " + selEndDate);
+            $("#SelectedPayPeriod_StartDate").prop('disabled', true);
+            $("#SelectedPayPeriod_EndDate").prop('disabled', true);
+        }
+        else {
+            $("#idSelectedPayPeriod").text(selTimePeriodValue + " " + " - Please select Start Date and End Date");
+            //enable Start/End Date controls
+            $("#SelectedPayPeriod_StartDate").removeAttr('disabled');
+            $("#SelectedPayPeriod_EndDate").removeAttr('disabled');
+
+            //if (selectedTimePeriodValue == "-1") {
+            //    document.cookie = "DateRangeStartDate=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+            //    document.cookie = "DateRangeEndDate=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+            //}
+            //else {
+            //    document.cookie = "DateRangeStartDate=" + $("#hfSelectedPayPeriod_StartDate").val() + "; path=/";
+            //    document.cookie = "DateRangeEndDate=" + $("#hfSelectedPayPeriod_EndDate").val() + "; path=/";
+            //}
+        }
+    }
+
+    @*//TODO: evaluate code whether to refactor or remove
+    function HandleTimeEntrySearch() {
+        var isNonExempt = $("#YearAndPayPeriod_IsNonExempt").val();
+        var strEmployeeInfoId = GetCookie("EmployeeInfoId");
+
+        /* Non Exempt: Search */
+        if (isNonExempt == "True") {
+
+            var selectedTimePeriodValue = $("#ddlTimePeriods").val();
+            var selStartDate = selectedTimePeriodValue.toString().split("-")[0].trim().split(" ")[0];
+            var selEndDate = selectedTimePeriodValue.toString().split("-")[1].trim().split(" ")[0];
+
+            if (selectedTimePeriodValue == "-1") { //DateRange
+                selStartDate = $("#SelectedPayPeriod_StartDate").val();
+                selEndDate = $("#SelectedPayPeriod_EndDate").val();
+            }
+
+            $.ajax({
+                url: '@Url.Action("GetTimeEntries", "Timesheets")',
+                type: "POST",
+                cache: false,
+                data: { startDate: selStartDate, endDate: selEndDate, employeeInfoId: strEmployeeInfoId },
+                success: function (data) {
+                    $("#dvTSWeeklyView").html(data);
+                }
+            });
+            return false;
+        }
+        else { //Exempt: Search by year
+            var selectedYear = $("#ddlYears").val();
+            GetTimeEntriesByYear(selectedYear, strEmployeeInfoId);
+            return false;
+        }
+    }*@
+
+    function GetTimeEntriesByYear(selectedYear, strEmployeeInfoId) {
+        $.ajax({
+            url: '@Url.Action("GetTimeEntriesByYear", "Timesheets")',
+            type: "POST",
+            cache: false,
+            data: { year: selectedYear, employeeInfoId: strEmployeeInfoId },
+            success: function (data) {
+                $("#dvTSWeeklyView").html(data);
+            }
+        });
+        return false;
+    }
+
+    /*-------------------------------------------------------------------------------------*/
+</script>

@@ -1,0 +1,23 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@using GridMvc.Html
+<div class="NmarqGrid-Header text-center">
+    <b>Time Off Summary (YTD)</b>
+</div>
+<div class="well">
+    <div class="container-fluid">
+        <div class="row">
+            @if (Model.TimeOffSummaryYTD != null)
+            {
+                @Html.Grid(Model.TimeOffSummaryYTD, "_Grid").Columns(col =>
+                {
+                    col.Add(m => m.StatusType)
+                     .Titled(" ");
+                    col.Add(m => m.Total)
+                         .Titled("")
+                         .Format("{0:0.00}");
+                })
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+
+@using GridMvc.Html
+<div class="row">
+    <div class="col-sm-12">
+        <div class="NmarqGrid-SubHeader  NmarqGrid-Spacer text-center">
+            <b>PTO Summary</b>
+        </div>
+    </div>
+</div>
+<div class="well">
+    <div class="row">
+        @if (Model.PTOBalances != null)
+        {
+            <table class="table table-striped">
+                <tr>
+                    <td>Allowed</td>
+                    <td class="text-center">@String.Format("{0:##.00;(##.00)}", @Model.PTOBalances.Allowed)</td>
+                </tr>
+                <tr>
+                    <td>Taken (-)</td>
+                    <td class="text-center horizontal-line">@String.Format("{0:##.00;(##.00)}", @Model.PTOBalances.Taken)</td>
+                </tr>
+                <tr>
+                    <td>Balance</td>
+                    <td class="text-center">@String.Format("{0:##.00;(##.00)}", @Model.PTOBalances.Balance)</td>
+                </tr>
+            </table>
+                        <table class="table table-striped well well-sm">
+                            <tr>
+                                <td>Accrual Rate</td>
+                                <td class="text-center">@String.Format("{0:##.00;(##.00)}", @Model.PTOBalances.Accrual)</td>
+                            </tr>
+                            <tr>
+                                <td>Updated</td>
+                                <td class="text-center">@Model.PTOBalances.LastUpdated.ToShortDateString()</td>
+                            </tr>
+                        </table>
+        }
+    </div>
+</div>
+

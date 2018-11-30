@@ -1,0 +1,26 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimesheetViewModel
+@{
+    ViewBag.Title = "Non-TimeKeeper User";
+    Layout = "~/Views/Shared/_LayoutError.cshtml";
+}
+<br />
+<br />
+<h2>You do not have access to Timesheet</h2>
+<br />
+<h3 class="text-danger">Please contact Helpdesk. <br /> We apologize for your inconvenience.</h3>
+<ul>
+    <li>Login user: @Model.EmployeeIndividual.EmployeeInformation.txtUserID</li>
+    <li>Authentication Type: @User.Identity.AuthenticationType </li>
+    <li>Is User Authenticated: @User.Identity.IsAuthenticated</li>
+    @*<li>ActionName: @Model.ActionName</li>
+    <li>ControllerName: @Model.ControllerName</li>
+    <li><b>Exception: @Model.Exception.Message</b></li>
+    <li>Source: @Model.Exception.Source</li>
+    @if (ViewBag.CurrentEnvironment == null || (ViewBag.CurrentEnvironment != "prod" && ViewBag.CurrentEnvironment != "production"))
+    {
+        <li>StackTrace: @Model.Exception.StackTrace</li>
+        <li>TargetSite: @Model.Exception.TargetSite</li>
+    }*@
+
+</ul>
+

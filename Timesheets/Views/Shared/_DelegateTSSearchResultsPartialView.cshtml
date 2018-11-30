@@ -1,0 +1,29 @@
+﻿@model  List<NM.Web.WebApplication.Timesheets.Models.ViewModel.IndividualViewModel>
+@{
+    ViewBag.ManagerID = Model;
+}
+@using GridMvc.Html
+<div class="well">
+    <div class="container-fluid">
+        @if (Model != null)
+        {
+            @Html.Grid(Model, "_Grid").Columns(col =>
+            {
+                col.Add(m => m.IndividualID, true);
+                col.Add(m => m.FirstName, "FirstName").Titled("First Name");
+                col.Add(m => m.LastName, "LastName").Titled("Last Name");
+
+                col.Add()
+                .Encoded(false)
+                .Sanitized(false)
+                .SetWidth(30)
+                .RenderValueAs(i =>
+                    @<b>
+                        @Html.ActionLink("Set as Delegate", "UpsertDelegate", new { delegateId = 0, delegateToId = i.IndividualID, managerId = 0, isPrimaryDelegate = false }, new { @class = "btn btn-success", @id="linkSetDelegate" })
+                    </b>
+                );
+            })
+        }
+    </div>
+</div>
+

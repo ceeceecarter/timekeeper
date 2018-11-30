@@ -1,0 +1,173 @@
+﻿@model NM.Web.WebApplication.Timesheets.Models.ViewModel.TimeAllocationViewModel
+@{
+    ViewBag.Title = "Time Allocation";
+}
+
+@using GridMvc.Html
+
+
+
+<div class="container-fluid">
+    <div class="row">
+        @*<h2>This is the Time Allocation view.</h2>*@
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-sm-6">
+            @Html.DisplayFor(m => m.MonthAllocated)
+            @*@Html.TextAreaFor(m => m.MonthAllocated, new { @class = "form-control", id = "tbAllocationMonthDatePicker" })*@
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-10">
+            <div class="NmarqGrid-Header">
+                Individual Property Allocation
+            </div>
+            <div id="jsGridPropertyAllocations"></div>
+            @*<div id="jsGrid"></div>*@
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //Make the Timesheets nav tab active
+        $("#navTimeAllocation").addClass("active");
+
+
+
+        ////Time Allocation Month datepicker
+        //$('#tbAllocationMonthDatePicker').datepicker({
+        //    format: 'mm/yyyy',
+        //    dateFormat: 'MM yy',
+        //    autoclose: true
+        //});
+        //if ($("#tbAllocationMonthDatePicker").val().length == 0) {
+        //    var today = new Date();
+        //    var month = today.getMonth(),
+        //        year = today.getFullYear();
+        //    if (month < 0) {
+        //        month = 11;
+        //        year -= 1;
+        //    }
+        //}
+    });
+
+    function dateChanged(evt) {
+        var month = $(this).val();
+    }
+
+    function bindDatePicker(e) {
+        document.getElementById('hfCurrentPayPeriod_StartDate').value = document.getElementById('CurrentPayPeriod_StartDate').value;
+        document.getElementById('hfCurrentPayPeriod_EndDate').value = document.getElementById('CurrentPayPeriod_EndDate').value;
+    }
+
+
+    var individualProperties = @Html.Raw(Json.Encode(Model.IndividualPropertyAllocations));
+    var list = [];
+    var buildingList = [];
+    $.each(individualProperties, function(index, value){
+        $.each(value.IndividualPropertyAllocationDetail, function(i, val){
+            list.push(val);
+            buildingList.push(val.Building);
+        });
+    });
+
+    
+    $("#jsGridPropertyAllocations").jsGrid({
+        width: "100%",
+        height: "400px",
+
+        inserting: true,
+        editing: true,
+        sorting: true,
+        paging: true,
+        autoload: true,
+
+        controller: {
+            loadData: function(){
+                
+                var d = $.Deferred();
+                d.resolve(list);
+                return d.promise();
+            }
+            ,updateItem: function(updatingClient) { },
+            insertItem: function(insertingClient){
+                this.list.push(insertingClient);
+            }
+        },
+
+        //data: list,
+
+        fields: [
+            {name: "IndividualPropertyAllocationDetailID", title: "ID", type: "text", width: 12, visible: false, readOnly: true},
+            {name: "EntityID", type: "text", width: 30, validate: "required", readOnly:true},
+            {name: "EntityID", title: "Building", type: "select", width: 60, items: buildingList, valueField: "ENTITYID", textField:"BLDGNAME", readOnly: true },
+            {name: "AllocationPercent", title: "Allocate (%)", width: 30, type: "number"
+                , readOnly:false
+                , validate:
+                    {
+                        message: "Allocation Percent must be less than or equal to 100",
+                        validator: function(value){
+                            return value <= 100;
+                        }
+                    }
+                , itemTemplate: function(value){
+                    return value + "%";
+                }
+                //,editValue: function(value, item){
+                //    debugger;
+                //    alert(value);
+                //    //return $.extend(value, {
+                //    //    AllocationPercent: $("#AllocationPercent").val()
+                //    //});
+                //}
+            },
+            {type: "control", width: 20}
+        ]
+    });
+
+    var saveClient = function(client){
+        $.extend(client, {
+            AllocationPercent: parseFloat($("#AllocationPercent").val(), 10)
+        });
+    }
+
+
+
+
+    ////demo for jsgrid
+    //var properties = [
+    //    { "Name": "Northland Center 1", "City": 1 },
+    //    { "Name": "Northland Center 2", "City": 1 },
+    //    { "Name": "Centennial Building 1", "City": 2 },
+    //    { "Name": "Centennial Building 2", "City": 2 }
+    //];
+
+    //var cities = [
+    //    { "Name": "", "Id": 0 },
+    //    { "Name": "Minneapolis", "Id": 1 },
+    //    { "Name": "Bloomington", "Id": 2 }
+    //];
+
+    //$("#jsGrid").jsGrid({
+    //    width: "100%",
+    //    height: "400px",
+
+    //    inserting: true,
+    //    editing: true,
+    //    sorting: true,
+    //    paging: true,
+
+    //    data: properties,
+
+    //    fields: [
+    //        { name: "Name", type: "text", width: 150, validate: "required" },
+    //        { name: "City", type: "select", items: cities, valueField: "Id", textField: "Name" },
+    //        {type:"control"}
+    //    ]
+
+    //});
+
+
+</script>
